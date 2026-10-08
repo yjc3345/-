@@ -365,7 +365,7 @@ const special=["전체복습","Monthly Test 및 촬영","프레젠테이션 쓰�
 const specialT=["말이되는 어법 Test","프레젠테이션 쓰기","문법","교재 고치기","영어 도서관"];
 for(let i=0;i<5;i++)lessons.push({inclass:special[i],vocab:i===4?"(누적) 161~200":(161+i*10)+"~"+(170+i*10),troom:specialT[i]});
 let cells={}, config=null;
-const key="evo-academy-interb-v1",archiveKey="evo-academy-period-archive-v1";
+const key="evo-academy-schedule-v2",archiveKey="evo-academy-schedule-archive-v2";
 let archive={},activePeriod=null;
 try{archive=JSON.parse(localStorage.getItem(archiveKey)||"{}")||{};}catch(e){archive={};}
 const periodLabel=c=>{const a=local(c.start),b=local(c.end);return (a.getFullYear()===b.getFullYear()?"":a.getFullYear()+"년 ")+(a.getMonth()+1)+"월~"+(b.getMonth()+1)+"월";};
