@@ -180,6 +180,26 @@ html,body,.wrap{padding:0!important;margin:0!important}
 .calendar tr.lesson-row:has(+ .date-row) td{border-bottom:1pt solid #a9bad0!important}
 .calendar tbody tr.lesson-row:last-child th.sidehead,.calendar tbody tr.lesson-row:last-child td{border-bottom:1pt solid #a9bad0!important}
 }
+
+/* Inclass 50%, Vocab 25%, T-Room 25% */
+@media screen{
+.calendar tr.inclass-row th,.calendar tr.inclass-row td{height:54px!important;max-height:54px!important}
+.calendar tr.vocab-row th,.calendar tr.vocab-row td,
+.calendar tr.troom-row th,.calendar tr.troom-row td{height:28px!important;max-height:28px!important}
+.calendar tr.inclass-row textarea{height:46px!important;min-height:46px!important;max-height:46px!important;overflow:auto!important}
+.calendar tr.vocab-row textarea,.calendar tr.troom-row textarea{height:22px!important;min-height:22px!important;max-height:22px!important;overflow:auto!important;padding:1px 3px!important}
+}
+@media print{
+.calendar tr.inclass-row,.calendar tr.inclass-row th,.calendar tr.inclass-row td{
+height:calc((var(--week-height,31mm) - 5mm) / 2)!important;
+max-height:calc((var(--week-height,31mm) - 5mm) / 2)!important;
+}
+.calendar tr.vocab-row,.calendar tr.vocab-row th,.calendar tr.vocab-row td,
+.calendar tr.troom-row,.calendar tr.troom-row th,.calendar tr.troom-row td{
+height:calc((var(--week-height,31mm) - 5mm) / 4)!important;
+max-height:calc((var(--week-height,31mm) - 5mm) / 4)!important;
+}
+}
 </style></head><body>
 <header><strong>✦ Evo AI · Academy Planner</strong><span>교재별 수업 진도표</span></header>
 <main class="wrap">
@@ -242,7 +262,7 @@ function draw(){
   for(let i=0;i<5;i++){dates.push(iso(cursor));cursor.setDate(cursor.getDate()+1);}
   const fields=[["date","날짜"],["inclass","Inclass"],["vocab","Vocab."],["troom","T-Room"]];
   for(const [field,labelText] of fields){
-   const tr=create("tr",field==="date"?"date-row":"lesson-row");
+   const tr=create("tr",field==="date"?"date-row":"lesson-row "+field+"-row");
    tr.appendChild(create("th","sidehead",labelText));
    for(let i=0;i<5;i++){
     const date=dates[i],data=cells[date],outside=local(date)<start||local(date)>end;
