@@ -277,6 +277,12 @@ text-align:center!important;white-space:pre-wrap!important;overflow-wrap:anywher
 .calendar tbody tr>th.sidehead,.calendar tbody tr>th.sidehead:nth-child(1){background:var(--teacher-soft)!important;color:var(--teacher-color)!important}
 .calendar tbody tr.date-row>td .celltop,.calendar tbody tr.date-row>td:nth-child(5) .celltop{background:var(--teacher-soft)!important;color:var(--teacher-color)!important}
 .calendar tbody tr.vocab-row>td.cumulative,.calendar tbody tr.vocab-row>td.cumulative textarea,.calendar tbody tr.vocab-row>td.cumulative .print-value,.calendar tbody tr.vocab-row>td.cumulative .entry,.calendar tbody tr.vocab-row>td .entry.cumulative{background:var(--teacher-color)!important;color:white!important;border-color:var(--teacher-color)!important}
+
+/* final teacher palette override for table cells */
+.calendar thead th{background-color:var(--teacher-color)!important}
+.calendar tbody th.sidehead{background-color:var(--teacher-soft)!important;color:var(--teacher-color)!important}
+.calendar tbody tr.vocab-row td.cumulative{background-color:var(--teacher-color)!important;color:white!important}
+.calendar tbody tr.vocab-row td.cumulative textarea{background-color:transparent!important;color:white!important}
 </style></head><body>
 <header><strong>✦ Evo AI · Academy Planner</strong><span class="admin-placeholder" title="계정별 권한 기능은 로그인 연동 후 활성화됩니다">관리자용 선생님 선택 <select disabled aria-label="선생님 선택 (로그인 연동 후 사용)"><option>로그인 연동 후 사용</option></select></span></header>
 <main class="wrap">
