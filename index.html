@@ -259,8 +259,17 @@ text-align:center!important;white-space:pre-wrap!important;overflow-wrap:anywher
 }
 .calendar tbody tr.lesson-row>td .holidaytext{display:flex!important;align-items:center!important;justify-content:center!important;height:100%!important;padding:0!important}
 }
+
+.period-tabs{display:flex;align-items:flex-end;gap:3px;padding:0 12px;margin:18px 0 -1px;overflow-x:auto;white-space:nowrap}
+.period-tab{border:1px solid #c5d1e2;border-radius:8px 8px 0 0;background:#e9eef6;color:#53667f;padding:8px 15px;font-size:12px;font-weight:700;flex-shrink:0}
+.period-tab.active{background:white;color:#1b477e;border-bottom-color:white;position:relative;z-index:1}
+.period-tab:focus-visible{outline:2px solid #2759c9}
+.admin-placeholder{display:flex;align-items:center;gap:8px;font-size:12px;color:#dce8f9}
+.admin-placeholder select{max-width:155px;padding:5px 8px;border-radius:6px;border:1px solid #9eb0ca;background:#dce4ef;color:#425b77}
+.period-tabs+.sheet{margin-top:0;border-top-left-radius:8px}
+@media print{.period-tabs,.admin-placeholder{display:none!important}}
 </style></head><body>
-<header><strong>✦ Evo AI · Academy Planner</strong><span>교재별 수업 진도표</span></header>
+<header><strong>✦ Evo AI · Academy Planner</strong><span class="admin-placeholder" title="계정별 권한 기능은 로그인 연동 후 활성화됩니다">관리자용 선생님 선택 <select disabled aria-label="선생님 선택 (로그인 연동 후 사용)"><option>로그인 연동 후 사용</option></select></span></header>
 <main class="wrap">
 <section class="controls">
 <h1>수업 스케줄 자동 생성</h1><p class="muted">교재와 시작일, 휴무일을 정하면 교재 전체 진도를 월~금 수업일에 자동 배치합니다.</p>
@@ -275,10 +284,11 @@ text-align:center!important;white-space:pre-wrap!important;overflow-wrap:anywher
 <p class="note">휴무일은 YYYY-MM-DD 형식으로 입력하세요. 휴무일에는 진도를 배치하지 않고 다음 평일로 이어집니다. 생성 후 각 칸의 글을 클릭해 수정할 수 있습니다.</p>
 <p id="message" class="warning" role="status"></p><p id="period" class="teacher-period">선생님용 · 시작일을 선택하고 스케줄을 생성하세요.</p>
 </section>
+<nav class="period-tabs" id="periodTabs" aria-label="수업 기간 선택"></nav>
 <section class="sheet" id="sheet">
 <div class="sheet-title"><h2>Inter Bridge1</h2><div id="studentPeriod" class="muted">수업 기간은 스케줄 생성 후 표시됩니다.</div></div>
 <table class="calendar"><colgroup><col class="label-column"><col span="5"></colgroup><thead><tr><th>항목</th><th>월요일</th><th>화요일</th><th>수요일</th><th>목요일</th><th>금요일</th></tr></thead><tbody id="calendar"></tbody></table>
-<p class="help">편집 화면 버전: 2026.10.08-8 · 표 안의 Inclass, Vocab., T-Room 내용을 직접 수정할 수 있습니다. 수정한 내용은 현재 브라우저에 저장됩니다.</p>
+<p class="help">표 안의 Inclass, Vocab., T-Room 내용을 직접 수정할 수 있습니다. 수정한 내용은 현재 브라우저에 저장됩니다.</p>
 </section>
 </main>
 <script>
@@ -304,10 +314,38 @@ const special=["전체복습","Monthly Test 및 촬영","프레젠테이션 쓰�
 const specialT=["말이되는 어법 Test","프레젠테이션 쓰기","문법","교재 고치기","영어 도서관"];
 for(let i=0;i<5;i++)lessons.push({inclass:special[i],vocab:i===4?"(누적) 161~200":(161+i*10)+"~"+(170+i*10),troom:specialT[i]});
 let cells={}, config=null;
-const key="evo-academy-interb-v1";
+const key="evo-academy-interb-v1",archiveKey="evo-academy-period-archive-v1";
+let archive={},activePeriod=null;
+try{archive=JSON.parse(localStorage.getItem(archiveKey)||"{}")||{};}catch(e){archive={};}
+const periodLabel=c=>{const a=local(c.start),b=local(c.end);return (a.getFullYear()===b.getFullYear()?"":a.getFullYear()+"년 ")+(a.getMonth()+1)+"월~"+(b.getMonth()+1)+"월";};
+function drawTabs(){
+ const nav=$("periodTabs");nav.replaceChildren();
+ const items=Object.entries(archive).sort((a,b)=>a[1].config.start.localeCompare(b[1].config.start));
+ if(!items.length){const t=create("span","period-tab active","현재 스케줄");nav.appendChild(t);return;}
+ for(const [id,item] of items){
+  const btn=create("button","period-tab"+(id===activePeriod?" active":""),periodLabel(item.config));
+  btn.type="button";btn.setAttribute("aria-current",id===activePeriod?"page":"false");
+  btn.title=item.config.start+" ~ "+item.config.end;
+  btn.addEventListener("click",()=>{
+   if(id===activePeriod)return;
+   activePeriod=id;config=structuredClone(archive[id].config);cells=structuredClone(archive[id].cells);
+   $("start").value=config.start;$("vocabStart").value=config.vocabStart||1;
+   $("holidays").value=(config.holidays||[]).join(", ");
+   refreshSuggestions();draw();
+  });nav.appendChild(btn);
+ }
+}
+function persistArchive(){
+ if(!config)return;
+ const id=activePeriod||config.start;
+ archive[id]={config:structuredClone(config),cells:structuredClone(cells)};
+ activePeriod=id;
+ try{localStorage.setItem(archiveKey,JSON.stringify(archive));}catch(e){$("message").textContent="지난 스케줄 저장 공간이 부족합니다.";}
+ drawTabs();
+}
 function vocabFor(index,start){const block=Math.floor(index/5),position=index%5,first=start+block*40;return position===4?"(누적) "+first+"~"+(first+39):(first+position*10)+"~"+(first+position*10+9);}
 function printFit(){const weeks=$("calendar").querySelectorAll(".date-row").length;const available=187;document.documentElement.style.setProperty("--week-height",(available/Math.max(weeks,1)).toFixed(2)+"mm");document.documentElement.style.setProperty("--week-count",String(weeks));}
-function save(){try{localStorage.setItem(key,JSON.stringify({config,cells}));}catch(e){$("message").textContent="저장 공간이 부족하거나 차단되어 변경사항을 저장하지 못했습니다.";}}
+function save(){try{localStorage.setItem(key,JSON.stringify({config,cells}));persistArchive();}catch(e){$("message").textContent="저장 공간이 부족하거나 차단되어 변경사항을 저장하지 못했습니다.";}}
 function create(tag,cls,text){const el=document.createElement(tag);if(cls)el.className=cls;if(text!==undefined)el.textContent=text;return el;}
 function draw(){
  if(!config)return;
@@ -345,7 +383,7 @@ function draw(){
  }
  $("period").textContent="선생님용 · 수업 기간: "+config.start+" ~ "+config.end+"  |  월~금 수업  |  휴무일 "+config.holidays.length+"일";
  $("studentPeriod").textContent=config.start+" ~ "+config.end;
- printFit();
+ printFit();drawTabs();
 }
 function readHolidays(){return [...new Set($("holidays").value.split(/[,，\n]+/).map(s=>s.trim()).filter(Boolean))];}
 function refreshSuggestions(){
@@ -374,7 +412,8 @@ function generate(){
  const holidays=[...new Set(tokens)];
  const vocabStart=Number($("vocabStart").value);
  if(!Number.isSafeInteger(vocabStart)||vocabStart<1||vocabStart>99999){$("message").textContent="단어 시작 번호는 1 이상의 정수로 입력해 주세요.";return;}
- cells={};let count=0;let end=start;
+ if(config&&activePeriod)persistArchive();
+ activePeriod=null;cells={};let count=0;let end=start;
  for(let d=local(start),steps=0;count<lessons.length&&steps<365;d.setDate(d.getDate()+1),steps++){
   const day=d.getDay(),date=iso(d);if(day===0||day===6)continue;
   if(holidays.includes(date)){cells[date]={holiday:true};continue;}
@@ -389,7 +428,7 @@ $("print").onclick=()=>{if(!config){$("message").textContent="먼저 스케줄�
 $("reset").onclick=()=>{if(!confirm("직접 수정한 내용을 지우고 기본 진도로 다시 생성할까요?"))return;generate();};
 const now=new Date();
 $("start").value=iso(now);
-try{const stored=JSON.parse(localStorage.getItem(key)||"null");if(stored&&stored.config&&stored.cells&&/^\d{4}-\d{2}-\d{2}$/.test(stored.config.start)){config=stored.config;cells=stored.cells;$("start").value=config.start;$("vocabStart").value=config.vocabStart||1;$("holidays").value=(config.holidays||[]).join(", ");draw();}}catch(e){}
-refreshSuggestions();
+try{const stored=JSON.parse(localStorage.getItem(key)||"null");if(stored&&stored.config&&stored.cells&&/^\d{4}-\d{2}-\d{2}$/.test(stored.config.start)){config=stored.config;cells=stored.cells;activePeriod=config.start;if(!archive[activePeriod])persistArchive();$("start").value=config.start;$("vocabStart").value=config.vocabStart||1;$("holidays").value=(config.holidays||[]).join(", ");draw();}}catch(e){}
+refreshSuggestions();drawTabs();
 })();
 </script></body></html>
