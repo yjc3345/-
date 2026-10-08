@@ -95,6 +95,23 @@ html,body,.wrap{padding:0!important;margin:0!important}
 .calendar .holidaytext{font-size:10pt!important;text-align:center!important;padding:0!important}
 .calendar tr{break-inside:avoid!important}
 }
+
+.calendar .sidehead,.calendar .sidehead:first-child{width:66px!important;min-width:66px;max-width:66px;padding:3px!important;font-size:11px!important;line-height:1.2!important;white-space:normal!important}
+.calendar tr.date-row td{height:30px!important;max-height:30px!important}
+.calendar tr.lesson-row td{height:48px!important;max-height:48px!important;vertical-align:middle;text-align:center;padding:3px!important}
+.calendar tr.lesson-row textarea{display:block;width:100%;height:38px;min-height:0;max-height:38px;resize:none;text-align:center;font-size:14px;font-weight:700;line-height:1.25;padding:3px;border:0;background:transparent;overflow:auto;color:inherit}
+.calendar tr.lesson-row td.cumulative{background:#294b83!important;color:#fff!important}
+.calendar tr.lesson-row td.cumulative textarea,.calendar tr.lesson-row td.cumulative .print-value{color:#fff!important}
+@media print{
+@page{size:A4 landscape;margin:2mm}
+.calendar .sidehead,.calendar .sidehead:first-child{width:13mm!important;min-width:13mm!important;max-width:13mm!important;font-size:7pt!important;padding:.4mm!important}
+.calendar tr.date-row td{height:4mm!important;max-height:4mm!important}
+.calendar tr.lesson-row td{height:calc((var(--week-height,29mm) - 4mm)/3)!important;max-height:calc((var(--week-height,29mm) - 4mm)/3)!important;padding:.4mm!important}
+.calendar tr.lesson-row textarea{display:none!important}
+.calendar tr.lesson-row .print-value{display:block!important;font-size:9pt!important;font-weight:700!important;line-height:1.12!important;text-align:center!important;white-space:pre-wrap;overflow-wrap:anywhere}
+.calendar tr.lesson-row td.cumulative{background:#294b83!important;color:#fff!important;-webkit-print-color-adjust:exact;print-color-adjust:exact}
+.calendar tr.lesson-row td.cumulative .print-value{color:#fff!important}
+}
 </style></head><body>
 <header><strong>✦ Evo AI · Academy Planner</strong><span>교재별 수업 진도표</span></header>
 <main class="wrap">
@@ -142,7 +159,7 @@ for(let i=0;i<5;i++)lessons.push({inclass:special[i],vocab:i===4?"(누적) 161~2
 let cells={}, config=null;
 const key="evo-academy-interb-v1";
 function vocabFor(index,start){const block=Math.floor(index/5),position=index%5,first=start+block*40;return position===4?"(누적) "+first+"~"+(first+39):(first+position*10)+"~"+(first+position*10+9);}
-function printFit(){const rows=$("calendar").rows.length;const height=Math.min(33,Math.max(16,174/Math.max(1,rows)));document.documentElement.style.setProperty("--row-height",height+"mm");document.documentElement.style.setProperty("--print-scale","1");}
+function printFit(){const weeks=$("calendar").querySelectorAll(".date-row").length;document.documentElement.style.setProperty("--week-height",Math.min(32,174/Math.max(weeks,1))+"mm");}
 function save(){try{localStorage.setItem(key,JSON.stringify({config,cells}));}catch(e){$("message").textContent="저장 공간이 부족하거나 차단되어 변경사항을 저장하지 못했습니다.";}}
 function create(tag,cls,text){const el=document.createElement(tag);if(cls)el.className=cls;if(text!==undefined)el.textContent=text;return el;}
 function draw(){
@@ -153,24 +170,31 @@ function draw(){
  const last=new Date(end);last.setDate(last.getDate()+(5-last.getDay()+7)%7);
  let cursor=new Date(first),rows=0;
  while(cursor<=last&&rows<60){
-  const tr=create("tr");tr.appendChild(create("th","sidehead","Inclass\nVocab.\nT-Room"));
-  for(let i=0;i<5;i++){
-   const date=iso(cursor),data=cells[date],td=create("td",data&&data.holiday?"holiday":"");
-   const outside=cursor<start||cursor>end;
-   if(outside)td.classList.add("off");
-   td.appendChild(create("div","celltop",fmt(date)+" ("+["월","화","수","목","금"][i]+")"));
-   if(data&&data.holiday)td.appendChild(create("div","holidaytext","휴무일"));
-   else if(data&&data.lesson){
-    for(const field of [["inclass","Inclass"],["vocab","Vocab."],["troom","T-Room"]]){
-     const block=create("div","entry"+(field[0]==="vocab"&&data[field[0]]&&data[field[0]].includes("(누적)")?" cumulative":"" )),label=create("label","",field[1]),area=create("textarea"),printed=create("div","print-value");
-     area.value=data[field[0]]||"";printed.textContent=area.value;area.setAttribute("aria-label",date+" "+field[1]);area.rows=Math.max(1,area.value.split("\n").length);
-     area.addEventListener("input",()=>{cells[date][field[0]]=area.value;area.rows=Math.max(1,area.value.split("\n").length);printed.textContent=area.value;if(field[0]==="vocab")block.classList.toggle("cumulative",area.value.includes("(누적)"));save();});
-     block.append(label,area,printed);td.appendChild(block);
+  const dates=[];
+  for(let i=0;i<5;i++){dates.push(iso(cursor));cursor.setDate(cursor.getDate()+1);}
+  const fields=[["date","날짜"],["inclass","Inclass"],["vocab","Vocab."],["troom","T-Room"]];
+  for(const [field,labelText] of fields){
+   const tr=create("tr",field==="date"?"date-row":"lesson-row");
+   tr.appendChild(create("th","sidehead",labelText));
+   for(let i=0;i<5;i++){
+    const date=dates[i],data=cells[date],outside=local(date)<start||local(date)>end;
+    const cumulative=field==="vocab"&&data&&data.lesson&&String(data.vocab||"").includes("(누적)");
+    const td=create("td",(outside?"off ":"")+(data&&data.holiday?"holiday ":"")+(cumulative?"cumulative ":""));
+    if(field==="date")td.appendChild(create("div","celltop",fmt(date)+" ("+["월","화","수","목","금"][i]+")"));
+    else if(data&&data.holiday){if(field==="inclass")td.appendChild(create("div","holidaytext","휴무일"));}
+    else if(data&&data.lesson){
+     const area=create("textarea"),printed=create("div","print-value");
+     area.value=data[field]||"";printed.textContent=area.value;
+     area.setAttribute("aria-label",date+" "+labelText);
+     area.rows=Math.max(1,area.value.split("\\n").length);
+     area.addEventListener("input",()=>{cells[date][field]=area.value;printed.textContent=area.value;td.classList.toggle("cumulative",field==="vocab"&&area.value.includes("(누적)"));save();});
+     td.append(area,printed);
     }
-   }else td.appendChild(create("div","empty",outside?"":"—"));
-   tr.appendChild(td);cursor.setDate(cursor.getDate()+1);
+    tr.appendChild(td);
+   }
+   tbody.appendChild(tr);
   }
-  tbody.appendChild(tr);cursor.setDate(cursor.getDate()+2);rows++;
+  cursor.setDate(cursor.getDate()+2);rows++;
  }
  $("period").textContent="선생님용 · 수업 기간: "+config.start+" ~ "+config.end+"  |  월~금 수업  |  휴무일 "+config.holidays.length+"일";
  $("studentPeriod").textContent=config.start+" ~ "+config.end;
