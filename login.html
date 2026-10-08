@@ -3,7 +3,7 @@
 </style></head><body><header>✦ Evo AI · Academy Planner</header><main>
 <section id="loginPanel" class="card"><h1>선생님 로그인</h1><p class="hint">본인 아이디와 비밀번호를 입력하세요. 다른 선생님의 시간표는 볼 수 없습니다.</p><form id="loginForm"><label>아이디<input id="username" autocomplete="username" required placeholder="선생님 영문이름"></label><label>비밀번호<input id="password" type="password" autocomplete="current-password" required></label><button type="submit">로그인</button></form><p id="loginMessage" class="message" role="alert"></p></section>
 <section id="accountPanel" class="card hidden"><h1>내 계정</h1><p id="welcome"></p><p id="changeNotice" class="hint"></p><form id="changeForm"><label>새 비밀번호<input id="newPassword" type="password" autocomplete="new-password" minlength="6" required></label><label>새 비밀번호 확인<input id="confirmPassword" type="password" autocomplete="new-password" minlength="6" required></label><button type="submit">비밀번호 변경</button><button type="button" id="logout" class="secondary">로그아웃</button></form><p class="hint">비밀번호는 6자 이상으로 설정해 주세요. 계정 생성 및 초기화는 관리자만 할 수 있습니다.</p><p id="accountMessage" class="message" role="alert"></p><a id="scheduleLink" href="./" class="hidden">기존 시간표 열기</a></section>
-<section id="adminPanel" class="card hidden"><h2>관리자 · 선생님 관리</h2><p class="hint">선생님 추가 시 임시 비밀번호가 한 번 표시됩니다. 안전하게 전달하고 첫 로그인 때 변경하도록 안내해 주세요.</p><form id="createForm"><label>새 선생님 아이디<input id="newName" pattern="[A-Za-z][A-Za-z0-9_-]{1,30}" required placeholder="NewTeacher"></label><button type="submit">선생님 추가</button></form><p id="adminMessage" class="message" role="alert"></p><div id="staffList"></div></section>
+<section id="adminPanel" class="card hidden"><h2>관리자 · 선생님 관리</h2><p class="hint">선생님 추가·비밀번호 초기화 시 임시 비밀번호는 아이디+1234로 설정됩니다. 첫 로그인 후 반드시 변경해야 합니다. 임시 비밀번호는 한 번 표시됩니다. 안전하게 전달하고 첫 로그인 때 변경하도록 안내해 주세요.</p><form id="createForm"><label>새 선생님 아이디<input id="newName" pattern="[A-Za-z][A-Za-z0-9_-]{1,30}" required placeholder="NewTeacher"></label><button type="submit">선생님 추가</button></form><p id="adminMessage" class="message" role="alert"></p><div id="staffList"></div></section>
 </main><script src="https://cdn.jsdelivr.net/npm/@supabase/supabase-js@2/dist/umd/supabase.min.js"></script><script>
 (()=>{"use strict";
 const $=id=>document.getElementById(id);
@@ -16,11 +16,11 @@ async function load(){
  if(!user){current=null;show("loginPanel",true);show("accountPanel",false);show("adminPanel",false);return;}
  const {data,error}=await client.from("staff_profiles").select("*").eq("user_id",user.id).single();
  if(error||!data){await client.auth.signOut();msg("loginMessage","등록되지 않은 계정입니다. 관리자에게 문의하세요.");return load();}
- current=data;show("loginPanel",false);show("accountPanel",true);show("adminPanel",data.role==="admin");
+ current=data;show("loginPanel",false);show("accountPanel",true);show("adminPanel",data.role==="admin"&&!data.must_change_password);
  $("welcome").textContent=data.display_name+" · "+(data.role==="admin"?"관리자":"선생님");
  $("changeNotice").textContent=data.must_change_password?"첫 로그인입니다. 다른 기능을 사용하기 전에 비밀번호를 변경하세요.":"필요할 때 비밀번호를 변경할 수 있어요.";
  show("scheduleLink",!data.must_change_password);
- if(data.role==="admin")await staff();
+ if(data.role==="admin"&&!data.must_change_password)await staff();
 }
 $("loginForm").onsubmit=async e=>{
  e.preventDefault();msg("loginMessage","로그인 확인 중...");
