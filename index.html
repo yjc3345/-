@@ -181,23 +181,23 @@ html,body,.wrap{padding:0!important;margin:0!important}
 .calendar tbody tr.lesson-row:last-child th.sidehead,.calendar tbody tr.lesson-row:last-child td{border-bottom:1pt solid #a9bad0!important}
 }
 
-/* Inclass 70%, Vocab 15%, T-Room 15% */
+/* Inclass 60%, Vocab 20%, T-Room 20% */
 @media screen{
-.calendar tr.inclass-row th,.calendar tr.inclass-row td{height:77px!important;max-height:77px!important}
+.calendar tr.inclass-row th,.calendar tr.inclass-row td{height:72px!important;max-height:72px!important}
 .calendar tr.vocab-row th,.calendar tr.vocab-row td,
-.calendar tr.troom-row th,.calendar tr.troom-row td{height:17px!important;max-height:17px!important}
-.calendar tr.inclass-row textarea{height:69px!important;min-height:69px!important;max-height:69px!important;overflow:auto!important}
-.calendar tr.vocab-row textarea,.calendar tr.troom-row textarea{height:15px!important;min-height:15px!important;max-height:15px!important;overflow:auto!important;padding:1px 3px!important}
+.calendar tr.troom-row th,.calendar tr.troom-row td{height:24px!important;max-height:24px!important}
+.calendar tr.inclass-row textarea{height:64px!important;min-height:64px!important;max-height:64px!important;overflow:auto!important}
+.calendar tr.vocab-row textarea,.calendar tr.troom-row textarea{height:20px!important;min-height:20px!important;max-height:20px!important;overflow:auto!important;padding:1px 3px!important}
 }
 @media print{
 .calendar tr.inclass-row,.calendar tr.inclass-row th,.calendar tr.inclass-row td{
-height:calc((var(--week-height,31mm) - 5mm) * .7)!important;
-max-height:calc((var(--week-height,31mm) - 5mm) * .7)!important;
+height:calc((var(--week-height,31mm) - 5mm) * .6)!important;
+max-height:calc((var(--week-height,31mm) - 5mm) * .6)!important;
 }
 .calendar tr.vocab-row,.calendar tr.vocab-row th,.calendar tr.vocab-row td,
 .calendar tr.troom-row,.calendar tr.troom-row th,.calendar tr.troom-row td{
-height:calc((var(--week-height,31mm) - 5mm) * .15)!important;
-max-height:calc((var(--week-height,31mm) - 5mm) * .15)!important;
+height:calc((var(--week-height,31mm) - 5mm) * .2)!important;
+max-height:calc((var(--week-height,31mm) - 5mm) * .2)!important;
 }
 }
 
@@ -205,18 +205,37 @@ max-height:calc((var(--week-height,31mm) - 5mm) * .15)!important;
 @media screen{
 .calendar{height:auto!important}
 .calendar tbody tr.date-row{height:26px!important}
-.calendar tbody tr.inclass-row{height:84px!important}
-.calendar tbody tr.vocab-row,.calendar tbody tr.troom-row{height:18px!important}
-.calendar tbody tr.inclass-row>th,.calendar tbody tr.inclass-row>td{height:84px!important;max-height:84px!important;padding:2px 3px!important}
+.calendar tbody tr.inclass-row{height:72px!important}
+.calendar tbody tr.vocab-row,.calendar tbody tr.troom-row{height:24px!important}
+.calendar tbody tr.inclass-row>th,.calendar tbody tr.inclass-row>td{height:72px!important;max-height:72px!important;padding:2px 3px!important}
 .calendar tbody tr.vocab-row>th,.calendar tbody tr.vocab-row>td,
-.calendar tbody tr.troom-row>th,.calendar tbody tr.troom-row>td{height:18px!important;max-height:18px!important;padding:0 3px!important;line-height:16px!important}
-.calendar tbody tr.inclass-row textarea{height:76px!important;min-height:76px!important;max-height:76px!important}
-.calendar tbody tr.vocab-row textarea,.calendar tbody tr.troom-row textarea{display:block!important;height:16px!important;min-height:16px!important;max-height:16px!important;line-height:16px!important;padding:0 2px!important;overflow:hidden!important}
+.calendar tbody tr.troom-row>th,.calendar tbody tr.troom-row>td{height:24px!important;max-height:24px!important;padding:0 3px!important;line-height:16px!important}
+.calendar tbody tr.inclass-row textarea{height:64px!important;min-height:64px!important;max-height:64px!important}
+.calendar tbody tr.vocab-row textarea,.calendar tbody tr.troom-row textarea{display:block!important;height:20px!important;min-height:20px!important;max-height:20px!important;line-height:16px!important;padding:0 2px!important;overflow:hidden!important}
 .calendar tbody tr.vocab-row .sidehead,.calendar tbody tr.troom-row .sidehead{font-size:10px!important}
 }
 @media print{
-.calendar tbody tr.inclass-row{height:calc((var(--week-height,31mm) - 5mm) * .7)!important}
-.calendar tbody tr.vocab-row,.calendar tbody tr.troom-row{height:calc((var(--week-height,31mm) - 5mm) * .15)!important}
+.calendar tbody tr.inclass-row{height:calc((var(--week-height,31mm) - 5mm) * .6)!important}
+.calendar tbody tr.vocab-row,.calendar tbody tr.troom-row{height:calc((var(--week-height,31mm) - 5mm) * .2)!important}
+}
+
+/* 최종: 요일별 색 차이 제거, 항목 사이 연한 점선 */
+.calendar thead th:nth-child(5){background:#27538d!important;color:white!important}
+.calendar tbody tr.date-row td:nth-child(5) .celltop{background:#e4effe!important;color:#1b477e!important}
+.calendar tbody tr.lesson-row td:nth-child(5):not(.cumulative):not(.off){background:#fff!important;color:#192b42!important}
+.calendar tbody tr.lesson-row td:nth-child(5) textarea{color:#172b46!important}
+.calendar tbody tr.lesson-row td:nth-child(5).cumulative textarea{color:#fff!important}
+.calendar tbody tr.lesson-row.inclass-row>th,.calendar tbody tr.lesson-row.inclass-row>td,
+.calendar tbody tr.lesson-row.vocab-row>th,.calendar tbody tr.lesson-row.vocab-row>td{
+border-bottom:1px dashed #d9e2ee!important;
+}
+.calendar tbody tr.lesson-row.vocab-row>th,.calendar tbody tr.lesson-row.vocab-row>td,
+.calendar tbody tr.lesson-row.troom-row>th,.calendar tbody tr.lesson-row.troom-row>td{
+border-top:0!important;
+}
+@media print{
+.calendar tbody tr.lesson-row.inclass-row>th,.calendar tbody tr.lesson-row.inclass-row>td,
+.calendar tbody tr.lesson-row.vocab-row>th,.calendar tbody tr.lesson-row.vocab-row>td{border-bottom:.35pt dashed #d9e2ee!important}
 }
 </style></head><body>
 <header><strong>✦ Evo AI · Academy Planner</strong><span>교재별 수업 진도표</span></header>
