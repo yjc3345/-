@@ -89,6 +89,7 @@ for(const [label,field] of [["날짜","date"],["Inclass","inclass"],["Vocab.","v
 const tr=document.createElement("tr");const th=document.createElement("th");th.textContent=label;tr.append(th);
 for(const day of week){const td=document.createElement("td");const c=byDate.get(day);if(day<selected.start_date||day>selected.end_date){td.textContent="—";td.style.background="#f3f4f6"}else if(field==="date"){td.textContent=day.slice(5).replace("-","/");if(c?.is_holiday)td.textContent+=" · 휴무"}else if(c?.is_holiday){td.textContent="휴무";td.style.background="#fef3c7"}else{td.textContent=c?.[field]||""}td.style.whiteSpace="pre-wrap";td.style.verticalAlign="top";td.style.minWidth="100px";tr.append(td)}table.append(tr)}
 }
+}
 approval.onclick=async()=>{const selected=data.find(p=>p.id===choose.value);if(!selected)return;const next=selected.approved_at?null:new Date().toISOString();if(!confirm(next?"이 시간표를 승인하고 선생님의 수정·삭제를 잠글까요?":"승인을 취소하고 선생님의 수정·삭제를 허용할까요?"))return;const result=await client.from("schedule_periods").update({approved_at:next}).eq("id",selected.id);if(result.error){alert(result.error.message);return}selected.approved_at=next;await render()};category.onchange=async()=>{fillPeriods();await render()};choose.onchange=render;await render();
 };
 load();
