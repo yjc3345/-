@@ -21,7 +21,7 @@ async function load(){
  $("welcome").textContent=data.display_name+" · "+(data.role==="admin"?"관리자":"선생님");
  $("changeNotice").textContent=data.must_change_password?"첫 로그인입니다. 다른 기능을 사용하기 전에 비밀번호를 변경하세요.":"필요할 때 비밀번호를 변경할 수 있어요.";
  show("schedulePanel",!data.must_change_password);show("passwordArea",!!data.must_change_password);show("adminPanel",false);$("adminTab").textContent="관리자";
- if(data.role==="admin"&&!data.must_change_password)await staff();
+ if(data.role==="admin"&&!data.must_change_password){await staff();const requested=new URLSearchParams(location.search).get("viewTeacher");if(requested&&Array.from($("viewTeacher").options).some(o=>o.value===requested)){$("adminTab").click();document.querySelector('[data-pane="view"]')?.click();$("viewTeacher").value=requested;$("viewTeacher").dispatchEvent(new Event("change"));}}
 }
 $("loginForm").onsubmit=async e=>{
  e.preventDefault();msg("loginMessage","로그인 확인 중...");
