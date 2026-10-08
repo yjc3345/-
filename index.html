@@ -3,6 +3,7 @@
 <title>Evo AI | 학원 수업 스케줄</title>
 <style>
 *{box-sizing:border-box}body{margin:0;background:#f2f5fa;color:#192b42;font-family:system-ui,-apple-system,"Apple SD Gothic Neo",sans-serif}button,input,select,textarea{font:inherit}button{cursor:pointer;border:0;border-radius:9px;background:#2759c9;color:white;padding:10px 16px}button.secondary{background:#e6ebf5;color:#233a59}header{background:#162c4b;color:white;padding:18px 5vw;display:flex;justify-content:space-between;align-items:center}header strong{font-size:20px}.wrap{max-width:1250px;margin:auto;padding:26px 18px}.controls,.sheet{background:white;border:1px solid #dbe3ef;border-radius:15px;padding:22px;box-shadow:0 8px 28px #1b31550b}.controls h1{margin:0 0 6px;font-size:25px}.muted{color:#60748c;font-size:13px}.inputs{display:grid;grid-template-columns:1fr 1fr 1.6fr;gap:14px;margin:18px 0}.inputs label{display:block;font-size:13px;font-weight:650}.inputs input,.inputs select{width:100%;margin-top:6px;border:1px solid #cbd5e1;border-radius:8px;padding:10px;background:white;color:#172b46}.row{display:flex;gap:9px;align-items:center;flex-wrap:wrap}.note{margin-top:12px;color:#465d79;font-size:13px}.sheet{margin-top:20px;overflow:auto}.sheet-title{text-align:center;padding:3px 0 16px}.sheet-title h2{font-size:24px;margin:0 0 4px}.calendar{width:100%;border-collapse:collapse;table-layout:fixed}.calendar th,.calendar td{border:1px solid #9baec5;vertical-align:top}.calendar th{background:#203d66;color:white;padding:9px 2px;font-size:13px}.calendar td{height:130px;padding:0;background:#fff}.calendar td.off{background:#f1f3f7}.celltop{font-size:12px;font-weight:700;padding:6px 7px;background:#edf2fa;border-bottom:1px solid #d7e0ed}.holiday .celltop{background:#fce8e8;color:#9d3341}.entry{padding:5px 7px;font-size:11px;line-height:1.4}.entry label{display:block;font-weight:700;color:#48617e;font-size:10px;margin-bottom:2px}.entry textarea{width:100%;border:1px solid transparent;border-radius:4px;resize:vertical;min-height:28px;background:transparent;padding:2px;font-size:11px;color:#172b46;line-height:1.35}.entry textarea:focus{outline:1px solid #5e86d7;background:#f8fbff}.entry textarea:hover{border-color:#d0d8e5}.holidaytext{padding:18px 5px;text-align:center;color:#a04444;font-weight:700;font-size:13px}.empty{padding:14px;text-align:center;color:#95a3b6;font-size:12px}.warning{color:#9a4e13;font-size:13px;margin-top:10px}.help{margin-top:12px;color:#6a7e95;font-size:12px}.printhead{display:none}@page{size:A4 landscape;margin:8mm}@media print{body{background:white;-webkit-print-color-adjust:exact;print-color-adjust:exact}header,.controls,.row.actions,.help,.warning,.note{display:none!important}.wrap{padding:0;max-width:none}.sheet{border:0;border-radius:0;box-shadow:none;padding:0;margin:0;overflow:visible}.sheet-title{padding:0 0 5mm}.sheet-title h2{font-size:16pt}.sheet-title .muted{font-size:9pt}.calendar th{padding:2mm;font-size:9pt}.calendar td{height:auto}.celltop{padding:1mm 2mm;font-size:8pt}.entry{padding:1mm 2mm;font-size:7pt}.entry label{font-size:6.5pt}.entry textarea{min-height:0;height:auto!important;overflow:hidden;resize:none;border:0;padding:0;font-size:7pt;white-space:pre-wrap}.calendar tr{break-inside:avoid;page-break-inside:avoid}.sheet{zoom:var(--print-scale,1)}}@media(max-width:850px){.inputs{grid-template-columns:1fr 1fr}.sheet{padding:10px}.calendar{min-width:720px}}@media(max-width:520px){.inputs{grid-template-columns:1fr}}
+ .suggestions{margin:15px 0;padding:14px;background:#f4f7fc;border:1px solid #d9e4f4;border-radius:12px}.suggesthead{display:flex;align-items:center;gap:12px;flex-wrap:wrap}.holiday-options{display:flex;gap:8px;flex-wrap:wrap;margin-top:12px}.holiday-option{display:flex;align-items:center;gap:7px;border:1px solid #cad7ea;background:white;border-radius:8px;padding:8px 10px;font-size:13px;cursor:pointer}.holiday-option input{accent-color:#2759c9;width:auto;margin:0}.holiday-option:has(input:checked){border-color:#2759c9;background:#e6efff}@media print{.suggestions{display:none!important}}
 </style></head><body>
 <header><strong>✦ Evo AI · Academy Planner</strong><span>교재별 수업 진도표</span></header>
 <main class="wrap">
@@ -14,6 +15,7 @@
 
 <label>휴무일 (쉼표로 구분)<input id="holidays" placeholder="예: 2026-11-05, 2026-11-12"></label>
 </div>
+<section id="holidaySuggestions" class="suggestions"><div class="suggesthead"><strong>🇰🇷 대한민국 공휴일 추천</strong><span class="muted">추천 날짜를 선택하면 휴무일에 추가됩니다.</span></div><div id="holidayOptions" class="holiday-options"></div><p id="holidayInfo" class="muted"></p></section>
 <div class="row actions"><button id="generate">스케줄 생성하기</button><button class="secondary" id="print">A4 한 장 인쇄 / PDF</button><button class="secondary" id="reset">수정 내용 초기화</button></div>
 <p class="note">휴무일은 YYYY-MM-DD 형식으로 입력하세요. 휴무일에는 진도를 배치하지 않고 다음 평일로 이어집니다. 생성 후 각 칸의 글을 클릭해 수정할 수 있습니다.</p>
 <p id="message" class="warning" role="status"></p>
@@ -31,6 +33,10 @@ const $=id=>document.getElementById(id), pad=n=>String(n).padStart(2,"0");
 const iso=d=>d.getFullYear()+"-"+pad(d.getMonth()+1)+"-"+pad(d.getDate());
 const local=s=>{const a=s.split("-").map(Number);return new Date(a[0],a[1]-1,a[2]);};
 const fmt=s=>{const a=s.split("-");return Number(a[1])+"/"+Number(a[2]);};
+const holidaysByYear={
+2026:{"2026-01-01":"신정","2026-02-16":"설날 연휴","2026-02-17":"설날","2026-02-18":"설날 연휴","2026-03-02":"삼일절 대체공휴일","2026-05-01":"노동절","2026-05-05":"어린이날","2026-05-25":"부처님오신날 대체공휴일","2026-06-03":"지방선거일","2026-07-17":"제헌절","2026-08-17":"광복절 대체공휴일","2026-09-24":"추석 연휴","2026-09-25":"추석 연휴","2026-10-05":"개천절 대체공휴일","2026-10-09":"한글날","2026-12-25":"성탄절"},
+2027:{"2027-01-01":"신정","2027-02-08":"설날 연휴","2027-02-09":"설날 대체공휴일","2027-03-01":"삼일절","2027-05-03":"노동절 대체공휴일","2027-05-05":"어린이날","2027-05-13":"부처님오신날","2027-07-19":"제헌절 대체공휴일","2027-08-16":"광복절 대체공휴일","2027-09-14":"추석 연휴","2027-09-15":"추석","2027-09-16":"추석 연휴","2027-10-04":"개천절 대체공휴일","2027-10-11":"한글날 대체공휴일","2027-12-27":"성탄절 대체공휴일"}
+};
 const lessons=[];
 for(let w=0;w<4;w++){
  for(let k=0;k<5;k++){
@@ -76,6 +82,24 @@ function draw(){
  $("period").textContent=config.start+" ~ "+config.end+"  |  월~금 수업  |  휴무일 "+config.holidays.length+"일";
  document.documentElement.style.setProperty("--print-scale",rows>8?".72":rows>6?".84":"1");
 }
+function readHolidays(){return [...new Set($("holidays").value.split(/[,，\n]+/).map(s=>s.trim()).filter(Boolean))];}
+function refreshSuggestions(){
+ const start=$("start").value,options=$("holidayOptions");options.replaceChildren();
+ if(!start){$("holidayInfo").textContent="시작일을 선택하면 공휴일을 추천합니다.";return;}
+ const startDate=local(start),endDate=local(start);endDate.setDate(endDate.getDate()+65);
+ const selected=new Set(readHolidays());let count=0;
+ for(let d=new Date(startDate);d<=endDate;d.setDate(d.getDate()+1)){
+ const date=iso(d),name=(holidaysByYear[d.getFullYear()]||{})[date];
+ if(!name||d.getDay()===0||d.getDay()===6)continue;
+ const label=create("label","holiday-option"),check=create("input");check.type="checkbox";check.checked=selected.has(date);
+ check.addEventListener("change",()=>{const days=new Set(readHolidays());if(check.checked)days.add(date);else days.delete(date);$("holidays").value=[...days].sort().join(", ");refreshSuggestions();});
+ label.append(check,document.createTextNode(date+" · "+name));options.appendChild(label);count++;
+ }
+ const years=[...new Set([startDate.getFullYear(),endDate.getFullYear()])];
+ $("holidayInfo").textContent=years.some(y=>!holidaysByYear[y])?"해당 연도의 공휴일 정보가 아직 준비되지 않았습니다. 휴무일을 직접 입력해 주세요.":count?"수업 시작일부터 약 65일 내 평일 공휴일입니다. 학원 운영 여부에 따라 선택하세요.":"이 기간에는 추천할 평일 공휴일이 없습니다.";
+}
+$("start").addEventListener("change",refreshSuggestions);
+$("holidays").addEventListener("input",refreshSuggestions);
 function generate(){
  const start=$("start").value;
  if(!start){$("message").textContent="시작일을 선택해 주세요.";return;}
@@ -99,5 +123,6 @@ $("reset").onclick=()=>{if(!confirm("직접 수정한 내용을 지우고 기본
 const now=new Date();
 $("start").value=iso(now);
 try{const stored=JSON.parse(localStorage.getItem(key)||"null");if(stored&&stored.config&&stored.cells&&/^\d{4}-\d{2}-\d{2}$/.test(stored.config.start)){config=stored.config;cells=stored.cells;$("start").value=config.start;$("holidays").value=(config.holidays||[]).join(", ");draw();}}catch(e){}
+refreshSuggestions();
 })();
 </script></body></html>
