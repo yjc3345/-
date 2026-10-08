@@ -411,8 +411,20 @@ function drawTabs(){
  const nav=$("periodTabs");nav.replaceChildren();
  const selectedClass=$("className").value.trim()||"Inter Bridge 1";
 const items=Object.entries(archive).filter(([id,item])=>(item.config.className||"Inter Bridge 1")===selectedClass).sort((a,b)=>a[1].config.start.localeCompare(b[1].config.start));
- if(!items.length){const t=create("span","period-tab active","현재 스케줄");nav.appendChild(t);return;}
+ for(const w of availableWindows){
+ const archived=items.find(([id,item])=>item.config.windowId===w.id||item.config.start===w.start_date);
+ const tab=create("button","period-tab"+((archived&&archived[0]===activePeriod)||(!archived&&$("academyWindow").value===w.id&&!config)?" active":""),w.label);
+ tab.type="button";tab.title=w.start_date+" ~ "+w.end_date;
+ tab.onclick=()=>{
+ const select=$("academyWindow");select.value=w.id;select.dispatchEvent(new Event("change"));
+ if(archived){const [id,item]=archived;activePeriod=id;config=structuredClone(item.config);cells=structuredClone(item.cells);$("book").value=config.book||"Inter Bridge 1";$("vocabStart").value=config.vocabStart||1;draw()}
+ else{activePeriod=null;config=null;cells={};$("calendar").replaceChildren();$("studentPeriod").textContent="스케줄 생성하기를 눌러 시간표를 만드세요."}
+ drawTabs();
+ };nav.append(tab);
+ }
+ if(!items.length){if(!availableWindows.length)nav.appendChild(create("span","period-tab active","현재 스케줄"));return;}
  for(const [id,item] of items){
+  if(availableWindows.some(w=>w.id===item.config.windowId||w.start_date===item.config.start))continue;
   const btn=create("button","period-tab"+(id===activePeriod?" active":""),periodLabel(item.config));
   btn.type="button";btn.setAttribute("aria-current",id===activePeriod?"page":"false");
   btn.title=item.config.start+" ~ "+item.config.end;
