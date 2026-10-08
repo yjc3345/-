@@ -9,7 +9,7 @@
 const $=id=>document.getElementById(id);
 const client=supabase.createClient("https://eovntwuvjzvnztyxzwer.supabase.co","sb_publishable_XMxCvN3wguCsjUY-6GrR2g_HidFJtoc");
 let current=null;
-function setTeacherTheme(hex){if(!/^#[0-9a-fA-F]{6}$/.test(hex||""))hex="#27538d";const n=parseInt(hex.slice(1),16),r=n>>16,g=(n>>8)&255,b=n&255;const pale=`rgb(${Math.round(r*.10+255*.90)},${Math.round(g*.10+255*.90)},${Math.round(b*.10+255*.90)})`;document.documentElement.style.setProperty("--teacher-color",hex);document.documentElement.style.setProperty("--teacher-pale",pale);const frame=$("scheduleFrame");if(frame)frame.src="./?theme="+encodeURIComponent(hex)+"&style=v18"}
+function setTeacherTheme(hex){if(!/^#[0-9a-fA-F]{6}$/.test(hex||""))hex="#27538d";const n=parseInt(hex.slice(1),16),r=n>>16,g=(n>>8)&255,b=n&255;const pale=`rgb(${Math.round(r*.10+255*.90)},${Math.round(g*.10+255*.90)},${Math.round(b*.10+255*.90)})`;document.documentElement.style.setProperty("--teacher-color",hex);document.documentElement.style.setProperty("--teacher-pale",pale);const frame=$("scheduleFrame");if(frame)frame.src="./?theme="+encodeURIComponent(hex)+"&style=v28"}
 function msg(id,text){$(id).textContent=text||""}
 function show(id,visible){$(id).classList.toggle("hidden",!visible)}
 async function load(){
