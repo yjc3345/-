@@ -304,6 +304,19 @@ html,body{margin:0!important;padding:0!important;width:100%!important;height:aut
 .holidaytext{padding:.4mm!important;font-size:7pt!important}
 #periodTabs,.period-tabs{display:none!important}
 }
+
+/* Equal safe margins on all four sides for A4 landscape */
+@media print{
+@page{size:A4 landscape;margin:7mm!important}
+html,body{width:auto!important;margin:0!important;padding:0!important}
+.wrap,.sheet{box-sizing:border-box!important;width:100%!important;max-width:100%!important;margin:0!important;padding:0!important}
+.sheet{zoom:1!important;transform:none!important}
+.calendar{width:100%!important;table-layout:fixed!important}
+.calendar tr{height:auto!important}
+.calendar th{padding:.35mm!important}
+.calendar td{height:auto!important}
+.sheet-title{padding:0 0 1mm!important}
+}
 </style></head><body>
 <header><strong>✦ Evo AI · Academy Planner</strong><span class="admin-placeholder" title="계정별 권한 기능은 로그인 연동 후 활성화됩니다">관리자용 선생님 선택 <select disabled aria-label="선생님 선택 (로그인 연동 후 사용)"><option>로그인 연동 후 사용</option></select></span></header>
 <main class="wrap">
