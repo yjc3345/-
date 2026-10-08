@@ -448,4 +448,21 @@ $("start").value=iso(now);
 try{const stored=JSON.parse(localStorage.getItem(key)||"null");if(stored&&stored.config&&stored.cells&&/^\d{4}-\d{2}-\d{2}$/.test(stored.config.start)){config=stored.config;cells=stored.cells;activePeriod=config.start;if(!archive[activePeriod])persistArchive();$("start").value=config.start;$("vocabStart").value=config.vocabStart||1;$("holidays").value=(config.holidays||[]).join(", ");draw();}}catch(e){}
 refreshSuggestions();drawTabs();
 })();
+</script><script src="https://cdn.jsdelivr.net/npm/@supabase/supabase-js@2/dist/umd/supabase.min.js"></script><script>
+(async()=>{
+try{
+ const db=supabase.createClient("https://eovntwuvjzvnztyxzwer.supabase.co","sb_publishable_XMxCvN3wguCsjUY-6GrR2g_HidFJtoc");
+ const {data:{user}}=await db.auth.getUser();
+ if(!user)return;
+ const {data:profile}=await db.from("staff_profiles").select("theme_color").eq("user_id",user.id).single();
+ const hex=profile?.theme_color;
+ if(!/^#[0-9a-fA-F]{6}$/.test(hex||""))return;
+ const n=parseInt(hex.slice(1),16),r=n>>16,g=(n>>8)&255,b=n&255;
+ const blend=p=>"rgb("+[r,g,b].map(v=>Math.round(v*p+255*(1-p))).join(",")+")";
+ const root=document.documentElement.style;
+ root.setProperty("--teacher-color",hex);
+ root.setProperty("--teacher-pale",blend(.08));
+ root.setProperty("--teacher-soft",blend(.15));
+}catch(e){console.warn("Teacher theme unavailable",e)}
+})();
 </script></body></html>
