@@ -515,6 +515,7 @@ function generate(){
   if(holidays.includes(date)){cells[date]={holiday:true};continue;}
   if(count<lessons.length){cells[date]={...lessons[count],vocab:textbookTemplate(book).noVocab?"":vocabFor(count,vocabStart),lesson:true};count++;end=date;}
  }
+ if(selectedWindow.dataset.end&&end>selectedWindow.dataset.end){$("message").textContent="선택한 기간의 종료일("+selectedWindow.dataset.end+")까지 교재 진도 "+count+"일을 모두 배치할 수 없습니다. 관리자에게 기간 연장을 요청해 주세요.";return;}
  config={start,end,windowId:$("academyWindow").value,windowLabel:selectedWindow.textContent,holidays,vocabStart,book,noVocab:textbookTemplate(book).noVocab||false,hasHomework:!!textbookTemplate(book).noVocab,className:$("className").value.trim()||"Inter Bridge 1"};
  $("message").textContent="기본 진도 "+count+"일을 자동 배치했습니다. 마지막 수업일: "+end;
  save();draw();
