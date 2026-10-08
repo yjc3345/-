@@ -503,7 +503,7 @@ function generate(){
  const start=$("start").value;
  if(!start){$("message").textContent="관리자가 시작일을 등록한 기간을 선택해 주세요.";return;}
  if(selectedWindow.dataset.end&&start>selectedWindow.dataset.end){$("message").textContent="시작일이 공통 종료일보다 늦을 수 없습니다.";return;}
- const tokens=$("holidays").value.split(/[,，\n]+/).map(s=>s.trim()).filter(Boolean);
+ const tokens=($("academyWindow").selectedOptions[0]?.dataset.holidays||"").split(",").map(s=>s.trim()).filter(Boolean);
  const valid=/^\d{4}-\d{2}-\d{2}$/;
  if(tokens.some(s=>!valid.test(s)||iso(local(s))!==s)){$("message").textContent="휴무일을 YYYY-MM-DD 형식으로 입력해 주세요.";return;}
  const holidays=[...new Set(tokens)];
@@ -652,12 +652,12 @@ else{picker.value=assigned[0].class_name;picker.dispatchEvent(new Event("change"
 try{
 const db=supabase.createClient("https://eovntwuvjzvnztyxzwer.supabase.co","sb_publishable_XMxCvN3wguCsjUY-6GrR2g_HidFJtoc");
 const {data:{user}}=await db.auth.getUser();if(!user)return;
-const {data,error}=await db.from("academy_schedule_windows").select("id,label,start_date,end_date").order("start_date",{ascending:false});
+const {data,error}=await db.from("academy_schedule_windows").select("id,label,start_date,end_date,holidays").order("start_date",{ascending:false});
 const select=document.getElementById("academyWindow"),start=document.getElementById("start"),message=document.getElementById("message");
 if(error){message.textContent="수업 기간을 불러오지 못했습니다: "+error.message;return}
 select.replaceChildren(new Option("수업 기간을 선택하세요",""));
-for(const w of data||[]){const opt=new Option(w.label+" ("+(w.start_date||"시작일 미지정")+" ~ "+w.end_date+")",w.id);opt.dataset.start=w.start_date;opt.dataset.end=w.end_date;select.add(opt)}
-select.onchange=()=>{const opt=select.selectedOptions[0];start.value=opt?.dataset.start||"";document.getElementById("windowEndNotice").textContent=opt?.dataset.end?"자동 종료일: "+opt.dataset.end:"";};
+for(const w of data||[]){const opt=new Option(w.label+" ("+(w.start_date||"시작일 미지정")+" ~ "+w.end_date+")",w.id);opt.dataset.start=w.start_date;opt.dataset.end=w.end_date;opt.dataset.holidays=(w.holidays||[]).join(",");select.add(opt)}
+select.onchange=()=>{const opt=select.selectedOptions[0];start.value=opt?.dataset.start||"";document.getElementById("holidays").value=opt?.dataset.holidays||"";document.getElementById("windowEndNotice").textContent=opt?.dataset.end?"관리자 지정 종료일: "+opt.dataset.end:"";};
 if(!data?.length)message.textContent="관리자가 아직 수업 기간을 등록하지 않았습니다.";
 }catch(e){console.warn("Academy windows",e)}
 })();
