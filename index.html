@@ -57,7 +57,7 @@
 <p id="message" class="warning" role="status"></p><p id="period" class="teacher-period">선생님용 · 시작일을 선택하고 스케줄을 생성하세요.</p>
 </section>
 <section class="sheet" id="sheet">
-<div class="sheet-title"><h2>Inter Bridge1</h2></div>
+<div class="sheet-title"><h2>Inter Bridge1</h2><div id="studentPeriod" class="muted">수업 기간은 스케줄 생성 후 표시됩니다.</div></div>
 <table class="calendar"><thead><tr><th>월요일</th><th>화요일</th><th>수요일</th><th>목요일</th><th>금요일</th></tr></thead><tbody id="calendar"></tbody></table>
 <p class="help">표 안의 Inclass, Vocab., T-Room 내용을 직접 수정할 수 있습니다. 수정한 내용은 현재 브라우저에 저장됩니다.</p>
 </section>
@@ -116,6 +116,7 @@ function draw(){
   tbody.appendChild(tr);cursor.setDate(cursor.getDate()+2);rows++;
  }
  $("period").textContent="선생님용 · 수업 기간: "+config.start+" ~ "+config.end+"  |  월~금 수업  |  휴무일 "+config.holidays.length+"일";
+ $("studentPeriod").textContent=config.start+" ~ "+config.end;
  document.documentElement.style.setProperty("--print-scale",rows>8?".72":rows>6?".84":"1");
 }
 function readHolidays(){return [...new Set($("holidays").value.split(/[,，\n]+/).map(s=>s.trim()).filter(Boolean))];}
