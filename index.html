@@ -547,4 +547,30 @@ setTimeout(()=>location.reload(),700);
 }catch(e){status.textContent="삭제 실패: "+e.message}finally{deleteButton.disabled=false}
 };
 })();
+</script><script>
+(async()=>{
+const db=supabase.createClient("https://eovntwuvjzvnztyxzwer.supabase.co","sb_publishable_XMxCvN3wguCsjUY-6GrR2g_HidFJtoc");
+const {data:{user}}=await db.auth.getUser();if(!user)return;
+const save=document.getElementById("saveSchedule"),del=document.getElementById("deleteSchedule"),cal=document.getElementById("calendar");
+let approved=false,checking=false;
+async function check(){
+if(checking)return;checking=true;
+try{
+const c=window.getCurrentTeacherSchedule?.()?.config;
+if(!c?.start){approved=false}else{
+const r=await db.from("schedule_periods").select("approved_at").eq("teacher_id",user.id).eq("start_date",c.start).maybeSingle();
+approved=!!r.data?.approved_at;
+}
+save.disabled=approved;del.disabled=approved;
+save.title=del.title=approved?"관리자가 승인한 시간표입니다. 승인 취소 후 수정·삭제할 수 있습니다.":"";
+cal.querySelectorAll("textarea").forEach(t=>t.readOnly=approved);
+const msg=document.getElementById("approvalStatus");msg.textContent=approved?"🔒 관리자 승인 완료 · 수정 및 삭제가 잠겨 있습니다.":"";
+}catch(e){console.warn("Approval status",e)}finally{checking=false}
+}
+const status=document.createElement("p");status.id="approvalStatus";status.style.cssText="text-align:right;font-weight:700;color:#b45309";document.querySelector(".schedule-bottom-actions")?.before(status);
+const observer=new MutationObserver(()=>{clearTimeout(window.__approvalTimer);window.__approvalTimer=setTimeout(check,250)});
+observer.observe(cal,{childList:true,subtree:false});
+document.getElementById("periodTabs")?.addEventListener("click",()=>setTimeout(check,100));
+setInterval(check,12000);check();
+})();
 </script></body></html>
