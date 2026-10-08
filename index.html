@@ -465,4 +465,34 @@ try{
  root.setProperty("--teacher-soft",blend(.15));
 }catch(e){console.warn("Teacher theme unavailable",e)}
 })();
+</script><script>
+(async()=>{
+const db=supabase.createClient("https://eovntwuvjzvnztyxzwer.supabase.co","sb_publishable_XMxCvN3wguCsjUY-6GrR2g_HidFJtoc");
+const {data:{user}}=await db.auth.getUser();if(!user)return;
+const {data:profile}=await db.from("staff_profiles").select("role,must_change_password").eq("user_id",user.id).single();
+if(!profile||profile.must_change_password)return;
+let busy=false,again=false;
+async function sync(){
+ if(busy){again=true;return}busy=true;
+ try{
+ const archive=JSON.parse(localStorage.getItem("evo-academy-period-archive-v1")||"{}");
+ const current=JSON.parse(localStorage.getItem("evo-academy-interb-v1")||"null");
+ if(current?.config?.start)archive[current.config.start]=current;
+ for(const item of Object.values(archive)){
+ const c=item.config;if(!c?.start||!c?.end)continue;
+ let {data:period}=await db.from("schedule_periods").select("id").eq("teacher_id",user.id).eq("start_date",c.start).maybeSingle();
+ if(!period){const created=await db.from("schedule_periods").insert({teacher_id:user.id,label:c.start+" ~ "+c.end,start_date:c.start,end_date:c.end,holidays:c.holidays||[],vocab_start:c.vocabStart||1}).select("id").single();if(created.error)throw created.error;period=created.data}
+ else{const updated=await db.from("schedule_periods").update({end_date:c.end,holidays:c.holidays||[],vocab_start:c.vocabStart||1}).eq("id",period.id);if(updated.error)throw updated.error}
+ const rows=Object.entries(item.cells||{}).map(([date,v])=>({period_id:period.id,lesson_date:date,inclass:v.inclass||"",troom:v.troom||"",vocab_base:v.vocab||"",is_holiday:!!v.holiday}));
+ const existing=await db.from("schedule_cells").select("id,lesson_date").eq("period_id",period.id);if(existing.error)throw existing.error;
+ const byDate=new Map((existing.data||[]).map(x=>[x.lesson_date,x.id]));
+ for(const row of rows){const id=byDate.get(row.lesson_date);const result=id?await db.from("schedule_cells").update(row).eq("id",id):await db.from("schedule_cells").insert(row);if(result.error)throw result.error}
+ }
+ }catch(e){console.warn("Schedule sync:",e.message)}
+ finally{busy=false;if(again){again=false;setTimeout(sync,1000)}}
+}
+const original=Storage.prototype.setItem;
+Storage.prototype.setItem=function(k,v){const result=original.call(this,k,v);if(k==="evo-academy-interb-v1"||k==="evo-academy-period-archive-v1")setTimeout(sync,1500);return result};
+setTimeout(sync,1200);
+})();
 </script></body></html>
