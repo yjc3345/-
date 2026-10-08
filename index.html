@@ -2,16 +2,16 @@
 <html lang="ko"><head><meta charset="utf-8"><meta name="viewport" content="width=device-width,initial-scale=1">
 <title>Evo AI | 학원 수업 스케줄</title>
 <style>
-*{box-sizing:border-box}body{margin:0;background:#f2f5fa;color:#192b42;font-family:system-ui,-apple-system,"Apple SD Gothic Neo",sans-serif}button,input,select,textarea{font:inherit}button{cursor:pointer;border:0;border-radius:9px;background:#2759c9;color:white;padding:10px 16px}button.secondary{background:#e6ebf5;color:#233a59}header{background:#162c4b;color:white;padding:18px 5vw;display:flex;justify-content:space-between;align-items:center}header strong{font-size:20px}.wrap{max-width:1250px;margin:auto;padding:26px 18px}.controls,.sheet{background:white;border:1px solid #dbe3ef;border-radius:15px;padding:22px;box-shadow:0 8px 28px #1b31550b}.controls h1{margin:0 0 6px;font-size:25px}.muted{color:#60748c;font-size:13px}.inputs{display:grid;grid-template-columns:1.1fr 1fr 1fr 1.5fr;gap:14px;margin:18px 0}.inputs label{display:block;font-size:13px;font-weight:650}.inputs input,.inputs select{width:100%;margin-top:6px;border:1px solid #cbd5e1;border-radius:8px;padding:10px;background:white;color:#172b46}.row{display:flex;gap:9px;align-items:center;flex-wrap:wrap}.note{margin-top:12px;color:#465d79;font-size:13px}.sheet{margin-top:20px;overflow:auto}.sheet-title{text-align:center;padding:3px 0 16px}.sheet-title h2{font-size:24px;margin:0 0 4px}.calendar{width:100%;border-collapse:collapse;table-layout:fixed}.calendar th,.calendar td{border:1px solid #9baec5;vertical-align:top}.calendar th{background:#203d66;color:white;padding:9px 2px;font-size:13px}.calendar td{height:130px;padding:0;background:#fff}.calendar td.off{background:#f1f3f7}.celltop{font-size:12px;font-weight:700;padding:6px 7px;background:#edf2fa;border-bottom:1px solid #d7e0ed}.holiday .celltop{background:#fce8e8;color:#9d3341}.entry{padding:5px 7px;font-size:11px;line-height:1.4}.entry label{display:block;font-weight:700;color:#48617e;font-size:10px;margin-bottom:2px}.entry textarea{width:100%;border:1px solid transparent;border-radius:4px;resize:vertical;min-height:28px;background:transparent;padding:2px;font-size:11px;color:#172b46;line-height:1.35}.entry textarea:focus{outline:1px solid #5e86d7;background:#f8fbff}.entry textarea:hover{border-color:#d0d8e5}.holidaytext{padding:18px 5px;text-align:center;color:#a04444;font-weight:700;font-size:13px}.empty{padding:14px;text-align:center;color:#95a3b6;font-size:12px}.warning{color:#9a4e13;font-size:13px;margin-top:10px}.help{margin-top:12px;color:#6a7e95;font-size:12px}.printhead{display:none}@page{size:A4 landscape;margin:8mm}@media print{body{background:white;-webkit-print-color-adjust:exact;print-color-adjust:exact}header,.controls,.row.actions,.help,.warning,.note{display:none!important}.wrap{padding:0;max-width:none}.sheet{border:0;border-radius:0;box-shadow:none;padding:0;margin:0;overflow:visible}.sheet-title{padding:0 0 5mm}.sheet-title h2{font-size:16pt}.sheet-title .muted{font-size:9pt}.calendar th{padding:2mm;font-size:9pt}.calendar td{height:auto}.celltop{padding:1mm 2mm;font-size:8pt}.entry{padding:1mm 2mm;font-size:7pt}.entry label{font-size:6.5pt}.entry textarea{min-height:0;height:auto!important;overflow:hidden;resize:none;border:0;padding:0;font-size:7pt;white-space:pre-wrap}.calendar tr{break-inside:avoid;page-break-inside:avoid}.sheet{zoom:var(--print-scale,1)}}@media(max-width:850px){.inputs{grid-template-columns:1fr 1fr}.sheet{padding:10px}.calendar{min-width:720px}}@media(max-width:520px){.inputs{grid-template-columns:1fr}}
+*{box-sizing:border-box}body{margin:0;background:#f2f5fa;color:#192b42;font-family:system-ui,-apple-system,"Apple SD Gothic Neo",sans-serif}button,input,select,textarea{font:inherit}button{cursor:pointer;border:0;border-radius:9px;background:#2759c9;color:white;padding:10px 16px}button.secondary{background:#e6ebf5;color:#233a59}header{background:#162c4b;color:white;padding:18px 5vw;display:flex;justify-content:space-between;align-items:center}header strong{font-size:20px}.wrap{max-width:1250px;margin:auto;padding:26px 18px}.controls,.sheet{background:white;border:1px solid #dbe3ef;border-radius:15px;padding:22px;box-shadow:0 8px 28px #1b31550b}.controls h1{margin:0 0 6px;font-size:25px}.muted{color:#60748c;font-size:13px}.inputs{display:grid;grid-template-columns:1fr 1fr 1.6fr;gap:14px;margin:18px 0}.inputs label{display:block;font-size:13px;font-weight:650}.inputs input,.inputs select{width:100%;margin-top:6px;border:1px solid #cbd5e1;border-radius:8px;padding:10px;background:white;color:#172b46}.row{display:flex;gap:9px;align-items:center;flex-wrap:wrap}.note{margin-top:12px;color:#465d79;font-size:13px}.sheet{margin-top:20px;overflow:auto}.sheet-title{text-align:center;padding:3px 0 16px}.sheet-title h2{font-size:24px;margin:0 0 4px}.calendar{width:100%;border-collapse:collapse;table-layout:fixed}.calendar th,.calendar td{border:1px solid #9baec5;vertical-align:top}.calendar th{background:#203d66;color:white;padding:9px 2px;font-size:13px}.calendar td{height:130px;padding:0;background:#fff}.calendar td.off{background:#f1f3f7}.celltop{font-size:12px;font-weight:700;padding:6px 7px;background:#edf2fa;border-bottom:1px solid #d7e0ed}.holiday .celltop{background:#fce8e8;color:#9d3341}.entry{padding:5px 7px;font-size:11px;line-height:1.4}.entry label{display:block;font-weight:700;color:#48617e;font-size:10px;margin-bottom:2px}.entry textarea{width:100%;border:1px solid transparent;border-radius:4px;resize:vertical;min-height:28px;background:transparent;padding:2px;font-size:11px;color:#172b46;line-height:1.35}.entry textarea:focus{outline:1px solid #5e86d7;background:#f8fbff}.entry textarea:hover{border-color:#d0d8e5}.holidaytext{padding:18px 5px;text-align:center;color:#a04444;font-weight:700;font-size:13px}.empty{padding:14px;text-align:center;color:#95a3b6;font-size:12px}.warning{color:#9a4e13;font-size:13px;margin-top:10px}.help{margin-top:12px;color:#6a7e95;font-size:12px}.printhead{display:none}@page{size:A4 landscape;margin:8mm}@media print{body{background:white;-webkit-print-color-adjust:exact;print-color-adjust:exact}header,.controls,.row.actions,.help,.warning,.note{display:none!important}.wrap{padding:0;max-width:none}.sheet{border:0;border-radius:0;box-shadow:none;padding:0;margin:0;overflow:visible}.sheet-title{padding:0 0 5mm}.sheet-title h2{font-size:16pt}.sheet-title .muted{font-size:9pt}.calendar th{padding:2mm;font-size:9pt}.calendar td{height:auto}.celltop{padding:1mm 2mm;font-size:8pt}.entry{padding:1mm 2mm;font-size:7pt}.entry label{font-size:6.5pt}.entry textarea{min-height:0;height:auto!important;overflow:hidden;resize:none;border:0;padding:0;font-size:7pt;white-space:pre-wrap}.calendar tr{break-inside:avoid;page-break-inside:avoid}.sheet{zoom:var(--print-scale,1)}}@media(max-width:850px){.inputs{grid-template-columns:1fr 1fr}.sheet{padding:10px}.calendar{min-width:720px}}@media(max-width:520px){.inputs{grid-template-columns:1fr}}
 </style></head><body>
 <header><strong>✦ Evo AI · Academy Planner</strong><span>교재별 수업 진도표</span></header>
 <main class="wrap">
 <section class="controls">
-<h1>수업 스케줄 자동 생성</h1><p class="muted">교재와 기간, 휴무일을 정하면 월~금 수업 진도를 캘린더로 배치합니다.</p>
+<h1>수업 스케줄 자동 생성</h1><p class="muted">교재와 시작일, 휴무일을 정하면 교재 전체 진도를 월~금 수업일에 자동 배치합니다.</p>
 <div class="inputs">
 <label>교재<select id="book"><option value="interb">Inter B · Inter Bridge 1</option></select></label>
 <label>시작일<input id="start" type="date"></label>
-<label>종료일<input id="end" type="date"></label>
+
 <label>휴무일 (쉼표로 구분)<input id="holidays" placeholder="예: 2026-11-05, 2026-11-12"></label>
 </div>
 <div class="row actions"><button id="generate">스케줄 생성하기</button><button class="secondary" id="print">A4 한 장 인쇄 / PDF</button><button class="secondary" id="reset">수정 내용 초기화</button></div>
@@ -19,7 +19,7 @@
 <p id="message" class="warning" role="status"></p>
 </section>
 <section class="sheet" id="sheet">
-<div class="sheet-title"><h2>Inter B · 수업 진도 캘린더</h2><div id="period" class="muted">기간을 선택하고 스케줄을 생성하세요.</div></div>
+<div class="sheet-title"><h2>Inter B · 수업 진도 캘린더</h2><div id="period" class="muted">시작일을 선택하고 스케줄을 생성하세요.</div></div>
 <table class="calendar"><thead><tr><th>월요일</th><th>화요일</th><th>수요일</th><th>목요일</th><th>금요일</th></tr></thead><tbody id="calendar"></tbody></table>
 <p class="help">표 안의 Inclass, Vocab., T-Room 내용을 직접 수정할 수 있습니다. 수정한 내용은 현재 브라우저에 저장됩니다.</p>
 </section>
@@ -77,28 +77,27 @@ function draw(){
  document.documentElement.style.setProperty("--print-scale",rows>8?".72":rows>6?".84":"1");
 }
 function generate(){
- const start=$("start").value,end=$("end").value;
- if(!start||!end||start>end){$("message").textContent="시작일과 종료일을 올바르게 선택해 주세요.";return;}
- const days=Math.round((local(end)-local(start))/86400000);
- if(days>300){$("message").textContent="A4 한 장 출력을 위해 기간은 최대 300일로 제한됩니다.";return;}
+ const start=$("start").value;
+ if(!start){$("message").textContent="시작일을 선택해 주세요.";return;}
  const tokens=$("holidays").value.split(/[,，\n]+/).map(s=>s.trim()).filter(Boolean);
  const valid=/^\d{4}-\d{2}-\d{2}$/;
  if(tokens.some(s=>!valid.test(s)||iso(local(s))!==s)){$("message").textContent="휴무일을 YYYY-MM-DD 형식으로 입력해 주세요.";return;}
  const holidays=[...new Set(tokens)];
- config={start,end,holidays};cells={};let count=0;
- for(let d=local(start);d<=local(end);d.setDate(d.getDate()+1)){
+ cells={};let count=0;let end=start;
+ for(let d=local(start),steps=0;count<lessons.length&&steps<365;d.setDate(d.getDate()+1),steps++){
   const day=d.getDay(),date=iso(d);if(day===0||day===6)continue;
   if(holidays.includes(date)){cells[date]={holiday:true};continue;}
-  if(count<lessons.length){cells[date]={...lessons[count],lesson:true};count++;}
+  if(count<lessons.length){cells[date]={...lessons[count],lesson:true};count++;end=date;}
  }
- $("message").textContent=count<lessons.length?"교재 기본 진도 "+lessons.length+"일 중 "+count+"일이 배치되었습니다. 기간을 늘리면 나머지 진도를 배치할 수 있습니다.":"기본 진도 "+lessons.length+"일을 배치했습니다. 남은 날짜는 빈칸으로 두었습니다.";
+ config={start,end,holidays};
+ $("message").textContent="기본 진도 "+count+"일을 자동 배치했습니다. 마지막 수업일: "+end;
  save();draw();
 }
 $("generate").onclick=generate;
 $("print").onclick=()=>{if(!config){$("message").textContent="먼저 스케줄을 생성해 주세요.";return;}window.print();};
 $("reset").onclick=()=>{if(!confirm("직접 수정한 내용을 지우고 기본 진도로 다시 생성할까요?"))return;generate();};
-const now=new Date(),later=new Date(now);later.setDate(later.getDate()+34);
-$("start").value=iso(now);$("end").value=iso(later);
-try{const stored=JSON.parse(localStorage.getItem(key)||"null");if(stored&&stored.config&&stored.cells&&/^\d{4}-\d{2}-\d{2}$/.test(stored.config.start)){config=stored.config;cells=stored.cells;$("start").value=config.start;$("end").value=config.end;$("holidays").value=(config.holidays||[]).join(", ");draw();}}catch(e){}
+const now=new Date();
+$("start").value=iso(now);
+try{const stored=JSON.parse(localStorage.getItem(key)||"null");if(stored&&stored.config&&stored.cells&&/^\d{4}-\d{2}-\d{2}$/.test(stored.config.start)){config=stored.config;cells=stored.cells;$("start").value=config.start;$("holidays").value=(config.holidays||[]).join(", ");draw();}}catch(e){}
 })();
 </script></body></html>
