@@ -491,7 +491,7 @@ function refreshSuggestions(){
 $("start").addEventListener("change",refreshSuggestions);
 $("holidays").addEventListener("input",refreshSuggestions);
 function generate(){
- const chosenClass=$("className").value;if(!chosenClass){$("message").textContent="먼저 담당 수업을 선택해 주세요.";return;}
+ const chosenClass=$("className").value;if(!chosenClass){$("message").textContent="상단의 담당 수업을 먼저 선택해 주세요. 수업 목록이 비어 있다면 페이지를 새로고침해 주세요."; $("className").focus();return;}
  const book=$("book").value;
  lessons=makeLessons(book);
  const start=$("start").value;
@@ -507,7 +507,7 @@ function generate(){
  for(let d=local(start),steps=0;count<lessons.length&&steps<365;d.setDate(d.getDate()+1),steps++){
   const day=d.getDay(),date=iso(d);if(day===0||day===6)continue;
   if(holidays.includes(date)){cells[date]={holiday:true};continue;}
-  if(count<lessons.length){cells[date]={...lessons[count],vocab:vocabFor(count,vocabStart),lesson:true};count++;end=date;}
+  if(count<lessons.length){cells[date]={...lessons[count],vocab:textbookTemplate(book).noVocab?"":vocabFor(count,vocabStart),lesson:true};count++;end=date;}
  }
  config={start,end,holidays,vocabStart,book,noVocab:textbookTemplate(book).noVocab||false,hasHomework:!!textbookTemplate(book).noVocab,className:$("className").value.trim()||"Inter Bridge 1"};
  $("message").textContent="기본 진도 "+count+"일을 자동 배치했습니다. 마지막 수업일: "+end;
