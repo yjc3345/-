@@ -318,6 +318,11 @@ html,body{width:auto!important;margin:0!important;padding:0!important}
 .sheet-title{padding:0 0 1mm!important}
 }
 .schedule-bottom-actions{display:flex;justify-content:flex-end;gap:10px;margin-top:16px}.danger-button{background:#c62828!important;color:white!important;border-color:#c62828!important}.danger-button:hover{background:#a71d1d!important}@media print{.schedule-bottom-actions{display:none!important}}
+
+/* T-Room과 Homework 행 구분선 */
+.calendar tr.troom-row td,.calendar tr.troom-row th{border-bottom:1.5px dashed #8ba2c1!important}
+.calendar tr.homework-row td,.calendar tr.homework-row th{border-top:1.5px dashed #8ba2c1!important}
+@media print{.calendar tr.troom-row td,.calendar tr.troom-row th{border-bottom:1px dashed #7086a6!important}.calendar tr.homework-row td,.calendar tr.homework-row th{border-top:1px dashed #7086a6!important}}
 </style></head><body>
 <header><strong>✦ Evo AI · Academy Planner</strong><span class="admin-placeholder" id="adminTeacherPicker" hidden>관리자용 선생님 선택 <select id="adminTeacherSelect" aria-label="조회할 선생님"><option value="">선생님 선택</option></select></span></header>
 <main class="wrap">
