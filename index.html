@@ -405,13 +405,16 @@ let archive={},activePeriod=null,availableWindows=[];
 const archiveId=c=>(c.className||"Inter Bridge 1")+"|"+c.start;
 try{archive=JSON.parse(localStorage.getItem(archiveKey)||"{}")||{};}catch(e){archive={};}
 const periodLabel=c=>{const a=local(c.start),b=local(c.end);return (a.getFullYear()===b.getFullYear()?"":a.getFullYear()+"년 ")+(a.getMonth()+1)+"월~"+(b.getMonth()+1)+"월";};
+function sixMonthCutoff(){const d=new Date();d.setHours(12,0,0,0);d.setMonth(d.getMonth()-6);return iso(d);}
+function isHistoricalPeriod(end){return !!end&&end<=sixMonthCutoff();}
 function drawTabs(){
  const names=[...new Set(Object.values(archive).map(x=>x.config.className||"Inter Bridge 1"))];
  const picker=$("className");if(!picker.dataset.assigned){for(const name of names){if(!Array.from(picker.options).some(o=>o.value===name))picker.add(new Option(name,name))}}
  const nav=$("periodTabs");nav.replaceChildren();
  const selectedClass=$("className").value.trim()||"Inter Bridge 1";
-const items=Object.entries(archive).filter(([id,item])=>(item.config.className||"Inter Bridge 1")===selectedClass).sort((a,b)=>a[1].config.start.localeCompare(b[1].config.start));
+const items=Object.entries(archive).filter(([id,item])=>(item.config.className||"Inter Bridge 1")===selectedClass&&!isHistoricalPeriod(item.config.end)).sort((a,b)=>a[1].config.start.localeCompare(b[1].config.start));
  for(const w of availableWindows){
+ if(isHistoricalPeriod(w.end_date))continue;
  const archived=items.find(([id,item])=>item.config.windowId===w.id||item.config.start===w.start_date);
  const tab=create("button","period-tab"+((archived&&archived[0]===activePeriod)||(!archived&&$("academyWindow").value===w.id&&!config)?" active":""),w.label);
  tab.type="button";tab.title=w.start_date+" ~ "+w.end_date;
@@ -422,7 +425,7 @@ const items=Object.entries(archive).filter(([id,item])=>(item.config.className||
  drawTabs();
  };nav.append(tab);
  }
- if(!items.length){if(!availableWindows.length)nav.appendChild(create("span","period-tab active","현재 스케줄"));return;}
+ if(!items.length){if(!nav.children.length)nav.appendChild(create("span","period-tab active","현재 스케줄"));return;}
  for(const [id,item] of items){
   if(availableWindows.some(w=>w.id===item.config.windowId||w.start_date===item.config.start))continue;
   const btn=create("button","period-tab"+(id===activePeriod?" active":""),periodLabel(item.config));
@@ -668,9 +671,9 @@ const {data,error}=await db.from("academy_schedule_windows").select("id,label,st
 const select=document.getElementById("academyWindow"),start=document.getElementById("start"),message=document.getElementById("message");
 if(error){message.textContent="수업 기간을 불러오지 못했습니다: "+error.message;return}
 select.replaceChildren(new Option("수업 기간을 선택하세요",""));
-availableWindows=data||[];for(const w of data||[]){const opt=new Option(w.label+" ("+(w.start_date||"시작일 미지정")+" ~ "+w.end_date+")",w.id);opt.dataset.start=w.start_date;opt.dataset.end=w.end_date;opt.dataset.holidays=(w.holidays||[]).join(",");select.add(opt)}
+availableWindows=(data||[]).filter(w=>!isHistoricalPeriod(w.end_date));for(const w of availableWindows){const opt=new Option(w.label+" ("+(w.start_date||"시작일 미지정")+" ~ "+w.end_date+")",w.id);opt.dataset.start=w.start_date;opt.dataset.end=w.end_date;opt.dataset.holidays=(w.holidays||[]).join(",");select.add(opt)}
 select.onchange=()=>{const opt=select.selectedOptions[0];start.value=opt?.dataset.start||"";document.getElementById("holidays").value=opt?.dataset.holidays||"";document.getElementById("windowEndNotice").textContent=opt?.dataset.end?"관리자 지정 종료일: "+opt.dataset.end:"";};
-if(!data?.length)message.textContent="관리자가 아직 수업 기간을 등록하지 않았습니다.";else{select.value=data[0].id;select.dispatchEvent(new Event("change"));drawTabs();}
+if(!data?.length)message.textContent="관리자가 아직 수업 기간을 등록하지 않았습니다.";else if(availableWindows.length){select.value=availableWindows[0].id;select.dispatchEvent(new Event("change"));drawTabs();}else{message.textContent="최근 6개월 내 수업 기간이 없습니다. 지난 시간표는 로그인 화면의 지난 스케줄표 조회에서 확인하세요.";drawTabs();}
 }catch(e){console.warn("Academy windows",e)}
 })();
 </script></body></html>
