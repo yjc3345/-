@@ -335,7 +335,7 @@ html,body{width:auto!important;margin:0!important;padding:0!important}
 <p class="note">휴무일은 YYYY-MM-DD 형식으로 입력하세요. 휴무일에는 진도를 배치하지 않고 다음 평일로 이어집니다. 생성 후 각 칸의 글을 클릭해 수정할 수 있습니다.</p>
 <p id="message" class="warning" role="status"></p><p id="period" class="teacher-period">선생님용 · 시작일을 선택하고 스케줄을 생성하세요.</p>
 </section>
-<nav class="period-tabs" id="periodTabs" aria-label="수업 기간 선택"></nav>
+<p class="muted" style="margin-bottom:4px">선택한 수업의 기간별 시간표</p><nav class="period-tabs" id="periodTabs" aria-label="수업 기간 선택"></nav>
 <section class="sheet" id="sheet">
 <div class="sheet-title"><h2>Inter Bridge1</h2><div id="studentPeriod" class="muted">수업 기간은 스케줄 생성 후 표시됩니다.</div></div>
 <table class="calendar"><colgroup><col class="label-column"><col span="5"></colgroup><thead><tr><th>항목</th><th>월요일</th><th>화요일</th><th>수요일</th><th>목요일</th><th>금요일</th></tr></thead><tbody id="calendar"></tbody></table>
@@ -374,6 +374,9 @@ const archiveId=c=>(c.className||"Inter Bridge 1")+"|"+c.start;
 try{archive=JSON.parse(localStorage.getItem(archiveKey)||"{}")||{};}catch(e){archive={};}
 const periodLabel=c=>{const a=local(c.start),b=local(c.end);return (a.getFullYear()===b.getFullYear()?"":a.getFullYear()+"년 ")+(a.getMonth()+1)+"월~"+(b.getMonth()+1)+"월";};
 function drawTabs(){
+ const names=[...new Set(Object.values(archive).map(x=>x.config.className||"Inter Bridge 1"))];
+ const suggestions=$("classSuggestions");suggestions.replaceChildren();
+ for(const name of names)suggestions.append(new Option(name));
  const nav=$("periodTabs");nav.replaceChildren();
  const selectedClass=$("className").value.trim()||"Inter Bridge 1";
 const items=Object.entries(archive).filter(([id,item])=>(item.config.className||"Inter Bridge 1")===selectedClass).sort((a,b)=>a[1].config.start.localeCompare(b[1].config.start));
