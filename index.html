@@ -594,4 +594,19 @@ for(const p of staff||[]){if(p.user_id===user.id)continue;select.add(new Option(
 select.onchange=()=>{if(!select.value)return;const loginUrl=new URL("./login.html",location.href);loginUrl.searchParams.set("viewTeacher",select.value);window.top.location.href=loginUrl.href};
 }catch(e){console.warn(e)}
 })();
+</script><script>
+(async()=>{
+try{
+const db=supabase.createClient("https://eovntwuvjzvnztyxzwer.supabase.co","sb_publishable_XMxCvN3wguCsjUY-6GrR2g_HidFJtoc");
+const {data:{user}}=await db.auth.getUser();if(!user)return;
+const {data:assigned,error}=await db.from("teacher_classes").select("class_name").eq("teacher_id",user.id).order("class_name");
+if(error||!assigned?.length)return;
+const picker=document.getElementById("className");const previous=picker.value;
+picker.replaceChildren(new Option("수업을 선택하세요",""));
+for(const c of assigned)picker.add(new Option(c.class_name,c.class_name));
+picker.dataset.assigned="true";
+if(assigned.some(c=>c.class_name===previous))picker.value=previous;
+else{picker.value=assigned[0].class_name;picker.dispatchEvent(new Event("change"))}
+}catch(e){console.warn("Assigned classes",e)}
+})();
 </script></body></html>
