@@ -181,23 +181,23 @@ html,body,.wrap{padding:0!important;margin:0!important}
 .calendar tbody tr.lesson-row:last-child th.sidehead,.calendar tbody tr.lesson-row:last-child td{border-bottom:1pt solid #a9bad0!important}
 }
 
-/* Inclass 50%, Vocab 25%, T-Room 25% */
+/* Inclass 70%, Vocab 15%, T-Room 15% */
 @media screen{
-.calendar tr.inclass-row th,.calendar tr.inclass-row td{height:54px!important;max-height:54px!important}
+.calendar tr.inclass-row th,.calendar tr.inclass-row td{height:77px!important;max-height:77px!important}
 .calendar tr.vocab-row th,.calendar tr.vocab-row td,
-.calendar tr.troom-row th,.calendar tr.troom-row td{height:28px!important;max-height:28px!important}
-.calendar tr.inclass-row textarea{height:46px!important;min-height:46px!important;max-height:46px!important;overflow:auto!important}
-.calendar tr.vocab-row textarea,.calendar tr.troom-row textarea{height:22px!important;min-height:22px!important;max-height:22px!important;overflow:auto!important;padding:1px 3px!important}
+.calendar tr.troom-row th,.calendar tr.troom-row td{height:17px!important;max-height:17px!important}
+.calendar tr.inclass-row textarea{height:69px!important;min-height:69px!important;max-height:69px!important;overflow:auto!important}
+.calendar tr.vocab-row textarea,.calendar tr.troom-row textarea{height:15px!important;min-height:15px!important;max-height:15px!important;overflow:auto!important;padding:1px 3px!important}
 }
 @media print{
 .calendar tr.inclass-row,.calendar tr.inclass-row th,.calendar tr.inclass-row td{
-height:calc((var(--week-height,31mm) - 5mm) / 2)!important;
-max-height:calc((var(--week-height,31mm) - 5mm) / 2)!important;
+height:calc((var(--week-height,31mm) - 5mm) * .7)!important;
+max-height:calc((var(--week-height,31mm) - 5mm) * .7)!important;
 }
 .calendar tr.vocab-row,.calendar tr.vocab-row th,.calendar tr.vocab-row td,
 .calendar tr.troom-row,.calendar tr.troom-row th,.calendar tr.troom-row td{
-height:calc((var(--week-height,31mm) - 5mm) / 4)!important;
-max-height:calc((var(--week-height,31mm) - 5mm) / 4)!important;
+height:calc((var(--week-height,31mm) - 5mm) * .15)!important;
+max-height:calc((var(--week-height,31mm) - 5mm) * .15)!important;
 }
 }
 </style></head><body>
