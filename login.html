@@ -49,16 +49,16 @@ $("logout").onclick=async()=>{await client.auth.signOut();await load()};
 let historyPeriods=[];
 async function openHistory(){
 if(!current||current.must_change_password)return;
-show("schedulePanel",false);show("historyPanel",true);msg("historyMessage","불러오는 중...");
+show("schedulePanel",false);show("adminPanel",false);show("historyPanel",true);msg("historyMessage","불러오는 중...");
 const [windowsResult,periodsResult]=await Promise.all([
  client.from("academy_schedule_windows").select("id,start_date,end_date").order("start_date",{ascending:false}),
- client.from("schedule_periods").select("id,label,start_date,end_date,class_name").eq("teacher_id",current.user_id).order("start_date",{ascending:false})
+ client.from("schedule_periods").select("id,label,start_date,end_date,class_name,teacher_id").order("start_date",{ascending:false})
 ]);
 if(windowsResult.error||periodsResult.error){msg("historyMessage",(windowsResult.error||periodsResult.error).message);return}
 const windows=windowsResult.data||[],recent=windows.slice(0,6),old=windows.slice(6);
 const oldStarts=new Set(old.map(w=>w.start_date)),recentStarts=new Set(recent.map(w=>w.start_date));
 const oldestRecent=recent.length?recent[recent.length-1].start_date:null;
-historyPeriods=(periodsResult.data||[]).filter(p=>oldStarts.has(p.start_date)||(!recentStarts.has(p.start_date)&&oldestRecent&&p.start_date<oldestRecent));
+historyPeriods=(periodsResult.data||[]).filter(p=>(current.role==="admin"||p.teacher_id===current.user_id)&&(oldStarts.has(p.start_date)||(!recentStarts.has(p.start_date)&&oldestRecent&&p.start_date<oldestRecent)));
 const select=$("historyClass");select.replaceChildren(new Option("전체 반",""));
 for(const name of [...new Set(historyPeriods.map(p=>p.class_name||"미지정"))])select.add(new Option(name,name));
 renderHistory();
