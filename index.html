@@ -64,7 +64,7 @@ html,body{width:100%;height:auto}
 .entry.cumulative{padding:.5mm 1mm;margin:.5mm;border:0.7pt solid #19385f}
 .holidaytext{padding:2mm 0;font-size:8pt}
 }
-</style></head><body>
+.sidehead{width:10%;white-space:pre-line;background:#e4edfa!important;color:#28456b!important;text-align:center;vertical-align:middle}@media print{@page{size:A4 landscape;margin:2mm}.wrap,.sheet{padding:0!important;margin:0!important}.sheet-title{margin:0!important;padding:0 0 1mm!important}}</style></head><body>
 <header><strong>✦ Evo AI · Academy Planner</strong><span>교재별 수업 진도표</span></header>
 <main class="wrap">
 <section class="controls">
@@ -82,7 +82,7 @@ html,body{width:100%;height:auto}
 </section>
 <section class="sheet" id="sheet">
 <div class="sheet-title"><h2>Inter Bridge1</h2><div id="studentPeriod" class="muted">수업 기간은 스케줄 생성 후 표시됩니다.</div></div>
-<table class="calendar"><thead><tr><th>월요일</th><th>화요일</th><th>수요일</th><th>목요일</th><th>금요일</th></tr></thead><tbody id="calendar"></tbody></table>
+<table class="calendar"><thead><tr><th>항목</th><th>월요일</th><th>화요일</th><th>수요일</th><th>목요일</th><th>금요일</th></tr></thead><tbody id="calendar"></tbody></table>
 <p class="help">표 안의 Inclass, Vocab., T-Room 내용을 직접 수정할 수 있습니다. 수정한 내용은 현재 브라우저에 저장됩니다.</p>
 </section>
 </main>
@@ -122,7 +122,7 @@ function draw(){
  const last=new Date(end);last.setDate(last.getDate()+(5-last.getDay()+7)%7);
  let cursor=new Date(first),rows=0;
  while(cursor<=last&&rows<60){
-  const tr=create("tr");
+  const tr=create("tr");tr.appendChild(create("th","sidehead","Inclass\nVocab.\nT-Room"));
   for(let i=0;i<5;i++){
    const date=iso(cursor),data=cells[date],td=create("td",data&&data.holiday?"holiday":"");
    const outside=cursor<start||cursor>end;
