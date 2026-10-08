@@ -536,9 +536,9 @@ deleteButton.disabled=true;
 try{
 const period=await findPeriod(current.config.start);
 if(period){const d=await db.from("schedule_cells").delete().eq("period_id",period.id);if(d.error)throw d.error;const p=await db.from("schedule_periods").delete().eq("id",period.id);if(p.error)throw p.error}
-localStorage.removeItem("evo-academy-interb-v1");
-const archive=JSON.parse(localStorage.getItem("evo-academy-period-archive-v1")||"{}");delete archive[current.config.start];
-localStorage.setItem("evo-academy-period-archive-v1",JSON.stringify(archive));
+localStorage.removeItem("evo-academy-schedule-v2");
+const archive=JSON.parse(localStorage.getItem("evo-academy-schedule-archive-v2")||"{}");delete archive[current.config.start];
+localStorage.setItem("evo-academy-schedule-archive-v2",JSON.stringify(archive));
 status.textContent="시간표가 삭제됐습니다. 새 시간표를 생성할 수 있습니다.";
 setTimeout(()=>location.reload(),700);
 }catch(e){status.textContent="삭제 실패: "+e.message}finally{deleteButton.disabled=false}
