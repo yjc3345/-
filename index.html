@@ -200,6 +200,24 @@ height:calc((var(--week-height,31mm) - 5mm) * .15)!important;
 max-height:calc((var(--week-height,31mm) - 5mm) * .15)!important;
 }
 }
+
+/* 2026-10-08 layout correction: force actual table row heights */
+@media screen{
+.calendar{height:auto!important}
+.calendar tbody tr.date-row{height:26px!important}
+.calendar tbody tr.inclass-row{height:84px!important}
+.calendar tbody tr.vocab-row,.calendar tbody tr.troom-row{height:18px!important}
+.calendar tbody tr.inclass-row>th,.calendar tbody tr.inclass-row>td{height:84px!important;max-height:84px!important;padding:2px 3px!important}
+.calendar tbody tr.vocab-row>th,.calendar tbody tr.vocab-row>td,
+.calendar tbody tr.troom-row>th,.calendar tbody tr.troom-row>td{height:18px!important;max-height:18px!important;padding:0 3px!important;line-height:16px!important}
+.calendar tbody tr.inclass-row textarea{height:76px!important;min-height:76px!important;max-height:76px!important}
+.calendar tbody tr.vocab-row textarea,.calendar tbody tr.troom-row textarea{display:block!important;height:16px!important;min-height:16px!important;max-height:16px!important;line-height:16px!important;padding:0 2px!important;overflow:hidden!important}
+.calendar tbody tr.vocab-row .sidehead,.calendar tbody tr.troom-row .sidehead{font-size:10px!important}
+}
+@media print{
+.calendar tbody tr.inclass-row{height:calc((var(--week-height,31mm) - 5mm) * .7)!important}
+.calendar tbody tr.vocab-row,.calendar tbody tr.troom-row{height:calc((var(--week-height,31mm) - 5mm) * .15)!important}
+}
 </style></head><body>
 <header><strong>✦ Evo AI · Academy Planner</strong><span>교재별 수업 진도표</span></header>
 <main class="wrap">
@@ -219,7 +237,7 @@ max-height:calc((var(--week-height,31mm) - 5mm) * .15)!important;
 <section class="sheet" id="sheet">
 <div class="sheet-title"><h2>Inter Bridge1</h2><div id="studentPeriod" class="muted">수업 기간은 스케줄 생성 후 표시됩니다.</div></div>
 <table class="calendar"><colgroup><col class="label-column"><col span="5"></colgroup><thead><tr><th>항목</th><th>월요일</th><th>화요일</th><th>수요일</th><th>목요일</th><th>금요일</th></tr></thead><tbody id="calendar"></tbody></table>
-<p class="help">표 안의 Inclass, Vocab., T-Room 내용을 직접 수정할 수 있습니다. 수정한 내용은 현재 브라우저에 저장됩니다.</p>
+<p class="help">편집 화면 버전: 2026.10.08-8 · 표 안의 Inclass, Vocab., T-Room 내용을 직접 수정할 수 있습니다. 수정한 내용은 현재 브라우저에 저장됩니다.</p>
 </section>
 </main>
 <script>
