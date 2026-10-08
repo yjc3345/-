@@ -268,6 +268,9 @@ text-align:center!important;white-space:pre-wrap!important;overflow-wrap:anywher
 .admin-placeholder select{max-width:155px;padding:5px 8px;border-radius:6px;border:1px solid #9eb0ca;background:#dce4ef;color:#425b77}
 .period-tabs+.sheet{margin-top:0;border-top-left-radius:8px}
 @media print{.period-tabs,.admin-placeholder{display:none!important}}
+
+/* 로그인한 선생님에게 배정된 색상을 시간표 전체에 적용 */
+:root{--teacher-color:#27538d;--teacher-pale:#f1f7ff;--teacher-soft:#e4effe}body{background:var(--teacher-pale)}header,.calendar th,.calendar th:first-child,.calendar th:last-child{background:var(--teacher-color)}button:not(.secondary){background:var(--teacher-color)}.sheet{border-color:var(--teacher-color)}.sheet-title{background:var(--teacher-pale)}.sheet-title h2,.celltop{color:var(--teacher-color)}.calendar tr:nth-child(even) td:not(.holiday):not(.off),.celltop,.calendar td:nth-child(1) .celltop,.calendar td:nth-child(5) .celltop{background:var(--teacher-soft)}
 </style></head><body>
 <header><strong>✦ Evo AI · Academy Planner</strong><span class="admin-placeholder" title="계정별 권한 기능은 로그인 연동 후 활성화됩니다">관리자용 선생님 선택 <select disabled aria-label="선생님 선택 (로그인 연동 후 사용)"><option>로그인 연동 후 사용</option></select></span></header>
 <main class="wrap">
@@ -292,6 +295,8 @@ text-align:center!important;white-space:pre-wrap!important;overflow-wrap:anywher
 </section>
 </main>
 <script>
+(()=>{const hex=new URLSearchParams(location.search).get("theme");if(!/^#[0-9a-fA-F]{6}$/.test(hex||""))return;const n=parseInt(hex.slice(1),16),r=n>>16,g=(n>>8)&255,b=n&255;const blend=p=>`rgb(${Math.round(r*p+255*(1-p))},${Math.round(g*p+255*(1-p))},${Math.round(b*p+255*(1-p))})`;document.documentElement.style.setProperty("--teacher-color",hex);document.documentElement.style.setProperty("--teacher-pale",blend(.08));document.documentElement.style.setProperty("--teacher-soft",blend(.15));})();
+
 (function(){
 "use strict";
 const $=id=>document.getElementById(id), pad=n=>String(n).padStart(2,"0");
