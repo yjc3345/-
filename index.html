@@ -319,7 +319,7 @@ html,body{width:auto!important;margin:0!important;padding:0!important}
 }
 .schedule-bottom-actions{display:flex;justify-content:flex-end;gap:10px;margin-top:16px}.danger-button{background:#c62828!important;color:white!important;border-color:#c62828!important}.danger-button:hover{background:#a71d1d!important}@media print{.schedule-bottom-actions{display:none!important}}
 </style></head><body>
-<header><strong>✦ Evo AI · Academy Planner</strong><span class="admin-placeholder" title="계정별 권한 기능은 로그인 연동 후 활성화됩니다">관리자용 선생님 선택 <select disabled aria-label="선생님 선택 (로그인 연동 후 사용)"><option>로그인 연동 후 사용</option></select></span></header>
+<header><strong>✦ Evo AI · Academy Planner</strong><span class="admin-placeholder" id="adminTeacherPicker" hidden>관리자용 선생님 선택 <select id="adminTeacherSelect" aria-label="조회할 선생님"><option value="">선생님 선택</option></select></span></header>
 <main class="wrap">
 <section class="controls">
 <h1>수업 스케줄 자동 생성</h1><p class="muted">교재와 시작일, 휴무일을 정하면 교재 전체 진도를 월~금 수업일에 자동 배치합니다.</p>
@@ -572,5 +572,17 @@ const observer=new MutationObserver(()=>{clearTimeout(window.__approvalTimer);wi
 observer.observe(cal,{childList:true,subtree:false});
 document.getElementById("periodTabs")?.addEventListener("click",()=>setTimeout(check,100));
 setInterval(check,12000);check();
+})();
+</script><script>
+(async()=>{
+try{
+const db=supabase.createClient("https://eovntwuvjzvnztyxzwer.supabase.co","sb_publishable_XMxCvN3wguCsjUY-6GrR2g_HidFJtoc");
+const {data:{user}}=await db.auth.getUser();if(!user)return;
+const {data:profile}=await db.from("staff_profiles").select("role").eq("user_id",user.id).maybeSingle();if(profile?.role!=="admin")return;
+const picker=document.getElementById("adminTeacherPicker"),select=document.getElementById("adminTeacherSelect");picker.hidden=false;
+const {data:staff}=await db.from("staff_profiles").select("user_id,display_name").order("display_name");
+for(const p of staff||[]){if(p.user_id===user.id)continue;select.add(new Option(p.display_name,p.user_id))}
+select.onchange=()=>{if(!select.value)return;const loginUrl=new URL("./login.html",location.href);loginUrl.searchParams.set("viewTeacher",select.value);window.top.location.href=loginUrl.href};
+}catch(e){console.warn(e)}
 })();
 </script></body></html>
