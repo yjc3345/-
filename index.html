@@ -295,7 +295,7 @@ text-align:center!important;white-space:pre-wrap!important;overflow-wrap:anywher
 <label>휴무일 (쉼표로 구분)<input id="holidays" placeholder="예: 2026-11-05, 2026-11-12"></label>
 </div>
 <section id="holidaySuggestions" class="suggestions"><div class="suggesthead"><strong>🇰🇷 대한민국 공휴일 추천</strong><span class="muted">추천 날짜를 선택하면 휴무일에 추가됩니다.</span></div><div id="holidayOptions" class="holiday-options"></div><p id="holidayInfo" class="muted"></p></section>
-<div class="row actions"><button id="generate">스케줄 생성하기</button><button class="secondary" id="print">A4 한 장 인쇄 / PDF</button><button class="secondary" id="reset">수정 내용 초기화</button></div>
+<div class="row actions"><button id="generate">스케줄 생성하기</button><button type="button" id="saveSchedule">시간표 저장</button><button type="button" class="secondary" id="deleteSchedule">시간표 삭제</button><button class="secondary" id="print">A4 한 장 인쇄 / PDF</button><button class="secondary" id="reset">수정 내용 초기화</button></div>
 <p class="note">휴무일은 YYYY-MM-DD 형식으로 입력하세요. 휴무일에는 진도를 배치하지 않고 다음 평일로 이어집니다. 생성 후 각 칸의 글을 클릭해 수정할 수 있습니다.</p>
 <p id="message" class="warning" role="status"></p><p id="period" class="teacher-period">선생님용 · 시작일을 선택하고 스케줄을 생성하세요.</p>
 </section>
@@ -469,30 +469,44 @@ try{
 (async()=>{
 const db=supabase.createClient("https://eovntwuvjzvnztyxzwer.supabase.co","sb_publishable_XMxCvN3wguCsjUY-6GrR2g_HidFJtoc");
 const {data:{user}}=await db.auth.getUser();if(!user)return;
-const {data:profile}=await db.from("staff_profiles").select("role,must_change_password").eq("user_id",user.id).single();
+const {data:profile}=await db.from("staff_profiles").select("must_change_password").eq("user_id",user.id).single();
 if(!profile||profile.must_change_password)return;
-let busy=false,again=false;
-async function sync(){
- if(busy){again=true;return}busy=true;
- try{
- const archive=JSON.parse(localStorage.getItem("evo-academy-period-archive-v1")||"{}");
- const current=JSON.parse(localStorage.getItem("evo-academy-interb-v1")||"null");
- if(current?.config?.start)archive[current.config.start]=current;
- for(const item of Object.values(archive)){
- const c=item.config;if(!c?.start||!c?.end)continue;
- let {data:period}=await db.from("schedule_periods").select("id").eq("teacher_id",user.id).eq("start_date",c.start).maybeSingle();
- if(!period){const created=await db.from("schedule_periods").insert({teacher_id:user.id,label:c.start+" ~ "+c.end,start_date:c.start,end_date:c.end,holidays:c.holidays||[],vocab_start:c.vocabStart||1}).select("id").single();if(created.error)throw created.error;period=created.data}
- else{const updated=await db.from("schedule_periods").update({end_date:c.end,holidays:c.holidays||[],vocab_start:c.vocabStart||1}).eq("id",period.id);if(updated.error)throw updated.error}
- const rows=Object.entries(item.cells||{}).map(([date,v])=>({period_id:period.id,lesson_date:date,inclass:v.inclass||"",troom:v.troom||"",vocab_base:v.vocab||"",is_holiday:!!v.holiday}));
- const existing=await db.from("schedule_cells").select("id,lesson_date").eq("period_id",period.id);if(existing.error)throw existing.error;
- const byDate=new Map((existing.data||[]).map(x=>[x.lesson_date,x.id]));
- for(const row of rows){const id=byDate.get(row.lesson_date);const result=id?await db.from("schedule_cells").update(row).eq("id",id):await db.from("schedule_cells").insert(row);if(result.error)throw result.error}
- }
- }catch(e){console.warn("Schedule sync:",e.message)}
- finally{busy=false;if(again){again=false;setTimeout(sync,1000)}}
+const status=document.getElementById("message");
+const saveButton=document.getElementById("saveSchedule"),deleteButton=document.getElementById("deleteSchedule");
+async function findPeriod(start){
+const r=await db.from("schedule_periods").select("id").eq("teacher_id",user.id).eq("start_date",start).maybeSingle();
+if(r.error)throw r.error;return r.data;
 }
-const original=Storage.prototype.setItem;
-Storage.prototype.setItem=function(k,v){const result=original.call(this,k,v);if(k==="evo-academy-interb-v1"||k==="evo-academy-period-archive-v1")setTimeout(sync,1500);return result};
-setTimeout(sync,1200);
+saveButton.onclick=async()=>{
+const current=JSON.parse(localStorage.getItem("evo-academy-interb-v1")||"null");
+if(!current?.config?.start){status.textContent="먼저 스케줄을 생성해 주세요.";return}
+saveButton.disabled=true;status.textContent="서버에 저장 중...";
+try{
+const c=current.config;let period=await findPeriod(c.start);
+const fields={teacher_id:user.id,label:c.start+" ~ "+c.end,start_date:c.start,end_date:c.end,holidays:c.holidays||[],vocab_start:c.vocabStart||1};
+if(period){const r=await db.from("schedule_periods").update(fields).eq("id",period.id);if(r.error)throw r.error}
+else{const r=await db.from("schedule_periods").insert(fields).select("id").single();if(r.error)throw r.error;period=r.data}
+const old=await db.from("schedule_cells").select("id").eq("period_id",period.id);if(old.error)throw old.error;
+if(old.data.length){const d=await db.from("schedule_cells").delete().eq("period_id",period.id);if(d.error)throw d.error}
+const rows=Object.entries(current.cells||{}).map(([date,v])=>({period_id:period.id,lesson_date:date,inclass:v.inclass||"",troom:v.troom||"",vocab_base:v.vocab||"",is_holiday:!!v.holiday}));
+for(let i=0;i<rows.length;i+=100){const r=await db.from("schedule_cells").insert(rows.slice(i,i+100));if(r.error)throw r.error}
+status.textContent="시간표가 서버에 저장됐습니다. 관리자가 조회할 수 있어요.";
+}catch(e){status.textContent="저장 실패: "+e.message}finally{saveButton.disabled=false}
+};
+deleteButton.onclick=async()=>{
+const current=JSON.parse(localStorage.getItem("evo-academy-interb-v1")||"null");
+if(!current?.config?.start){status.textContent="삭제할 시간표가 없습니다.";return}
+if(!confirm("현재 시간표를 삭제할까요? 서버에 저장된 동일한 시작일의 시간표도 삭제됩니다."))return;
+deleteButton.disabled=true;
+try{
+const period=await findPeriod(current.config.start);
+if(period){const d=await db.from("schedule_cells").delete().eq("period_id",period.id);if(d.error)throw d.error;const p=await db.from("schedule_periods").delete().eq("id",period.id);if(p.error)throw p.error}
+localStorage.removeItem("evo-academy-interb-v1");
+const archive=JSON.parse(localStorage.getItem("evo-academy-period-archive-v1")||"{}");delete archive[current.config.start];
+localStorage.setItem("evo-academy-period-archive-v1",JSON.stringify(archive));
+status.textContent="시간표가 삭제됐습니다. 새 시간표를 생성할 수 있습니다.";
+setTimeout(()=>location.reload(),700);
+}catch(e){status.textContent="삭제 실패: "+e.message}finally{deleteButton.disabled=false}
+};
 })();
 </script></body></html>
