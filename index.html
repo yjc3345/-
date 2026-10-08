@@ -283,6 +283,27 @@ text-align:center!important;white-space:pre-wrap!important;overflow-wrap:anywher
 .calendar tbody th.sidehead{background-color:var(--teacher-soft)!important;color:var(--teacher-color)!important}
 .calendar tbody tr.vocab-row td.cumulative{background-color:var(--teacher-color)!important;color:white!important}
 .calendar tbody tr.vocab-row td.cumulative textarea{background-color:transparent!important;color:white!important}
+
+/* A4 landscape: ensure the entire calendar stays on one printed sheet */
+@media print{
+@page{size:A4 landscape;margin:3mm}
+html,body{margin:0!important;padding:0!important;width:100%!important;height:auto!important;overflow:visible!important}
+.wrap,.sheet{width:100%!important;max-width:none!important;margin:0!important;padding:0!important;border:0!important;box-shadow:none!important}
+.sheet{zoom:1!important;transform:none!important;break-inside:avoid!important;page-break-inside:avoid!important}
+.sheet-title{margin:0!important;padding:0 0 1mm!important}
+.sheet-title h2{font-size:12pt!important;margin:0!important}
+.sheet-title .muted{font-size:7pt!important}
+.calendar{table-layout:fixed!important;width:100%!important;min-width:0!important;border-collapse:collapse!important}
+.calendar tr{height:auto!important;min-height:0!important;break-inside:avoid!important}
+.calendar th{font-size:7pt!important;padding:.4mm!important}
+.calendar td{height:auto!important;min-height:0!important;padding:0!important}
+.celltop{font-size:6.5pt!important;padding:.3mm!important}
+.entry{padding:.25mm .5mm!important;margin:0!important;min-height:0!important}
+.entry label{font-size:5.8pt!important;line-height:1!important;margin:0!important}
+.entry .print-value{font-size:6.4pt!important;line-height:1.05!important;margin:0!important}
+.holidaytext{padding:.4mm!important;font-size:7pt!important}
+#periodTabs,.period-tabs{display:none!important}
+}
 </style></head><body>
 <header><strong>✦ Evo AI · Academy Planner</strong><span class="admin-placeholder" title="계정별 권한 기능은 로그인 연동 후 활성화됩니다">관리자용 선생님 선택 <select disabled aria-label="선생님 선택 (로그인 연동 후 사용)"><option>로그인 연동 후 사용</option></select></span></header>
 <main class="wrap">
