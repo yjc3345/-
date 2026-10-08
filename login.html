@@ -59,8 +59,8 @@ $("createForm").onsubmit=async e=>{
 async function staff(){
  const {data,error}=await client.from("staff_profiles").select("user_id,display_name,role,theme_color").order("display_name");
  if(error){msg("adminMessage",error.message);return;}
- const colorBox=$("colorList"),resetBox=$("resetList");colorBox.replaceChildren();resetBox.replaceChildren();
- for(const p of data){
+ const colorBox=$("colorList"),resetBox=$("resetList");const picker=$("viewTeacher");picker.replaceChildren(new Option("선생님 선택",""));colorBox.replaceChildren();resetBox.replaceChildren();
+ for(const p of data){if(p.role==="teacher"){const option=new Option(p.display_name,p.user_id);option.dataset.color=p.theme_color;picker.add(option)}
  const row=document.createElement("div");row.className="staff";
  const label=document.createElement("strong");label.textContent=p.display_name+(p.role==="admin"?" (관리자)":"");
  const color=document.createElement("input");color.type="color";color.value=p.theme_color;color.title=p.display_name+" 테마 색상";
@@ -74,6 +74,7 @@ document.getElementById("topAdminSlot").appendChild(document.getElementById("adm
 document.querySelectorAll("[data-pane]").forEach(button=>button.onclick=()=>{const pane=button.dataset.pane;document.querySelectorAll("[data-pane]").forEach(b=>b.classList.toggle("active",b===button));show("addPane",pane==="add");show("viewPane",pane==="view");show("colorPane",pane==="color");show("resetPane",pane==="reset");if(pane==="password"){$("passwordTab").click();}});
 $("adminLogout").onclick=()=>{$("logout").click()};
 $("teacherLogout").onclick=async()=>{await client.auth.signOut();await load()};
+$("viewTeacher").onchange=async()=>{const picker=$("viewTeacher"),opt=picker.selectedOptions[0],box=$("teacherView");if(!picker.value){box.textContent="선생님을 선택해 주세요.";return;}const hex=opt.dataset.color||"#27538d";box.style.background=hex+"22";box.style.border="2px solid "+hex;box.replaceChildren();const heading=document.createElement("h3");heading.textContent=opt.text+" 선생님 시간표";heading.style.color=hex;box.append(heading);const {data,error}=await client.from("schedule_periods").select("id,label,start_date,end_date").eq("teacher_id",picker.value).order("start_date",{ascending:false});const note=document.createElement("p");note.textContent=error?"시간표를 불러오지 못했습니다: "+error.message:data?.length?"저장된 시간표 기간: "+data.map(x=>x.label||x.start_date+" ~ "+x.end_date).join(", "):"아직 서버에 저장된 시간표가 없습니다. 기존 브라우저 시간표는 선생님별 서버 시간표와 연결되지 않았습니다.";box.append(note)};
 load();
 })();
 </script></body></html>
