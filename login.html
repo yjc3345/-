@@ -70,7 +70,8 @@ async function staff(){
  }
 }
 document.getElementById("topAdminSlot").appendChild(document.getElementById("adminTab"));
-document.querySelectorAll("[data-pane]").forEach(button=>button.onclick=()=>{const pane=button.dataset.pane;document.querySelectorAll("[data-pane]").forEach(b=>b.classList.toggle("active",b===button));show("addPane",pane==="add");show("colorPane",pane==="color");show("resetPane",pane==="reset");});
+document.querySelectorAll("[data-pane]").forEach(button=>button.onclick=()=>{const pane=button.dataset.pane;document.querySelectorAll("[data-pane]").forEach(b=>b.classList.toggle("active",b===button));show("addPane",pane==="add");show("colorPane",pane==="color");show("resetPane",pane==="reset");if(pane==="password"){$("passwordTab").click();}});
+$("adminLogout").onclick=()=>{$("logout").click()};
 load();
 })();
 </script></body></html>
