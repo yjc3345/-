@@ -134,6 +134,30 @@ html,body,.wrap{padding:0!important;margin:0!important}
 .calendar tr.lesson-row textarea{height:28px!important;min-height:0!important;max-height:28px!important;font-size:11px!important;font-weight:500!important;line-height:1.2!important;padding:3px!important;resize:none!important}
 .calendar .holidaytext{font-size:12px!important;padding:3px!important}
 }
+
+/* 확정 레이아웃: 항목 열은 고정 폭, 날짜/수업은 동일한 5열 */
+.calendar{width:100%!important;table-layout:fixed!important;border-collapse:collapse!important}
+.calendar col.label-column{width:62px!important}
+.calendar th.sidehead{width:62px!important;min-width:0!important;max-width:none!important;box-sizing:border-box!important;white-space:nowrap!important;vertical-align:middle!important;text-align:center!important;padding:2px!important;line-height:1.1!important}
+.calendar thead th:first-child{width:62px!important;padding:4px 1px!important}
+.calendar tr.date-row td,.calendar tr.date-row th{background:#e4effe!important}
+.calendar tr.lesson-row td,.calendar tr.lesson-row th{border:1px solid #a9bad0!important;vertical-align:middle!important}
+.calendar tr.lesson-row td textarea{border:0!important;outline-offset:-2px!important;box-sizing:border-box!important}
+@media screen{
+.calendar th.sidehead{font-size:10px!important;font-weight:700!important}
+.calendar thead th{font-size:12px!important;padding:6px 2px!important}
+.calendar tr.date-row td,.calendar tr.date-row th{height:26px!important;padding:2px!important}
+.calendar tr.date-row .celltop{font-size:12px!important;padding:2px!important;border:0!important}
+.calendar tr.lesson-row td,.calendar tr.lesson-row th{height:36px!important;padding:2px 3px!important}
+.calendar tr.lesson-row td textarea{height:30px!important;max-height:30px!important;min-height:30px!important;font-size:12px!important;font-weight:500!important;padding:3px!important;text-align:center!important}
+.calendar tr.lesson-row td.cumulative textarea{font-weight:700!important}
+}
+@media print{
+.calendar col.label-column{width:13mm!important}
+.calendar th.sidehead,.calendar thead th:first-child{width:13mm!important;min-width:0!important;max-width:none!important;font-size:7pt!important;padding:.3mm!important}
+.calendar tr.lesson-row td textarea{display:none!important}
+.calendar tr.lesson-row td .print-value{display:block!important;font-size:9pt!important;font-weight:700!important;text-align:center!important}
+}
 </style></head><body>
 <header><strong>✦ Evo AI · Academy Planner</strong><span>교재별 수업 진도표</span></header>
 <main class="wrap">
@@ -152,7 +176,7 @@ html,body,.wrap{padding:0!important;margin:0!important}
 </section>
 <section class="sheet" id="sheet">
 <div class="sheet-title"><h2>Inter Bridge1</h2><div id="studentPeriod" class="muted">수업 기간은 스케줄 생성 후 표시됩니다.</div></div>
-<table class="calendar"><thead><tr><th>항목</th><th>월요일</th><th>화요일</th><th>수요일</th><th>목요일</th><th>금요일</th></tr></thead><tbody id="calendar"></tbody></table>
+<table class="calendar"><colgroup><col class="label-column"><col span="5"></colgroup><thead><tr><th>항목</th><th>월요일</th><th>화요일</th><th>수요일</th><th>목요일</th><th>금요일</th></tr></thead><tbody id="calendar"></tbody></table>
 <p class="help">표 안의 Inclass, Vocab., T-Room 내용을 직접 수정할 수 있습니다. 수정한 내용은 현재 브라우저에 저장됩니다.</p>
 </section>
 </main>
@@ -208,7 +232,7 @@ function draw(){
      const area=create("textarea"),printed=create("div","print-value");
      area.value=data[field]||"";printed.textContent=area.value;
      area.setAttribute("aria-label",date+" "+labelText);
-     area.rows=Math.max(1,area.value.split("\\n").length);
+     area.rows=Math.max(1,area.value.split("\n").length);
      area.addEventListener("input",()=>{cells[date][field]=area.value;printed.textContent=area.value;td.classList.toggle("cumulative",field==="vocab"&&area.value.includes("(누적)"));save();});
      td.append(area,printed);
     }
