@@ -86,7 +86,7 @@ function readHolidays(){return [...new Set($("holidays").value.split(/[,，\n]+/
 function refreshSuggestions(){
  const start=$("start").value,options=$("holidayOptions");options.replaceChildren();
  if(!start){$("holidayInfo").textContent="시작일을 선택하면 공휴일을 추천합니다.";return;}
- const startDate=local(start),endDate=local(start);endDate.setDate(endDate.getDate()+65);
+ const startDate=local(start),endDate=local(start);endDate.setDate(endDate.getDate()+50);
  const selected=new Set(readHolidays());let count=0;
  for(let d=new Date(startDate);d<=endDate;d.setDate(d.getDate()+1)){
  const date=iso(d),name=(holidaysByYear[d.getFullYear()]||{})[date];
@@ -96,7 +96,7 @@ function refreshSuggestions(){
  label.append(check,document.createTextNode(date+" · "+name));options.appendChild(label);count++;
  }
  const years=[...new Set([startDate.getFullYear(),endDate.getFullYear()])];
- $("holidayInfo").textContent=years.some(y=>!holidaysByYear[y])?"해당 연도의 공휴일 정보가 아직 준비되지 않았습니다. 휴무일을 직접 입력해 주세요.":count?"수업 시작일부터 약 65일 내 평일 공휴일입니다. 학원 운영 여부에 따라 선택하세요.":"이 기간에는 추천할 평일 공휴일이 없습니다.";
+ $("holidayInfo").textContent=years.some(y=>!holidaysByYear[y])?"해당 연도의 공휴일 정보가 아직 준비되지 않았습니다. 휴무일을 직접 입력해 주세요.":count?"수업 시작일부터 약 50일 내 평일 공휴일입니다. 학원 운영 여부에 따라 선택하세요.":"이 기간에는 추천할 평일 공휴일이 없습니다.";
 }
 $("start").addEventListener("change",refreshSuggestions);
 $("holidays").addEventListener("input",refreshSuggestions);
