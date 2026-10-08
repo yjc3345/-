@@ -356,17 +356,44 @@ const holidaysByYear={
 2026:{"2026-01-01":"신정","2026-02-16":"설날 연휴","2026-02-17":"설날","2026-02-18":"설날 연휴","2026-03-02":"삼일절 대체공휴일","2026-05-01":"노동절","2026-05-05":"어린이날","2026-05-25":"부처님오신날 대체공휴일","2026-06-03":"지방선거일","2026-07-17":"제헌절","2026-08-17":"광복절 대체공휴일","2026-09-24":"추석 연휴","2026-09-25":"추석 연휴","2026-10-05":"개천절 대체공휴일","2026-10-09":"한글날","2026-12-25":"성탄절"},
 2027:{"2027-01-01":"신정","2027-02-08":"설날 연휴","2027-02-09":"설날 대체공휴일","2027-03-01":"삼일절","2027-05-03":"노동절 대체공휴일","2027-05-05":"어린이날","2027-05-13":"부처님오신날","2027-07-19":"제헌절 대체공휴일","2027-08-16":"광복절 대체공휴일","2027-09-14":"추석 연휴","2027-09-15":"추석","2027-09-16":"추석 연휴","2027-10-04":"개천절 대체공휴일","2027-10-11":"한글날 대체공휴일","2027-12-27":"성탄절 대체공휴일"}
 };
-const lessons=[];
-for(let w=0;w<4;w++){
- for(let k=0;k<5;k++){
-  const n=w*4+k+1;
-  if(k===4)lessons.push({inclass:"Review + Unit Test",vocab:"(누적) "+(w*40+1)+"~"+((w+1)*40),troom:"영어 도서관"});
-  else lessons.push({inclass:(w===0&&k===0?"Inter Bridge 1 START!!\n":"")+"Day "+(w*4+k+1),vocab:(w*40+k*10+1)+"~"+(w*40+(k+1)*10),troom:"Day "+(w*4+k+1)});
- }
+const templates={
+"Sound Doctor 1":{noVocab:true,first:["첫수업 OT","Bb","Tt","Pp","Gg","Nn","Review (Game식으로)","Aa","Ee","Reviewing","Blending","Ss","Jj","Kk","Ll","Vv","Dd","Ii","Reviewing","Blending","전체 복습","전체 복습 (촬영 및 시험 설명)","동영상 촬영","Monthly Test","Activity!!"],room:"새김스튜던트, WB"},
+"Sound Doctor 2":{noVocab:true,first:["Mm","Hh","Ff","Rr","Oo","Uu","Reviewing","Blending","Cc","Xx","Qq","Ww","Yy","Zz","Soft C","Soft G","Ending Y","Soft C, G 복습","Reviewing","Blending","1권 포함 전체복습","전체복습","동영상촬영","Monthly Test","Activity"],room:"새김스튜던트, WB"},
+"Sound Doctor 3~6":{noVocab:true,first:Array.from({length:20},(_,i)=>i%5===4?"Review":"Unit "+(Math.floor(i/5)*2+Math.floor(i%5/2)+1)+" Lesson "+(i%2+1)).concat(["전체복습","전체복습","동영상 촬영","Monthly Test","Activity!!"]),room:"새김스튜던트, WB"},
+"Pre A1~A2":{noVocab:true,kind:"day",room:"새김 Day "},
+"Pre A3 (단어시작)":{kind:"day",room:"새김 Day "},
+"Pre A4~Pre B(문법시작)":{kind:"day",room:"Day "},
+"Silver A(수행마스터)":{kind:"silverA",room:"Day "},
+"Silver B":{kind:"silverB",room:"Day "},
+"Runner":{kind:"runner",room:"Day "},
+"Inter B":{kind:"inter",room:"Day "}
+};
+function textbookTemplate(book){
+const n=Number((book.match(/(\\d+)$/)||[])[1]||1);
+if(book.startsWith("Sound Doctor"))return n===1?templates["Sound Doctor 1"]:n===2?templates["Sound Doctor 2"]:templates["Sound Doctor 3~6"];
+if(book.startsWith("Pre Stella A"))return n<=2?templates["Pre A1~A2"]:n===3?templates["Pre A3 (단어시작)"]:templates["Pre A4~Pre B(문법시작)"];
+if(book.startsWith("Pre Stella B"))return templates["Pre A4~Pre B(문법시작)"];
+if(book.startsWith("Silver Stella A"))return templates["Silver A(수행마스터)"];
+if(book.startsWith("Silver Stella B"))return templates["Silver B"];
+if(book.startsWith("Runner"))return templates.Runner;
+return templates["Inter B"];
 }
-const special=["전체복습","Monthly Test 및 촬영","프레젠테이션 쓰기 및 촬영","문법 및 Activity","교재마무리"];
-const specialT=["말이되는 어법 Test","프레젠테이션 쓰기","문법","교재 고치기","영어 도서관"];
-for(let i=0;i<5;i++)lessons.push({inclass:special[i],vocab:i===4?"(누적) 161~200":(161+i*10)+"~"+(170+i*10),troom:specialT[i]});
+function makeLessons(book){
+const t=textbookTemplate(book),out=[];
+for(let i=0;i<25;i++){
+const w=Math.floor(i/5),day=w*4+i%5+1,review=i%5===4;
+let inclass=t.first?.[i];
+if(!inclass){if(w===4){const endings=t.kind==="runner"?["전체복습","Monthly Test 및 I-Pattern 촬영","프레젠테이션 쓰기 및 촬영","문법 및 Activity","교재마무리"]:["전체복습","Monthly Test 및 촬영","프레젠테이션 쓰기 및 촬영","문법 및 Activity","교재마무리"];inclass=endings[i%5]}
+else if(review){inclass=t.kind==="runner"?"Review & Weekly Test":t.kind==="silverA"?"Review + 수행마스터 Step "+(w+1):t.kind==="silverB"?"Review + 수행마스터 Step "+(w+1):t.kind==="inter"?"Review + Unit Test":"Review"}
+else if(t.kind==="runner")inclass="Unit "+(w+1)+" - "+(i%5+1);
+else inclass="Day "+day}
+if(i===0&&!t.first)inclass=book+" START!!\\n"+inclass;
+const vocab=t.noVocab?"":review?"(누적) "+(w*40+1)+"~"+((w+1)*40):(w*40+(i%5)*10+1)+"~"+(w*40+(i%5+1)*10);
+out.push({inclass,vocab,troom:review?"영어 도서관":t.room+(t.room.endsWith(" ")?day:""),homework:t.noVocab?"WB / WS / 음가연습":""});
+}
+return out;
+}
+let lessons=makeLessons("Inter Bridge 1");
 let cells={}, config=null;
 const key="evo-academy-schedule-v2",archiveKey="evo-academy-schedule-archive-v2";
 let archive={},activePeriod=null;
@@ -408,7 +435,7 @@ function save(){try{localStorage.setItem(key,JSON.stringify({config,cells}));per
 function create(tag,cls,text){const el=document.createElement(tag);if(cls)el.className=cls;if(text!==undefined)el.textContent=text;return el;}
 function draw(){
  if(!config)return;
- document.querySelector(".sheet-title h2").textContent=config.book||"Inter Bridge 1";
+ document.querySelector(".sheet-title h2").textContent=config.book||"Inter Bridge 1";lessons=makeLessons(config.book||"Inter Bridge 1");
  const tbody=$("calendar");tbody.replaceChildren();
  const start=local(config.start),end=local(config.end);
  const first=new Date(start);first.setDate(first.getDate()-(first.getDay()+6)%7);
@@ -417,7 +444,7 @@ function draw(){
  while(cursor<=last&&rows<60){
   const dates=[];
   for(let i=0;i<5;i++){dates.push(iso(cursor));cursor.setDate(cursor.getDate()+1);}
-  const fields=[["date","날짜"],["inclass","Inclass"],["vocab","Vocab."],["troom","T-Room"]];
+  const fields=[["date","날짜"],["inclass","Inclass"],...(config.noVocab?[]:[["vocab","Vocab."]]),["troom","T-Room"],...(config.hasHomework?[["homework","Homework"]]:[])];
   for(const [field,labelText] of fields){
    const tr=create("tr",field==="date"?"date-row":"lesson-row "+field+"-row");
    tr.appendChild(create("th","sidehead",labelText));
@@ -466,7 +493,7 @@ $("holidays").addEventListener("input",refreshSuggestions);
 function generate(){
  const chosenClass=$("className").value;if(!chosenClass){$("message").textContent="먼저 담당 수업을 선택해 주세요.";return;}
  const book=$("book").value;
- if(book!=="Inter Bridge 1"){$("message").textContent=book+" 교재는 등록됐지만 아직 실제 진도표가 없습니다. 해당 교재 스케줄을 올려주시면 자동 생성할 수 있어요.";return;}
+ lessons=makeLessons(book);
  const start=$("start").value;
  if(!start){$("message").textContent="시작일을 선택해 주세요.";return;}
  const tokens=$("holidays").value.split(/[,，\n]+/).map(s=>s.trim()).filter(Boolean);
@@ -482,7 +509,7 @@ function generate(){
   if(holidays.includes(date)){cells[date]={holiday:true};continue;}
   if(count<lessons.length){cells[date]={...lessons[count],vocab:vocabFor(count,vocabStart),lesson:true};count++;end=date;}
  }
- config={start,end,holidays,vocabStart,book,className:$("className").value.trim()||"Inter Bridge 1"};
+ config={start,end,holidays,vocabStart,book,noVocab:textbookTemplate(book).noVocab||false,hasHomework:!!textbookTemplate(book).noVocab,className:$("className").value.trim()||"Inter Bridge 1"};
  $("message").textContent="기본 진도 "+count+"일을 자동 배치했습니다. 마지막 수업일: "+end;
  save();draw();
 }
