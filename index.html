@@ -123,6 +123,17 @@ html,body,.wrap{padding:0!important;margin:0!important}
 .calendar tr.lesson-row{height:calc((var(--week-height,31mm) - 5mm)/3)!important}
 .calendar tr.lesson-row th,.calendar tr.lesson-row td{height:calc((var(--week-height,31mm) - 5mm)/3)!important;max-height:none!important}
 }
+
+/* 편집 화면은 조밀하게, 학생용 인쇄 스타일은 별도로 유지 */
+@media screen{
+.calendar th{font-size:12px!important;padding:5px 2px!important}
+.calendar .sidehead,.calendar .sidehead:first-child{font-size:10px!important}
+.calendar tr.date-row td{height:25px!important;max-height:25px!important}
+.calendar .celltop{font-size:12px!important;padding:3px 4px!important}
+.calendar tr.lesson-row td{height:34px!important;max-height:34px!important;padding:2px 4px!important}
+.calendar tr.lesson-row textarea{height:28px!important;min-height:0!important;max-height:28px!important;font-size:11px!important;font-weight:500!important;line-height:1.2!important;padding:3px!important;resize:none!important}
+.calendar .holidaytext{font-size:12px!important;padding:3px!important}
+}
 </style></head><body>
 <header><strong>✦ Evo AI · Academy Planner</strong><span>교재별 수업 진도표</span></header>
 <main class="wrap">
