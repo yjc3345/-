@@ -271,7 +271,7 @@ text-align:center!important;white-space:pre-wrap!important;overflow-wrap:anywher
 
 /* 로그인한 선생님에게 배정된 색상을 시간표 전체에 적용 */
 :root{--teacher-color:#27538d;--teacher-pale:#f1f7ff;--teacher-soft:#e4effe}body{background:var(--teacher-pale)}header,.calendar th,.calendar th:first-child,.calendar th:last-child{background:var(--teacher-color)}button:not(.secondary){background:var(--teacher-color)}.sheet{border-color:var(--teacher-color)}.sheet-title{background:var(--teacher-pale)}.sheet-title h2,.celltop{color:var(--teacher-color)}.calendar tr:nth-child(even) td:not(.holiday):not(.off),.celltop,.calendar td:nth-child(1) .celltop,.calendar td:nth-child(5) .celltop{background:var(--teacher-soft)}
-</style></head><body>
+.calendar thead th:nth-child(5){background:var(--teacher-color)!important}.calendar tbody tr.date-row td:nth-child(5) .celltop{background:var(--teacher-soft)!important;color:var(--teacher-color)!important}.entry.cumulative,.calendar .entry.cumulative{background:var(--teacher-color)!important;border-color:var(--teacher-color)!important}.sidehead{background:var(--teacher-soft)!important;color:var(--teacher-color)!important}</style></head><body>
 <header><strong>✦ Evo AI · Academy Planner</strong><span class="admin-placeholder" title="계정별 권한 기능은 로그인 연동 후 활성화됩니다">관리자용 선생님 선택 <select disabled aria-label="선생님 선택 (로그인 연동 후 사용)"><option>로그인 연동 후 사용</option></select></span></header>
 <main class="wrap">
 <section class="controls">
