@@ -112,6 +112,17 @@ html,body,.wrap{padding:0!important;margin:0!important}
 .calendar tr.lesson-row td.cumulative{background:#294b83!important;color:#fff!important;-webkit-print-color-adjust:exact;print-color-adjust:exact}
 .calendar tr.lesson-row td.cumulative .print-value{color:#fff!important}
 }
+
+/* 인쇄 시 표를 A4 세로 공간 전체에 균등 분배 */
+@media print{
+@page{size:A4 landscape;margin:2mm}
+.sheet-title{height:12mm!important;display:flex!important;flex-direction:column!important;align-items:center!important;justify-content:center!important;margin:0 0 1mm!important;padding:0!important}
+.calendar{height:calc(var(--week-height,31mm) * var(--week-count,6) + 5mm)!important}
+.calendar tr.date-row{height:5mm!important}
+.calendar tr.date-row th,.calendar tr.date-row td{height:5mm!important;max-height:5mm!important;padding:0!important}
+.calendar tr.lesson-row{height:calc((var(--week-height,31mm) - 5mm)/3)!important}
+.calendar tr.lesson-row th,.calendar tr.lesson-row td{height:calc((var(--week-height,31mm) - 5mm)/3)!important;max-height:none!important}
+}
 </style></head><body>
 <header><strong>✦ Evo AI · Academy Planner</strong><span>교재별 수업 진도표</span></header>
 <main class="wrap">
@@ -159,7 +170,7 @@ for(let i=0;i<5;i++)lessons.push({inclass:special[i],vocab:i===4?"(누적) 161~2
 let cells={}, config=null;
 const key="evo-academy-interb-v1";
 function vocabFor(index,start){const block=Math.floor(index/5),position=index%5,first=start+block*40;return position===4?"(누적) "+first+"~"+(first+39):(first+position*10)+"~"+(first+position*10+9);}
-function printFit(){const weeks=$("calendar").querySelectorAll(".date-row").length;document.documentElement.style.setProperty("--week-height",Math.min(32,174/Math.max(weeks,1))+"mm");}
+function printFit(){const weeks=$("calendar").querySelectorAll(".date-row").length;const available=187;document.documentElement.style.setProperty("--week-height",(available/Math.max(weeks,1)).toFixed(2)+"mm");document.documentElement.style.setProperty("--week-count",String(weeks));}
 function save(){try{localStorage.setItem(key,JSON.stringify({config,cells}));}catch(e){$("message").textContent="저장 공간이 부족하거나 차단되어 변경사항을 저장하지 못했습니다.";}}
 function create(tag,cls,text){const el=document.createElement(tag);if(cls)el.className=cls;if(text!==undefined)el.textContent=text;return el;}
 function draw(){
