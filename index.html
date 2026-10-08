@@ -505,7 +505,7 @@ try{
 </script><script>
 (async()=>{
 const db=supabase.createClient("https://eovntwuvjzvnztyxzwer.supabase.co","sb_publishable_XMxCvN3wguCsjUY-6GrR2g_HidFJtoc");
-const status=document.getElementById("message");
+const status=document.getElementById("saveFeedback");
 const authResult=await db.auth.getUser();const user=authResult.data?.user;
 if(!user){status.textContent="로그인 정보를 확인할 수 없습니다. 로그인 페이지에서 다시 로그인해 주세요.";return;}
 const {data:profile,error:profileError}=await db.from("staff_profiles").select("must_change_password").eq("user_id",user.id).single();
