@@ -317,6 +317,7 @@ html,body{width:auto!important;margin:0!important;padding:0!important}
 .calendar td{height:auto!important}
 .sheet-title{padding:0 0 1mm!important}
 }
+.schedule-bottom-actions{display:flex;justify-content:flex-end;gap:10px;margin-top:16px}.danger-button{background:#c62828!important;color:white!important;border-color:#c62828!important}.danger-button:hover{background:#a71d1d!important}@media print{.schedule-bottom-actions{display:none!important}}
 </style></head><body>
 <header><strong>✦ Evo AI · Academy Planner</strong><span class="admin-placeholder" title="계정별 권한 기능은 로그인 연동 후 활성화됩니다">관리자용 선생님 선택 <select disabled aria-label="선생님 선택 (로그인 연동 후 사용)"><option>로그인 연동 후 사용</option></select></span></header>
 <main class="wrap">
@@ -329,7 +330,7 @@ html,body{width:auto!important;margin:0!important;padding:0!important}
 <label>휴무일 (쉼표로 구분)<input id="holidays" placeholder="예: 2026-11-05, 2026-11-12"></label>
 </div>
 <section id="holidaySuggestions" class="suggestions"><div class="suggesthead"><strong>🇰🇷 대한민국 공휴일 추천</strong><span class="muted">추천 날짜를 선택하면 휴무일에 추가됩니다.</span></div><div id="holidayOptions" class="holiday-options"></div><p id="holidayInfo" class="muted"></p></section>
-<div class="row actions"><button id="generate">스케줄 생성하기</button><button type="button" id="saveSchedule">시간표 저장</button><button type="button" class="secondary" id="deleteSchedule">시간표 삭제</button><button class="secondary" id="print">A4 한 장 인쇄 / PDF</button><button class="secondary" id="reset">수정 내용 초기화</button></div>
+<div class="row actions"><button id="generate">스케줄 생성하기</button><button class="secondary" id="print">A4 한 장 인쇄 / PDF</button><button class="secondary" id="reset">수정 내용 초기화</button></div>
 <p class="note">휴무일은 YYYY-MM-DD 형식으로 입력하세요. 휴무일에는 진도를 배치하지 않고 다음 평일로 이어집니다. 생성 후 각 칸의 글을 클릭해 수정할 수 있습니다.</p>
 <p id="message" class="warning" role="status"></p><p id="period" class="teacher-period">선생님용 · 시작일을 선택하고 스케줄을 생성하세요.</p>
 </section>
@@ -338,6 +339,7 @@ html,body{width:auto!important;margin:0!important;padding:0!important}
 <div class="sheet-title"><h2>Inter Bridge1</h2><div id="studentPeriod" class="muted">수업 기간은 스케줄 생성 후 표시됩니다.</div></div>
 <table class="calendar"><colgroup><col class="label-column"><col span="5"></colgroup><thead><tr><th>항목</th><th>월요일</th><th>화요일</th><th>수요일</th><th>목요일</th><th>금요일</th></tr></thead><tbody id="calendar"></tbody></table>
 <p class="help">표 안의 Inclass, Vocab., T-Room 내용을 직접 수정할 수 있습니다. 수정한 내용은 현재 브라우저에 저장됩니다.</p>
+<div class="schedule-bottom-actions"><button type="button" id="saveSchedule">시간표 저장</button><button type="button" id="deleteSchedule" class="danger-button">시간표 삭제</button></div>
 </section>
 </main>
 <script>
