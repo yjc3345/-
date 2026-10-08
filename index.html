@@ -324,6 +324,7 @@ html,body{width:auto!important;margin:0!important;padding:0!important}
 <section class="controls">
 <h1>수업 스케줄 자동 생성</h1><p class="muted">교재와 시작일, 휴무일을 정하면 교재 전체 진도를 월~금 수업일에 자동 배치합니다.</p>
 <div class="inputs">
+<label>수업 이름<input id="className" list="classSuggestions" placeholder="예: Inter Bridge 1" value="Inter Bridge 1"><datalist id="classSuggestions"></datalist></label>
 <label>교재<select id="book"><option value="interb">Inter B · Inter Bridge 1</option></select></label>
 <label>시작일<input id="start" type="date"></label><label>단어 시작 번호<input id="vocabStart" type="number" min="1" max="99999" step="1" value="1"></label>
 
@@ -369,11 +370,13 @@ for(let i=0;i<5;i++)lessons.push({inclass:special[i],vocab:i===4?"(누적) 161~2
 let cells={}, config=null;
 const key="evo-academy-schedule-v2",archiveKey="evo-academy-schedule-archive-v2";
 let archive={},activePeriod=null;
+const archiveId=c=>(c.className||"Inter Bridge 1")+"|"+c.start;
 try{archive=JSON.parse(localStorage.getItem(archiveKey)||"{}")||{};}catch(e){archive={};}
 const periodLabel=c=>{const a=local(c.start),b=local(c.end);return (a.getFullYear()===b.getFullYear()?"":a.getFullYear()+"년 ")+(a.getMonth()+1)+"월~"+(b.getMonth()+1)+"월";};
 function drawTabs(){
  const nav=$("periodTabs");nav.replaceChildren();
- const items=Object.entries(archive).sort((a,b)=>a[1].config.start.localeCompare(b[1].config.start));
+ const selectedClass=$("className").value.trim()||"Inter Bridge 1";
+const items=Object.entries(archive).filter(([id,item])=>(item.config.className||"Inter Bridge 1")===selectedClass).sort((a,b)=>a[1].config.start.localeCompare(b[1].config.start));
  if(!items.length){const t=create("span","period-tab active","현재 스케줄");nav.appendChild(t);return;}
  for(const [id,item] of items){
   const btn=create("button","period-tab"+(id===activePeriod?" active":""),periodLabel(item.config));
@@ -381,7 +384,7 @@ function drawTabs(){
   btn.title=item.config.start+" ~ "+item.config.end;
   btn.addEventListener("click",()=>{
    if(id===activePeriod)return;
-   activePeriod=id;config=structuredClone(archive[id].config);cells=structuredClone(archive[id].cells);
+   activePeriod=id;config=structuredClone(archive[id].config);$("className").value=config.className||"Inter Bridge 1";cells=structuredClone(archive[id].cells);
    $("start").value=config.start;$("vocabStart").value=config.vocabStart||1;
    $("holidays").value=(config.holidays||[]).join(", ");
    refreshSuggestions();draw();
@@ -390,7 +393,7 @@ function drawTabs(){
 }
 function persistArchive(){
  if(!config)return;
- const id=activePeriod||config.start;
+ const id=archiveId(config);
  archive[id]={config:structuredClone(config),cells:structuredClone(cells)};
  activePeriod=id;
  try{localStorage.setItem(archiveKey,JSON.stringify(archive));}catch(e){$("message").textContent="지난 스케줄 저장 공간이 부족합니다.";}
@@ -473,7 +476,7 @@ function generate(){
   if(holidays.includes(date)){cells[date]={holiday:true};continue;}
   if(count<lessons.length){cells[date]={...lessons[count],vocab:vocabFor(count,vocabStart),lesson:true};count++;end=date;}
  }
- config={start,end,holidays,vocabStart};
+ config={start,end,holidays,vocabStart,className:$("className").value.trim()||"Inter Bridge 1"};
  $("message").textContent="기본 진도 "+count+"일을 자동 배치했습니다. 마지막 수업일: "+end;
  save();draw();
 }
@@ -482,7 +485,8 @@ $("print").onclick=()=>{if(!config){$("message").textContent="먼저 스케줄�
 $("reset").onclick=()=>{if(!confirm("직접 수정한 내용을 지우고 기본 진도로 다시 생성할까요?"))return;generate();};
 const now=new Date();
 $("start").value=iso(now);
-try{const stored=JSON.parse(localStorage.getItem(key)||"null");if(stored&&stored.config&&stored.cells&&/^\d{4}-\d{2}-\d{2}$/.test(stored.config.start)){config=stored.config;cells=stored.cells;activePeriod=config.start;if(!archive[activePeriod])persistArchive();$("start").value=config.start;$("vocabStart").value=config.vocabStart||1;$("holidays").value=(config.holidays||[]).join(", ");draw();}}catch(e){}
+try{const stored=JSON.parse(localStorage.getItem(key)||"null");if(stored&&stored.config&&stored.cells&&/^\d{4}-\d{2}-\d{2}$/.test(stored.config.start)){config=stored.config;cells=stored.cells;activePeriod=archiveId(config);if(!archive[activePeriod])persistArchive();$("className").value=config.className||"Inter Bridge 1";$("start").value=config.start;$("vocabStart").value=config.vocabStart||1;$("holidays").value=(config.holidays||[]).join(", ");draw();}}catch(e){}
+$("className").addEventListener("change",drawTabs);
 refreshSuggestions();drawTabs();
 })();
 </script><script src="https://cdn.jsdelivr.net/npm/@supabase/supabase-js@2/dist/umd/supabase.min.js"></script><script>
