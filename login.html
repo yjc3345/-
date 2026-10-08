@@ -46,6 +46,10 @@ $("scheduleTab").onclick=()=>{if(current?.must_change_password)return;show("sche
 $("adminTab").onclick=()=>{if(current?.role!=="admin"||current.must_change_password)return;const opening=$("adminPanel").classList.contains("hidden");show("schedulePanel",!opening);show("historyPanel",false);show("adminPanel",opening);show("passwordArea",false);$("adminTab").textContent=opening?"시간표로 돌아가기":"관리자"};
 $("passwordTab").onclick=()=>{show("schedulePanel",false);show("historyPanel",false);show("adminPanel",false);show("passwordArea",true)};
 $("logout").onclick=async()=>{await client.auth.signOut();await load()};
+let historyPeriods=[];
+function archiveCutoff(){const d=new Date();d.setMonth(d.getMonth()-6);return d.toISOString().slice(0,10)}
+async function openHistory(){if(current?.role!=="teacher")return;show("schedulePanel",false);show("historyPanel",true);msg("historyMessage","불러오는 중...");const {data,error}=await client.from("schedule_periods").select("id,label,start_date,end_date,class_name").eq("teacher_id",current.user_id).lte("end_date",archiveCutoff()).order("end_date",{ascending:false});if(error){msg("historyMessage",error.message);return}historyPeriods=data||[];const select=$("historyClass");select.replaceChildren(new Option("전체 반",""));for(const name of [...new Set(historyPeriods.map(p=>p.class_name||"미지정"))])select.add(new Option(name,name));renderHistory()}
+$("historyButton").onclick=openHistory;$("historyBack").onclick=()=>{show("historyPanel",false);show("schedulePanel",true)};
 async function adminCall(payload){
  const {data:{session}}=await client.auth.getSession();
  if(!session)throw Error("다시 로그인해 주세요.");
