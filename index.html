@@ -424,7 +424,8 @@ const items=Object.entries(archive).filter(([id,item])=>(item.config.className||
  }
  if(!items.length){if(!nav.children.length)nav.appendChild(create("span","period-tab active","현재 스케줄"));return;}
  for(const [id,item] of items){
-  if((dataWindowArchiveIds.has(item.config.windowId))||availableWindows.some(w=>w.start_date===item.config.start)||(!item.config.windowId&&availableWindows.length>=6&&item.config.start<availableWindows[availableWindows.length-1].start_date))continue;
+  if(availableWindows.length&&(!availableWindows.some(w=>w.id===item.config.windowId||w.start_date===item.config.start)))continue;
+  if(dataWindowArchiveIds.has(item.config.windowId)||availableWindows.some(w=>w.start_date===item.config.start))continue;
   const btn=create("button","period-tab"+(id===activePeriod?" active":""),periodLabel(item.config));
   btn.type="button";btn.setAttribute("aria-current",id===activePeriod?"page":"false");
   btn.title=item.config.start+" ~ "+item.config.end;
