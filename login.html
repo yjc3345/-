@@ -78,8 +78,17 @@ $("viewTeacher").onchange=async()=>{const picker=$("viewTeacher"),opt=picker.sel
 const choose=document.createElement("select");for(const p of data){const o=new Option(p.label||p.start_date+" ~ "+p.end_date,p.id);choose.add(o)}box.append(choose);
 const approval=document.createElement("button");approval.type="button";approval.style.marginLeft="10px";box.append(approval);const table=document.createElement("table");table.className="teacher-table";box.append(table);
 async function render(){const selected=data.find(p=>p.id===choose.value);approval.textContent=selected?.approved_at?"승인 취소":"시간표 승인";approval.style.background=selected?.approved_at?"#b45309":"#167347";approval.style.color="white";table.replaceChildren();const {data:cells,error:cellError}=await client.from("schedule_cells").select("lesson_date,inclass,vocab_base,troom,is_holiday").eq("period_id",choose.value).order("lesson_date");if(cellError){table.textContent=cellError.message;return}
-const head=document.createElement("tr");for(const name of ["날짜","Inclass","Vocab.","T-Room"]){const th=document.createElement("th");th.textContent=name;head.append(th)}table.append(head);
-for(const cell of cells||[]){const tr=document.createElement("tr");const fields=[cell.lesson_date,cell.is_holiday?"휴무일":cell.inclass,cell.is_holiday?"":cell.vocab_base,cell.is_holiday?"":cell.troom];for(const value of fields){const td=document.createElement("td");td.textContent=value||"";tr.append(td)}if((cell.vocab_base||"").includes("(누적)"))tr.className="cumulative-row";table.append(tr)}}
+const head=document.createElement("tr");for(const name of ["항목","월요일","화요일","수요일","목요일","금요일"]){const th=document.createElement("th");th.textContent=name;head.append(th)}table.append(head);
+const byDate=new Map((cells||[]).map(c=>[c.lesson_date,c]));
+const dates=[];const first=new Date(selected.start_date+"T12:00:00"),last=new Date(selected.end_date+"T12:00:00");
+const monday=new Date(first);monday.setDate(first.getDate()-((first.getDay()+6)%7));
+for(let d=new Date(monday);d<=last;d.setDate(d.getDate()+7)){const week=[];for(let k=0;k<5;k++){const x=new Date(d);x.setDate(d.getDate()+k);week.push(x.toISOString().slice(0,10))}dates.push(week)}
+for(const [weekIndex,week] of dates.entries()){
+const weekHead=document.createElement("tr");const wh=document.createElement("th");wh.colSpan=6;wh.textContent=(weekIndex+1)+"주차";wh.style.background=hex;wh.style.color="#fff";weekHead.append(wh);table.append(weekHead);
+for(const [label,field] of [["날짜","date"],["Inclass","inclass"],["Vocab.","vocab_base"],["T-Room","troom"]]){
+const tr=document.createElement("tr");const th=document.createElement("th");th.textContent=label;tr.append(th);
+for(const day of week){const td=document.createElement("td");const c=byDate.get(day);if(day<selected.start_date||day>selected.end_date){td.textContent="—";td.style.background="#f3f4f6"}else if(field==="date"){td.textContent=day.slice(5).replace("-","/");if(c?.is_holiday)td.textContent+=" · 휴무"}else if(c?.is_holiday){td.textContent="휴무";td.style.background="#fef3c7"}else{td.textContent=c?.[field]||""}td.style.whiteSpace="pre-wrap";td.style.verticalAlign="top";td.style.minWidth="100px";tr.append(td)}table.append(tr)}
+}
 approval.onclick=async()=>{const selected=data.find(p=>p.id===choose.value);if(!selected)return;const next=selected.approved_at?null:new Date().toISOString();if(!confirm(next?"이 시간표를 승인하고 선생님의 수정·삭제를 잠글까요?":"승인을 취소하고 선생님의 수정·삭제를 허용할까요?"))return;const result=await client.from("schedule_periods").update({approved_at:next}).eq("id",selected.id);if(result.error){alert(result.error.message);return}selected.approved_at=next;await render()};choose.onchange=render;await render();
 };
 load();
