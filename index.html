@@ -39,6 +39,7 @@
 .entry textarea{font-size:7.5pt;line-height:1.2;font-weight:650}
 .holidaytext{font-size:9pt;padding:3mm 0}
 }
+.teacher-period{font-size:13px;font-weight:700;color:#31517a;background:#eaf2ff;padding:10px 13px;border-radius:9px;margin:12px 0 0}@media print{.teacher-period{display:none!important}}
 </style></head><body>
 <header><strong>✦ Evo AI · Academy Planner</strong><span>교재별 수업 진도표</span></header>
 <main class="wrap">
@@ -53,10 +54,10 @@
 <section id="holidaySuggestions" class="suggestions"><div class="suggesthead"><strong>🇰🇷 대한민국 공휴일 추천</strong><span class="muted">추천 날짜를 선택하면 휴무일에 추가됩니다.</span></div><div id="holidayOptions" class="holiday-options"></div><p id="holidayInfo" class="muted"></p></section>
 <div class="row actions"><button id="generate">스케줄 생성하기</button><button class="secondary" id="print">A4 한 장 인쇄 / PDF</button><button class="secondary" id="reset">수정 내용 초기화</button></div>
 <p class="note">휴무일은 YYYY-MM-DD 형식으로 입력하세요. 휴무일에는 진도를 배치하지 않고 다음 평일로 이어집니다. 생성 후 각 칸의 글을 클릭해 수정할 수 있습니다.</p>
-<p id="message" class="warning" role="status"></p>
+<p id="message" class="warning" role="status"></p><p id="period" class="teacher-period">선생님용 · 시작일을 선택하고 스케줄을 생성하세요.</p>
 </section>
 <section class="sheet" id="sheet">
-<div class="sheet-title"><h2>Inter B · 수업 진도 캘린더</h2><div id="period" class="muted">시작일을 선택하고 스케줄을 생성하세요.</div></div>
+<div class="sheet-title"><h2>Inter Bridge1</h2></div>
 <table class="calendar"><thead><tr><th>월요일</th><th>화요일</th><th>수요일</th><th>목요일</th><th>금요일</th></tr></thead><tbody id="calendar"></tbody></table>
 <p class="help">표 안의 Inclass, Vocab., T-Room 내용을 직접 수정할 수 있습니다. 수정한 내용은 현재 브라우저에 저장됩니다.</p>
 </section>
@@ -114,7 +115,7 @@ function draw(){
   }
   tbody.appendChild(tr);cursor.setDate(cursor.getDate()+2);rows++;
  }
- $("period").textContent=config.start+" ~ "+config.end+"  |  월~금 수업  |  휴무일 "+config.holidays.length+"일";
+ $("period").textContent="선생님용 · 수업 기간: "+config.start+" ~ "+config.end+"  |  월~금 수업  |  휴무일 "+config.holidays.length+"일";
  document.documentElement.style.setProperty("--print-scale",rows>8?".72":rows>6?".84":"1");
 }
 function readHolidays(){return [...new Set($("holidays").value.split(/[,，\n]+/).map(s=>s.trim()).filter(Boolean))];}
