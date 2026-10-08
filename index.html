@@ -64,7 +64,38 @@ html,body{width:100%;height:auto}
 .entry.cumulative{padding:.5mm 1mm;margin:.5mm;border:0.7pt solid #19385f}
 .holidaytext{padding:2mm 0;font-size:8pt}
 }
-.sidehead{width:10%;white-space:pre-line;background:#e4edfa!important;color:#28456b!important;text-align:center;vertical-align:middle}@media print{@page{size:A4 landscape;margin:2mm}.wrap,.sheet{padding:0!important;margin:0!important}.sheet-title{margin:0!important;padding:0 0 1mm!important}}</style></head><body>
+.sidehead{width:10%;white-space:pre-line;background:#e4edfa!important;color:#28456b!important;text-align:center;vertical-align:middle}@media print{@page{size:A4 landscape;margin:2mm}.wrap,.sheet{padding:0!important;margin:0!important}.sheet-title{margin:0!important;padding:0 0 1mm!important}}
+/* 균일한 달력 격자, 학생 친화적인 큰 글씨 */
+.calendar{table-layout:fixed;width:100%}
+.calendar th.sidehead{width:11%;font-size:14px;line-height:2;font-weight:850}
+.calendar td{height:160px!important;max-height:160px;overflow:hidden;text-align:center}
+.calendar td .celltop{text-align:center;font-size:16px}
+.calendar .entry{height:calc((160px - 37px)/3);display:flex;flex-direction:column;align-items:center;justify-content:center;gap:2px;overflow:hidden;padding:3px 5px}
+.calendar .entry label{font-size:12px;text-align:center;line-height:1.1}
+.calendar .entry textarea{font-size:14px;text-align:center;font-weight:700;line-height:1.2;min-height:0;height:34px;max-height:45px;resize:none;overflow:auto;padding:2px}
+.calendar .holidaytext,.calendar .empty{text-align:center}
+.calendar .entry.cumulative{margin:0;border-radius:0;border:0;border-top:2px solid #19385f;border-bottom:2px solid #19385f;height:calc((160px - 37px)/3)}
+@media print{
+@page{size:A4 landscape;margin:2mm}
+html,body,.wrap{padding:0!important;margin:0!important}
+.sheet{padding:0!important;margin:0!important;zoom:1!important;overflow:visible!important}
+.sheet-title{padding:0!important;margin:0 0 1mm!important}
+.sheet-title h2{font-size:16pt!important}
+.sheet-title .muted{font-size:9pt!important}
+.calendar{width:100%!important;table-layout:fixed!important}
+.calendar th.sidehead{width:11%!important;font-size:8pt!important;line-height:1.8}
+.calendar th{font-size:9pt!important;padding:1mm!important;text-align:center!important}
+.calendar td{height:var(--row-height,30mm)!important;max-height:var(--row-height,30mm)!important;overflow:hidden!important;vertical-align:middle!important;text-align:center!important}
+.calendar .celltop{font-size:9pt!important;text-align:center!important;padding:.5mm!important}
+.calendar .entry{height:calc((var(--row-height,30mm) - 6mm)/3)!important;display:flex!important;flex-direction:column!important;align-items:center!important;justify-content:center!important;gap:.3mm!important;padding:.2mm .5mm!important;margin:0!important;overflow:hidden!important}
+.calendar .entry label{font-size:7.5pt!important;text-align:center!important;margin:0!important}
+.calendar .entry textarea{display:none!important}
+.calendar .entry .print-value{display:block!important;font-size:9pt!important;line-height:1.1!important;text-align:center!important;grid-column:auto!important;font-weight:700!important;max-width:100%}
+.calendar .entry.cumulative{border:0!important;border-top:1pt solid #19385f!important;border-bottom:1pt solid #19385f!important}
+.calendar .holidaytext{font-size:10pt!important;text-align:center!important;padding:0!important}
+.calendar tr{break-inside:avoid!important}
+}
+</style></head><body>
 <header><strong>✦ Evo AI · Academy Planner</strong><span>교재별 수업 진도표</span></header>
 <main class="wrap">
 <section class="controls">
@@ -111,7 +142,7 @@ for(let i=0;i<5;i++)lessons.push({inclass:special[i],vocab:i===4?"(누적) 161~2
 let cells={}, config=null;
 const key="evo-academy-interb-v1";
 function vocabFor(index,start){const block=Math.floor(index/5),position=index%5,first=start+block*40;return position===4?"(누적) "+first+"~"+(first+39):(first+position*10)+"~"+(first+position*10+9);}
-function printFit(){const rows=$("calendar").rows.length;const scale=Math.min(1,5.5/Math.max(rows,1));document.documentElement.style.setProperty("--print-scale",String(scale));}
+function printFit(){const rows=$("calendar").rows.length;const height=Math.min(33,Math.max(16,174/Math.max(1,rows)));document.documentElement.style.setProperty("--row-height",height+"mm");document.documentElement.style.setProperty("--print-scale","1");}
 function save(){try{localStorage.setItem(key,JSON.stringify({config,cells}));}catch(e){$("message").textContent="저장 공간이 부족하거나 차단되어 변경사항을 저장하지 못했습니다.";}}
 function create(tag,cls,text){const el=document.createElement(tag);if(cls)el.className=cls;if(text!==undefined)el.textContent=text;return el;}
 function draw(){
