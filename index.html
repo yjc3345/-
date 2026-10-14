@@ -356,7 +356,10 @@ html,body{width:auto!important;margin:0!important;padding:0!important}
  .calendar thead tr,.calendar thead th{display:none!important;height:0!important}
  table.calendar{height:var(--print-table-height,182mm)!important}
  .calendar tr.date-row,.calendar tr.date-row td,.calendar tr.date-row th{height:var(--print-date-height,8mm)!important;min-height:var(--print-date-height,8mm)!important;max-height:var(--print-date-height,8mm)!important;background:var(--teacher-color)!important;color:#fff!important;-webkit-print-color-adjust:exact!important;print-color-adjust:exact!important}
- .calendar tr.date-row .celltop,.calendar tr.date-row th.sidehead{font-size:9pt!important;font-weight:800!important;color:#fff!important;background:var(--teacher-color)!important;line-height:1.15!important;display:flex!important;align-items:center!important;justify-content:center!important;height:100%!important}
+ .calendar tr.date-row th.sidehead{display:table-cell!important;vertical-align:middle!important;text-align:center!important;font-size:9pt!important;font-weight:800!important;color:#fff!important;background:var(--teacher-color)!important;line-height:1.15!important}
+ .calendar tr.date-row td{display:table-cell!important;vertical-align:middle!important;text-align:center!important}
+ .calendar tr.date-row .celltop{display:block!important;width:100%!important;height:auto!important;box-sizing:border-box!important;margin:0!important;padding:0!important;border:0!important;font-size:9pt!important;font-weight:800!important;color:#fff!important;background:transparent!important;line-height:1.15!important;text-align:center!important}
+ .calendar tbody tr.date-row>th,.calendar tbody tr.date-row>td{border-top:1px solid #a9bad0!important;border-bottom:1px solid #a9bad0!important;box-sizing:border-box!important}
 }
 </style></head><body>
 <header><strong>✦ 고림파머스어학원 스케줄러</strong><span class="admin-placeholder" id="adminTeacherPicker" hidden style="display:none">관리자용 선생님 선택 <select id="adminTeacherSelect" aria-label="조회할 선생님"><option value="">선생님 선택</option></select></span></header>
