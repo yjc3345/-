@@ -610,9 +610,9 @@ const detail=e.detail||{},cls=detail.className;if(!cls)return;
 const result=await db.from("schedule_periods").select("id,start_date,end_date,holidays,vocab_start,approved_at").eq("teacher_id",user.id).eq("start_date",detail.start).eq("class_name",cls).maybeSingle();
 if(result.error){status.textContent="저장된 시간표 조회 실패: "+result.error.message;return}
 if(!result.data){document.getElementById("studentPeriod").textContent="저장된 시간표가 없습니다. 스케줄 생성하기를 눌러주세요.";return}
-const p=result.data,rows=await db.from("schedule_cells").select("lesson_date,inclass,troom,vocab_base,is_holiday").eq("period_id",p.id);
+const p=result.data,rows=await db.from("schedule_cells").select("lesson_date,inclass,troom,vocab_base,homework,is_holiday").eq("period_id",p.id);
 if(rows.error){status.textContent="시간표 내용 조회 실패: "+rows.error.message;return}
-const cells={};for(const r of rows.data||[])cells[r.lesson_date]={inclass:r.inclass||"",troom:r.troom||"",vocab:r.vocab_base||"",holiday:!!r.is_holiday,lesson:!r.is_holiday};
+const cells={};for(const r of rows.data||[])cells[r.lesson_date]={inclass:r.inclass||"",troom:r.troom||"",vocab:r.vocab_base||"",homework:r.homework||"",holiday:!!r.is_holiday,lesson:!r.is_holiday};
 const c={start:p.start_date,end:p.end_date,holidays:p.holidays||[],vocabStart:p.vocab_start||1,book:document.getElementById("book").value,className:cls,windowId:detail.windowId,windowLabel:detail.windowLabel,noVocab:false,hasHomework:false};
 window.applySavedTeacherSchedule?.(c,cells);status.textContent="서버에 저장된 시간표를 불러왔습니다.";
 });
@@ -627,7 +627,7 @@ if(period){const r=await db.from("schedule_periods").update(fields).eq("id",peri
 else{const r=await db.from("schedule_periods").insert(fields).select("id").single();if(r.error)throw r.error;period=r.data}
 const old=await db.from("schedule_cells").select("id").eq("period_id",period.id);if(old.error)throw old.error;
 if(old.data.length){const d=await db.from("schedule_cells").delete().eq("period_id",period.id);if(d.error)throw d.error}
-const rows=Object.entries(current.cells||{}).map(([date,v])=>({period_id:period.id,lesson_date:date,inclass:v.inclass||"",troom:v.troom||"",vocab_base:v.vocab||"",is_holiday:!!v.holiday}));
+const rows=Object.entries(current.cells||{}).map(([date,v])=>({period_id:period.id,lesson_date:date,inclass:v.inclass||"",troom:v.troom||"",vocab_base:v.vocab||"",homework:v.homework||"",is_holiday:!!v.holiday}));
 for(let i=0;i<rows.length;i+=100){const r=await db.from("schedule_cells").insert(rows.slice(i,i+100));if(r.error)throw r.error}
 status.textContent="시간표가 서버에 저장됐습니다. 관리자가 조회할 수 있어요.";
 }catch(e){status.textContent="저장 실패: "+e.message}finally{saveButton.disabled=false}
