@@ -403,6 +403,32 @@ html,body{width:auto!important;margin:0!important;padding:0!important}
  .calendar tbody tr.date-row>th,.calendar tbody tr.date-row>td{height:var(--print-date-height,7mm)!important;max-height:var(--print-date-height,7mm)!important}
  .calendar tbody tr.lesson-row>th,.calendar tbody tr.lesson-row>td{height:var(--print-lesson-height,8mm)!important;max-height:var(--print-lesson-height,8mm)!important}
 }
+
+/* 주차별 균등 배분: 날짜/Voca/T-Room/Homework는 같은 높이, Inclass는 1.8배 */
+@media print{
+ @page{size:A4 landscape;margin:5mm}
+ html,body,main.wrap,.wrap,#sheet,.sheet{height:auto!important;min-height:0!important;max-height:none!important;overflow:visible!important}
+ #sheet,.sheet{width:287mm!important;max-width:287mm!important;break-inside:avoid!important;page-break-inside:avoid!important}
+ .sheet-title{height:10mm!important;min-height:10mm!important;max-height:10mm!important}
+ table.calendar{width:287mm!important;height:var(--print-table-height,164mm)!important;max-height:var(--print-table-height,164mm)!important;table-layout:fixed!important;border-collapse:collapse!important;border:1pt solid #a9bad0!important}
+ .calendar thead{display:none!important}
+ .calendar tbody{height:var(--print-body-height,164mm)!important}
+ table.calendar tbody tr.date-row,table.calendar tbody tr.date-row>th,table.calendar tbody tr.date-row>td{
+  height:var(--print-date-height)!important;min-height:var(--print-date-height)!important;max-height:var(--print-date-height)!important;
+ }
+ table.calendar tbody tr.lesson-row:not(.inclass-row),table.calendar tbody tr.lesson-row:not(.inclass-row)>th,table.calendar tbody tr.lesson-row:not(.inclass-row)>td{
+  height:var(--print-lesson-height)!important;min-height:var(--print-lesson-height)!important;max-height:var(--print-lesson-height)!important;
+ }
+ table.calendar tbody tr.inclass-row,table.calendar tbody tr.inclass-row>th,table.calendar tbody tr.inclass-row>td{
+  height:var(--print-inclass-height)!important;min-height:var(--print-inclass-height)!important;max-height:var(--print-inclass-height)!important;
+ }
+ table.calendar tbody tr:last-child>th,table.calendar tbody tr:last-child>td{
+  background-image:none!important;box-shadow:none!important;border-bottom:1pt solid #a9bad0!important;
+ }
+ .calendar tr.lesson-row td,.calendar tr.lesson-row th{overflow:hidden!important}
+ .calendar .print-value{font-size:var(--print-font-size,6pt)!important;line-height:1.08!important}
+ .print-bottom-rule{display:none!important}
+}
 </style></head><body>
 <header><strong>✦ 고림파머스어학원 스케줄러</strong><span class="admin-placeholder" id="adminTeacherPicker" hidden style="display:none">관리자용 선생님 선택 <select id="adminTeacherSelect" aria-label="조회할 선생님"><option value="">선생님 선택</option></select></span></header>
 <main class="wrap">
@@ -532,7 +558,26 @@ const items=Object.entries(archive).filter(([id,item])=>(item.config.className||
 window.addEventListener("message",event=>{if(event.origin!==location.origin||event.data?.type!=="academy-windows")return;const list=event.data.windows||[];if(!Array.isArray(list))return;dataWindowArchiveIds=new Set(list.slice(6).map(w=>w.id));availableWindows=list.slice(0,6);const select=document.getElementById("academyWindow");select.replaceChildren(new Option("수업 기간을 선택하세요",""));for(const w of availableWindows){const opt=new Option(w.label+" ("+(w.start_date||"시작일 미지정")+" ~ "+w.end_date+")",w.id);opt.dataset.start=w.start_date||"";opt.dataset.end=w.end_date||"";opt.dataset.holidays=(w.holidays||[]).join(",");opt.dataset.holidayNames=JSON.stringify(w.holiday_names||{});opt.dataset.specialDays=JSON.stringify(w.special_days||{});select.add(opt)}if(availableWindows.length){select.value=availableWindows[0].id;select.dispatchEvent(new Event("change"));}drawTabs();if(select.value&&document.getElementById("className").value){const w=availableWindows.find(x=>x.id===select.value);if(w)window.dispatchEvent(new CustomEvent("load-saved-schedule",{detail:{start:w.start_date,end:w.end_date,windowId:w.id,windowLabel:w.label,className:document.getElementById("className").value}}))}});
 function persistArchive(){/* 임시 변경은 저장하지 않습니다. */}
 function vocabFor(index,start){const block=Math.floor(index/5),position=index%5,first=start+block*40;return position===4?"(누적) "+first+"~"+(first+39):(first+position*10)+"~"+(first+position*10+9);}
-function printFit(){const weeks=Math.max($("calendar").querySelectorAll(".date-row").length,1);const lessonRows=$("calendar").querySelectorAll(".lesson-row").length;const body=176, dateHeight=Math.min(7,body/(weeks*3)),lessonHeight=Math.max(1,(body-weeks*dateHeight)/Math.max(lessonRows,1));const root=document.documentElement.style;root.setProperty("--week-height",(body/weeks).toFixed(3)+"mm");root.setProperty("--week-count",String(weeks));root.setProperty("--print-body-height",body+"mm");root.setProperty("--print-table-height",body+"mm");root.setProperty("--print-date-height",dateHeight.toFixed(3)+"mm");root.setProperty("--print-lesson-height",lessonHeight.toFixed(3)+"mm");root.setProperty("--print-font-size",(lessonHeight<6?5.2:lessonHeight<8?6:7)+"pt");}
+function printFit(){
+ const weeks=Math.max($("calendar").querySelectorAll(".date-row").length,1);
+ const lessonRows=$("calendar").querySelectorAll(".lesson-row").length;
+ const lessonPerWeek=Math.max(1,Math.round(lessonRows/weeks));
+ // 날짜, Voca, T-Room, Homework는 동일한 높이; Inclass만 1.8배.
+ // 여유를 남겨 브라우저 인쇄 반올림으로 인한 마지막 행 잘림을 방지.
+ const body=164;
+ const unitsPerWeek=1+Math.max(0,lessonPerWeek-1)+1.8;
+ const unit=body/(weeks*unitsPerWeek);
+ const inclass=unit*1.8;
+ const root=document.documentElement.style;
+ root.setProperty("--week-height",(body/weeks).toFixed(4)+"mm");
+ root.setProperty("--week-count",String(weeks));
+ root.setProperty("--print-body-height",body+"mm");
+ root.setProperty("--print-table-height",body+"mm");
+ root.setProperty("--print-date-height",unit.toFixed(4)+"mm");
+ root.setProperty("--print-lesson-height",unit.toFixed(4)+"mm");
+ root.setProperty("--print-inclass-height",inclass.toFixed(4)+"mm");
+ root.setProperty("--print-font-size",(unit<4.8?5.5:unit<6?6:7)+"pt");
+}
 window.getCurrentTeacherSchedule=()=>config?{config:structuredClone(config),cells:structuredClone(cells)}:null;window.clearTeacherSchedule=()=>{config=null;scratchDraw();cells={};activePeriod=null;$("calendar").replaceChildren();document.querySelector(".sheet-title h2").textContent="";$("sheetClassName").textContent="";$("studentPeriod").textContent="";};
 window.applySavedTeacherSchedule=(c,rows)=>{c.noVocab=textbookTemplate(c.book||"Inter Bridge 1").noVocab||false;c.hasHomework=!!c.noVocab;config=c;cells=rows;approvedScheduleKey=null;activePeriod=archiveId(c);const savedWindow=availableWindows.find(w=>w.start_date===c.start||w.id===c.windowId);if(savedWindow){$("academyWindow").value=savedWindow.id;$("start").value=savedWindow.start_date||"";$("holidays").value=(savedWindow.holidays||[]).join(",");}$("book").value=c.book||"Inter Bridge 1";$("vocabStart").value=c.vocabStart||1;draw();drawTabs()};
 function save(){/* 저장 버튼을 누르기 전에는 브라우저에 기록하지 않습니다. */}
