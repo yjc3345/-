@@ -634,7 +634,7 @@ if(r.error)throw r.error;return r.data;
 async function reloadSelectedSchedule(){
  const cls=document.getElementById("className").value.trim(),select=document.getElementById("academyWindow"),opt=select.selectedOptions[0];
  const date=opt?.dataset.start;if(!cls||!date||!select.value)return;
- const token=++window.__classScheduleLoadToken;
+ const token=window.__classScheduleLoadToken=(window.__classScheduleLoadToken||0)+1;
  status.textContent=cls+" · 저장된 시간표 확인 중...";
  try{
  const result=await db.from("schedule_periods").select("id,start_date,end_date,holidays,vocab_start,approved_at").eq("teacher_id",user.id).eq("start_date",date).eq("class_name",cls).maybeSingle();
