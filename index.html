@@ -479,7 +479,7 @@ window.addEventListener("message",event=>{if(event.origin!==location.origin||eve
 function persistArchive(){/* 임시 변경은 저장하지 않습니다. */}
 function vocabFor(index,start){const block=Math.floor(index/5),position=index%5,first=start+block*40;return position===4?"(누적) "+first+"~"+(first+39):(first+position*10)+"~"+(first+position*10+9);}
 function printFit(){const weeks=Math.max($("calendar").querySelectorAll(".date-row").length,1);const lessonRows=$("calendar").querySelectorAll(".lesson-row").length;const body=182, dateHeight=Math.min(4,body/(weeks*5)),lessonHeight=Math.max(1,(body-weeks*dateHeight)/Math.max(lessonRows,1));const root=document.documentElement.style;root.setProperty("--week-height",(body/weeks).toFixed(3)+"mm");root.setProperty("--week-count",String(weeks));root.setProperty("--print-body-height",body+"mm");root.setProperty("--print-table-height","187mm");root.setProperty("--print-date-height",dateHeight.toFixed(3)+"mm");root.setProperty("--print-lesson-height",lessonHeight.toFixed(3)+"mm");root.setProperty("--print-font-size",(lessonHeight<6?5.2:lessonHeight<8?6:7)+"pt");}
-window.getCurrentTeacherSchedule=()=>config?{config:structuredClone(config),cells:structuredClone(cells)}:null;
+window.getCurrentTeacherSchedule=()=>config?{config:structuredClone(config),cells:structuredClone(cells)}:null;window.clearTeacherSchedule=()=>{config=null;cells={};activePeriod=null;$("calendar").replaceChildren();document.querySelector(".sheet-title h2").textContent="";$("sheetClassName").textContent="";$("studentPeriod").textContent="";};
 window.applySavedTeacherSchedule=(c,rows)=>{c.noVocab=textbookTemplate(c.book||"Inter Bridge 1").noVocab||false;c.hasHomework=!!c.noVocab;config=c;cells=rows;approvedScheduleKey=null;activePeriod=archiveId(c);const savedWindow=availableWindows.find(w=>w.start_date===c.start||w.id===c.windowId);if(savedWindow){$("academyWindow").value=savedWindow.id;$("academyWindow").dispatchEvent(new Event("change"));}$("book").value=c.book||"Inter Bridge 1";$("vocabStart").value=c.vocabStart||1;draw();drawTabs()};
 function save(){/* 저장 버튼을 누르기 전에는 브라우저에 기록하지 않습니다. */}
 function create(tag,cls,text){const el=document.createElement(tag);if(cls)el.className=cls;if(text!==undefined)el.textContent=text;return el;}
@@ -631,17 +631,30 @@ async function findPeriod(start,className){
 const r=await db.from("schedule_periods").select("id").eq("teacher_id",user.id).eq("start_date",start).eq("class_name",className||"Inter Bridge 1").maybeSingle();
 if(r.error)throw r.error;return r.data;
 }
-window.addEventListener("load-saved-schedule",async e=>{
-const detail=e.detail||{},cls=detail.className;if(!cls)return;const loadToken=++window.__classScheduleLoadToken;
-const result=await db.from("schedule_periods").select("id,start_date,end_date,holidays,vocab_start,approved_at").eq("teacher_id",user.id).eq("start_date",detail.start).eq("class_name",cls).maybeSingle();
-if(loadToken!==window.__classScheduleLoadToken||document.getElementById("className").value!==cls||document.getElementById("academyWindow").value!==detail.windowId)return;if(result.error){status.textContent="저장된 시간표 조회 실패: "+result.error.message;return}
-if(!result.data){status.textContent="이 반과 기간에 저장된 시간표가 없습니다. 새로 생성할 수 있습니다.";document.querySelector(".sheet-title h2").textContent="";document.getElementById("sheetClassName").textContent="";document.getElementById("studentPeriod").textContent="";return}
-const p=result.data,rows=await db.from("schedule_cells").select("lesson_date,inclass,troom,vocab_base,homework,is_holiday").eq("period_id",p.id);
-if(loadToken!==window.__classScheduleLoadToken||document.getElementById("className").value!==cls||document.getElementById("academyWindow").value!==detail.windowId)return;if(rows.error){status.textContent="시간표 내용 조회 실패: "+rows.error.message;return}
-const cells={};for(const r of rows.data||[])cells[r.lesson_date]={inclass:r.inclass||"",troom:r.troom||"",vocab:r.vocab_base||"",homework:r.homework||"",holiday:!!r.is_holiday,lesson:!r.is_holiday};
-const c={start:p.start_date,end:p.end_date,holidays:p.holidays||[],vocabStart:p.vocab_start||1,book:document.getElementById("book").value,className:cls,windowId:detail.windowId,windowLabel:detail.windowLabel,noVocab:false,hasHomework:false};
-window.applySavedTeacherSchedule?.(c,cells);status.textContent=cls+" · 저장된 시간표를 불러왔습니다.";
-});
+async function reloadSelectedSchedule(){
+ const cls=document.getElementById("className").value.trim(),select=document.getElementById("academyWindow"),opt=select.selectedOptions[0];
+ const date=opt?.dataset.start;if(!cls||!date||!select.value)return;
+ const token=++window.__classScheduleLoadToken;
+ status.textContent=cls+" · 저장된 시간표 확인 중...";
+ try{
+ const result=await db.from("schedule_periods").select("id,start_date,end_date,holidays,vocab_start,approved_at").eq("teacher_id",user.id).eq("start_date",date).eq("class_name",cls).maybeSingle();
+ if(token!==window.__classScheduleLoadToken||document.getElementById("className").value!==cls||select.value!==opt.value)return;
+ if(result.error)throw result.error;
+ if(!result.data){status.textContent=cls+" · 이 기간에 저장된 시간표가 없습니다.";window.clearTeacherSchedule?.();return;}
+ const p=result.data,rows=await db.from("schedule_cells").select("lesson_date,inclass,troom,vocab_base,homework,is_holiday").eq("period_id",p.id);
+ if(token!==window.__classScheduleLoadToken||document.getElementById("className").value!==cls||select.value!==opt.value)return;
+ if(rows.error)throw rows.error;
+ const cells={};for(const r of rows.data||[])cells[r.lesson_date]={inclass:r.inclass||"",troom:r.troom||"",vocab:r.vocab_base||"",homework:r.homework||"",holiday:!!r.is_holiday,lesson:!r.is_holiday};
+ const c={start:p.start_date,end:p.end_date,holidays:p.holidays||[],vocabStart:p.vocab_start||1,book:document.getElementById("book").value,className:cls,windowId:opt.value,windowLabel:opt.textContent,noVocab:false,hasHomework:false};
+ window.applySavedTeacherSchedule?.(c,cells);
+ status.textContent=cls+" · 저장된 시간표를 불러왔습니다.";
+ }catch(error){status.textContent="시간표 조회 실패: "+(error.message||error)}
+}
+window.addEventListener("load-saved-schedule",()=>reloadSelectedSchedule());
+document.getElementById("className").addEventListener("change",()=>setTimeout(reloadSelectedSchedule,0));
+document.getElementById("academyWindow").addEventListener("change",()=>setTimeout(reloadSelectedSchedule,0));
+setTimeout(reloadSelectedSchedule,400);
+
 saveButton.onclick=async()=>{
 const current=window.getCurrentTeacherSchedule?.();
 if(!current?.config?.start){status.textContent="먼저 스케줄을 생성해 주세요.";return}
