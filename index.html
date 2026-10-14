@@ -637,15 +637,20 @@ function draw(){
  const specialDates=windowInfo?.special_days||{};
  const blocked=new Set([...(config.holidays||[]),...(windowInfo?.holidays||[]),...Object.keys(specialDates)]);
  // 관리자 기간의 마지막 날짜까지 빈 날짜도 편집할 수 있도록 보존합니다.
- const occupied=Object.keys(cells).filter(d=>cells[d]?.lesson).sort();
+ const occupied=Object.keys(cells).filter(d=>cells[d]?.lesson&&!cells[d]?.holiday).sort();
  if(occupied.some(d=>blocked.has(d))){
+  // 기존 진도를 원래 순서대로 보존하고, 행사/휴무일 이후의 정상 수업일로 순연합니다.
   const sequence=occupied.map(d=>({...cells[d]}));
-  const dates=[];for(let d=local(config.start);d<=local(config.end);d.setDate(d.getDate()+1)){const k=iso(d);if(d.getDay()!==0&&d.getDay()!==6&&!blocked.has(k))dates.push(k)}
+  const dates=[];
+  const endDate=windowInfo?.end_date||config.end;
+  for(let d=local(config.start);d<=local(endDate);d.setDate(d.getDate()+1)){
+   const k=iso(d);if(d.getDay()!==0&&d.getDay()!==6&&!blocked.has(k))dates.push(k);
+  }
   if(dates.length>=sequence.length){
    for(const d of occupied)delete cells[d];
-   for(let i=0;i<sequence.length;i++)cells[dates[i]]={...sequence[i],lesson:true};
+   for(let i=0;i<sequence.length;i++)cells[dates[i]]={...sequence[i],lesson:true,special:false,holiday:false};
   }else{
-   $("message").textContent="휴무일·기념일을 제외하면 수업일이 부족합니다. 관리자에게 기간 조정을 요청해 주세요.";
+   $("message").textContent="행사일·휴무일을 제외하면 진도를 모두 옮길 수 없습니다. 관리자 기간을 연장해야 합니다.";
   }
  }
  const start=local(config.start),end=local(windowInfo?.end_date&&windowInfo.end_date>config.end?windowInfo.end_date:config.end);
@@ -793,7 +798,7 @@ async function reloadSelectedSchedule(){
  const p=result.data,rows=await db.from("schedule_cells").select("lesson_date,inclass,troom,vocab_base,homework,is_holiday").eq("period_id",p.id);
  if(token!==window.__classScheduleLoadToken||document.getElementById("className").value!==cls||select.value!==opt.value)return;
  if(rows.error)throw rows.error;
- const cells={};for(const r of rows.data||[])cells[r.lesson_date]={inclass:r.inclass||"",troom:r.troom||"",vocab:r.vocab_base||"",homework:r.homework||"",holiday:!!r.is_holiday,special:!r.is_holiday&&Object.hasOwn(JSON.parse(opt.dataset.specialDays||"{}"),r.lesson_date),lesson:!r.is_holiday&&!Object.hasOwn(JSON.parse(opt.dataset.specialDays||"{}"),r.lesson_date)};
+ const cells={};for(const r of rows.data||[])cells[r.lesson_date]={inclass:r.inclass||"",troom:r.troom||"",vocab:r.vocab_base||"",homework:r.homework||"",holiday:!!r.is_holiday,special:!r.is_holiday&&Object.hasOwn(JSON.parse(opt.dataset.specialDays||"{}"),r.lesson_date),lesson:!r.is_holiday&&!!((r.inclass||"").trim()||(r.troom||"").trim()||(r.vocab_base||"").trim()||(r.homework||"").trim())};
  const c={start:p.start_date,end:p.end_date,holidays:p.holidays||[],vocabStart:p.vocab_start||1,book:p.book||document.getElementById("book").value,className:cls,windowId:opt.value,windowLabel:opt.textContent,noVocab:false,hasHomework:false};
  const lessonDates=Object.keys(cells).filter(d=>cells[d].lesson).sort();const resetAt=lessonDates.find((d,i)=>i>0&&/^1\s*[~–-]\s*10$/.test(String(cells[d].vocab||"").trim()));if(resetAt)c.vocabResetDate=resetAt;
  window.applySavedTeacherSchedule?.(c,cells);
