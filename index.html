@@ -631,7 +631,7 @@ function installCellDrag(td,area,printed,date,field){
  td.classList.add("draggable-lesson");
  area.readOnly=true;
  td.draggable=true;
- td.addEventListener("dblclick",()=>{if(!canEditCell())return;area.readOnly=false;area.focus();area.select();});
+ td.addEventListener("dblclick",()=>{if(!canEditCell())return;area.readOnly=false;area.focus();area.select();});td.addEventListener("click",()=>{if(!canEditCell()||String(cells[date]?.[field]||"").trim())return;area.readOnly=false;area.focus();});
  area.addEventListener("blur",()=>{area.readOnly=true;});
  td.addEventListener("dragstart",e=>{
   if(!canEditCell()||!cells[date]?.[field]){e.preventDefault();return;}
@@ -657,7 +657,7 @@ function draw(){
  document.querySelector(".sheet-title h2").textContent=config.book||"Inter Bridge 1";$("sheetClassName").textContent=approvedScheduleKey===(config.className+"|"+config.start)?config.className||"":"";lessons=makeLessons(config.book||"Inter Bridge 1");
  const tbody=$("calendar");tbody.replaceChildren();
  // 기존 저장 진도 중 새 휴무일/기념일에 겹친 항목은 다음 수업일로 이동 (서버 자동 저장 없음).
- const windowInfo=availableWindows.find(w=>w.id===config.windowId||w.start_date===config.start);
+ const windowInfo=availableWindows.find(w=>w.id===config.windowId||w.start_date===config.start)||availableWindows.find(w=>w.id===$("academyWindow").value);
  const specialDates=windowInfo?.special_days||{};
  const blocked=new Set([...(config.holidays||[]),...(windowInfo?.holidays||[]),...Object.keys(specialDates)]);
  // 관리자 기간의 마지막 날짜까지 빈 날짜도 편집할 수 있도록 보존합니다.
@@ -677,7 +677,7 @@ function draw(){
    $("message").textContent="행사일·휴무일을 제외하면 진도를 모두 옮길 수 없습니다. 관리자 기간을 연장해야 합니다.";
   }
  }
- const start=local(config.start),end=local(windowInfo?.end_date&&windowInfo.end_date>config.end?windowInfo.end_date:config.end);
+ const officialEnd=[config.end,windowInfo?.end_date,$("academyWindow").selectedOptions[0]?.dataset.end].filter(Boolean).sort().at(-1);if(officialEnd&&officialEnd>config.end)config.end=officialEnd;const start=local(config.start),end=local(officialEnd);
  const first=new Date(start);first.setDate(first.getDate()-(first.getDay()+6)%7);
  const last=new Date(end);last.setDate(last.getDate()+(5-last.getDay()+7)%7);
  let cursor=new Date(first),rows=0;
