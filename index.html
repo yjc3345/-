@@ -768,6 +768,7 @@ async function reloadSelectedSchedule(){
  if(rows.error)throw rows.error;
  const cells={};for(const r of rows.data||[])cells[r.lesson_date]={inclass:r.inclass||"",troom:r.troom||"",vocab:r.vocab_base||"",homework:r.homework||"",holiday:!!r.is_holiday,special:!r.is_holiday&&Object.hasOwn(JSON.parse(opt.dataset.specialDays||"{}"),r.lesson_date),lesson:!r.is_holiday&&!Object.hasOwn(JSON.parse(opt.dataset.specialDays||"{}"),r.lesson_date)};
  const c={start:p.start_date,end:p.end_date,holidays:p.holidays||[],vocabStart:p.vocab_start||1,book:p.book||document.getElementById("book").value,className:cls,windowId:opt.value,windowLabel:opt.textContent,noVocab:false,hasHomework:false};
+ const lessonDates=Object.keys(cells).filter(d=>cells[d].lesson).sort();const resetAt=lessonDates.find((d,i)=>i>0&&/^1\s*[~–-]\s*10$/.test(String(cells[d].vocab||"").trim()));if(resetAt)c.vocabResetDate=resetAt;
  window.applySavedTeacherSchedule?.(c,cells);
  status.textContent="";
  }catch(error){status.textContent="시간표 조회 실패: "+(error.message||error)}
