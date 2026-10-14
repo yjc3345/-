@@ -433,6 +433,8 @@ html,body{width:auto!important;margin:0!important;padding:0!important}
 #approvalStatus{display:none!important}
 /* 관리자 지정 휴무일의 날짜만 빨간색으로 강조 (화면/인쇄 공통) */
 .calendar .celltop.holiday-date-label,.calendar .holiday .celltop.holiday-date-label{color:#c62828!important;font-weight:800!important}
+/* 인쇄 시 제목/기간 박스와 시간표 사이에 미세한 간격 */
+@media print{.sheet-title{margin-bottom:1.5mm!important}table.calendar{margin-top:0!important}}
 </style></head><body>
 <header><strong>✦ 고림파머스어학원 스케줄러</strong><span class="admin-placeholder" id="adminTeacherPicker" hidden style="display:none">관리자용 선생님 선택 <select id="adminTeacherSelect" aria-label="조회할 선생님"><option value="">선생님 선택</option></select></span></header>
 <main class="wrap">
