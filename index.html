@@ -413,7 +413,7 @@ const homeworkByBook={
 "Sound Doctor 1":[...["영어 이름 정하기","WS(Bb) / 음가연습","WS(Tt) / 음가연습","WS(Pp) / 음가연습","WS(Gg) / 음가연습"],...["WB / WS / 음가연습","알파벳 쓰기/음가연습",...Array(13).fill("WB / WS / 음가연습")],...Array(3).fill("알파벳 쓰기/음가연습"),"❤️","❤️"],
 "Sound Doctor 2":[...Array.from({length:15},(_,i)=>i%5===4?"WB / WS / 단모음읽기":"WB / WS / 음가연습"),"WB / WS / 음가연습","WB / WS / 음가연습","Hard/soft 첸트읽기","WB / WS / 음가연습","WB / WS / 단모음읽기","이기소 / 단모음 읽기","이기소 /  단모음 읽기","이기소 / 단모음 읽기","❤️","♥"],
 "Sound Doctor 3~6":[...Array.from({length:20},(_,i)=>i%5===4?"이기소쓰기 / 첸트읽기":"WB / WS / 첸트읽기"),...Array(4).fill("이기소쓰기 / 첸트읽기"),"♥"],
-"Pre A1~A2":[...Array(4).fill("WB / 녹음"),"데일리체크업/녹음",...Array.from({length:15},(_,i)=>i%5===4?"데일리체크업/녹음":"Day "+(5+(Math.floor(i/5)-1)*4+i%5)),"WB고치기 / 녹음","파닉스 챈트 녹음","영독비 녹음 / WS","교재 고치기","♥"]
+"Pre A1~A2":[...Array(4).fill("WB / 녹음"),"데일리체크업/녹음",...Array.from({length:15},(_,i)=>i%5===4?"데일리체크업/녹음":"Day "+(5+Math.floor(i/5)*4+i%5)),"WB고치기 / 녹음","파닉스 챈트 녹음","영독비 녹음 / WS","교재 고치기","♥"]
 };
 function textbookHomework(book,index){
 const n=Number((book.match(/(\\d+)$/)||[])[1]||1);
