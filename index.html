@@ -349,7 +349,7 @@ html,body{width:auto!important;margin:0!important;padding:0!important}
  .calendar tr.troom-row td,.calendar tr.troom-row th { border-bottom:1px dashed #7086a6!important; }
  .calendar tr.homework-row td,.calendar tr.homework-row th { border-top:1px dashed #7086a6!important; }
 }
-</style></head><body>
+.calendar td.draggable-lesson{cursor:grab}.calendar td.draggable-lesson.dragging{opacity:.4}.calendar td.draggable-lesson.drag-over{outline:3px solid #3b82f6;outline-offset:-3px}.calendar td.draggable-lesson textarea{cursor:grab}.calendar td.draggable-lesson textarea:not([readonly]){cursor:text}@media print{.calendar td.draggable-lesson{cursor:default}}</style></head><body>
 <header><strong>✦ Evo AI · Academy Planner</strong><span class="admin-placeholder" id="adminTeacherPicker" hidden style="display:none">관리자용 선생님 선택 <select id="adminTeacherSelect" aria-label="조회할 선생님"><option value="">선생님 선택</option></select></span></header>
 <main class="wrap">
 <section class="controls">
@@ -482,6 +482,31 @@ window.getCurrentTeacherSchedule=()=>config?{config:structuredClone(config),cell
 window.applySavedTeacherSchedule=(c,rows)=>{c.noVocab=textbookTemplate(c.book||"Inter Bridge 1").noVocab||false;c.hasHomework=!!c.noVocab;config=c;cells=rows;activePeriod=archiveId(c);$("book").value=c.book||"Inter Bridge 1";$("vocabStart").value=c.vocabStart||1;draw();drawTabs()};
 function save(){/* 저장 버튼을 누르기 전에는 브라우저에 기록하지 않습니다. */}
 function create(tag,cls,text){const el=document.createElement(tag);if(cls)el.className=cls;if(text!==undefined)el.textContent=text;return el;}
+let dragFrom=null;
+function canEditCell(){return !document.getElementById("approvalStatus")?.textContent.includes("승인 완료");}
+function installCellDrag(td,area,printed,date,field){
+ td.classList.add("draggable-lesson");
+ area.readOnly=true;
+ td.draggable=true;
+ td.addEventListener("dblclick",()=>{if(!canEditCell())return;area.readOnly=false;area.focus();area.select();});
+ area.addEventListener("blur",()=>{area.readOnly=true;});
+ td.addEventListener("dragstart",e=>{
+  if(!canEditCell()||!cells[date]?.[field]){e.preventDefault();return;}
+  dragFrom={date,field};e.dataTransfer.effectAllowed="move";e.dataTransfer.setData("text/plain",date+"|"+field);td.classList.add("dragging");
+ });
+ td.addEventListener("dragend",()=>{dragFrom=null;document.querySelectorAll(".dragging,.drag-over").forEach(el=>el.classList.remove("dragging","drag-over"));});
+ td.addEventListener("dragover",e=>{if(!dragFrom||dragFrom.field!==field||!canEditCell())return;e.preventDefault();e.dataTransfer.dropEffect="move";td.classList.add("drag-over");});
+ td.addEventListener("dragleave",()=>td.classList.remove("drag-over"));
+ td.addEventListener("drop",e=>{
+  e.preventDefault();td.classList.remove("drag-over");
+  const from=dragFrom;dragFrom=null;
+  if(!from||from.field!==field||from.date===date||!canEditCell()||!cells[date]?.lesson||!cells[from.date]?.lesson)return;
+  const value=cells[from.date][field]||"",target=cells[date][field]||"";
+  if(!value)return;
+  if(target&&!confirm("이동할 날짜에 이미 내용이 있습니다. 기존 내용을 덮어쓸까요?"))return;
+  cells[date][field]=value;cells[from.date][field]="";draw();
+ });
+}
 function draw(){
  if(!config)return;
  document.querySelector(".sheet-title h2").textContent=config.book||"Inter Bridge 1";lessons=makeLessons(config.book||"Inter Bridge 1");
@@ -509,7 +534,7 @@ function draw(){
      area.setAttribute("aria-label",date+" "+labelText);
      area.rows=Math.max(1,area.value.split("\n").length);
      area.addEventListener("input",()=>{cells[date][field]=area.value;printed.textContent=area.value;td.classList.toggle("cumulative",field==="vocab"&&area.value.includes("(누적)"));save();});
-     td.append(area,printed);
+     td.append(area,printed);installCellDrag(td,area,printed,date,field);
     }
     tr.appendChild(td);
    }
