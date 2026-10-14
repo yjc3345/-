@@ -626,6 +626,21 @@ function draw(){
  if(!config)return;
  document.querySelector(".sheet-title h2").textContent=config.book||"Inter Bridge 1";$("sheetClassName").textContent=approvedScheduleKey===(config.className+"|"+config.start)?config.className||"":"";lessons=makeLessons(config.book||"Inter Bridge 1");
  const tbody=$("calendar");tbody.replaceChildren();
+ // 기존 저장 진도 중 새 휴무일/기념일에 겹친 항목은 다음 수업일로 이동 (서버 자동 저장 없음).
+ const windowInfo=availableWindows.find(w=>w.id===config.windowId||w.start_date===config.start);
+ const specialDates=windowInfo?.special_days||{};
+ const blocked=new Set([...(config.holidays||[]),...(windowInfo?.holidays||[]),...Object.keys(specialDates)]);
+ const occupied=Object.keys(cells).filter(d=>cells[d]?.lesson).sort();
+ if(occupied.some(d=>blocked.has(d))){
+  const sequence=occupied.map(d=>({...cells[d]}));
+  const dates=[];for(let d=local(config.start);d<=local(config.end);d.setDate(d.getDate()+1)){const k=iso(d);if(d.getDay()!==0&&d.getDay()!==6&&!blocked.has(k))dates.push(k)}
+  if(dates.length>=sequence.length){
+   for(const d of occupied)delete cells[d];
+   for(let i=0;i<sequence.length;i++)cells[dates[i]]={...sequence[i],lesson:true};
+  }else{
+   $("message").textContent="휴무일·기념일을 제외하면 수업일이 부족합니다. 관리자에게 기간 조정을 요청해 주세요.";
+  }
+ }
  const start=local(config.start),end=local(config.end);
  const first=new Date(start);first.setDate(first.getDate()-(first.getDay()+6)%7);
  const last=new Date(end);last.setDate(last.getDate()+(5-last.getDay()+7)%7);
@@ -639,15 +654,19 @@ function draw(){
    tr.appendChild(create("th","sidehead",labelText));
    for(let i=0;i<5;i++){
     const date=dates[i],outside=local(date)<start||local(date)>end;
-    const specialNames=JSON.parse($("academyWindow").selectedOptions[0]?.dataset.specialDays||"{}");
-    if(!outside&&Object.hasOwn(specialNames,date)&&!cells[date]?.holiday){
-      cells[date]={special:true,lesson:false,homework:cells[date]?.homework||""};
+    const chosenWindow=availableWindows.find(w=>w.id===config.windowId||w.start_date===config.start);
+    const specialNames=chosenWindow?.special_days||JSON.parse($("academyWindow").selectedOptions[0]?.dataset.specialDays||"{}");
+    const holidayNames=chosenWindow?.holiday_names||JSON.parse($("academyWindow").selectedOptions[0]?.dataset.holidayNames||"{}");
+    const isHoliday=(config.holidays||[]).includes(date)||(chosenWindow?.holidays||[]).includes(date);
+    if(!outside&&isHoliday)cells[date]={holiday:true,lesson:false};
+    else if(!outside&&Object.hasOwn(specialNames,date)){
+      cells[date]={special:true,lesson:false,homework:config.hasHomework?(cells[date]?.homework||""):""};
     }
     const data=cells[date];
     const cumulative=field==="vocab"&&data&&data.lesson&&String(data.vocab||"").includes("(누적)");
     const td=create("td",(outside?"off ":"")+(data&&data.holiday?"holiday ":"")+(cumulative?"cumulative ":""));
     if(field==="date")td.appendChild(create("div","celltop",fmt(date)+" ("+["월","화","수","목","금"][i]+")"));
-    else if(data&&data.special&&field!=="homework"){if(field==="inclass"){const names=JSON.parse(document.getElementById("academyWindow").selectedOptions[0]?.dataset.specialDays||"{}");td.appendChild(create("div","specialtext",names[date]||"기념일"));}}else if(data&&data.holiday){if(field==="inclass"){const names=JSON.parse(document.getElementById("academyWindow").selectedOptions[0]?.dataset.holidayNames||"{}");td.appendChild(create("div","holidaytext",names[date]||"휴무일"));}}
+    else if(data&&data.holiday){if(field==="inclass")td.appendChild(create("div","holidaytext",holidayNames[date]||"휴무일"));}else if(data&&data.special&&field!=="homework"){if(field==="inclass")td.appendChild(create("div","specialtext",specialNames[date]||"기념일"));}
     else if(data&&(data.lesson||(data.special&&field==="homework"))){
      const area=create("textarea"),printed=create("div","print-value");
      area.value=data[field]||"";printed.textContent=area.value;
