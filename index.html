@@ -437,6 +437,9 @@ html,body{width:auto!important;margin:0!important;padding:0!important}
 @media print{.sheet-title{margin-bottom:1.5mm!important}table.calendar{margin-top:0!important}}
 /* 인쇄 제목 박스 하단 선만 제거; 1.5mm 간격 유지 */
 @media print{.sheet-title{border-bottom:0!important;box-shadow:none!important}.sheet-title::after{display:none!important}}
+/* 휴무일 날짜 텍스트: 테마색보다 우선하여 빨강 적용 */
+.calendar tr.date-row td .celltop.holiday-date-label,.calendar tr.date-row td.holiday .celltop{color:#c62828!important;-webkit-text-fill-color:#c62828!important;font-weight:800!important}
+@media print{.calendar tr.date-row td .celltop.holiday-date-label,.calendar tr.date-row td.holiday .celltop{color:#c62828!important;-webkit-text-fill-color:#c62828!important;print-color-adjust:exact!important;-webkit-print-color-adjust:exact!important}}
 </style></head><body>
 <header><strong>✦ 고림파머스어학원 스케줄러</strong><span class="admin-placeholder" id="adminTeacherPicker" hidden style="display:none">관리자용 선생님 선택 <select id="adminTeacherSelect" aria-label="조회할 선생님"><option value="">선생님 선택</option></select></span></header>
 <main class="wrap">
@@ -678,7 +681,7 @@ function draw(){
     const data=cells[date];
     const cumulative=field==="vocab"&&data&&data.lesson&&String(data.vocab||"").includes("(누적)");
     const td=create("td",(outside?"off ":"")+(data&&data.holiday?"holiday ":"")+(cumulative?"cumulative ":""));
-    if(field==="date"){const dateLabel=create("div","celltop",fmt(date)+" ("+["월","화","수","목","금"][i]+")");if(data?.holiday)dateLabel.classList.add("holiday-date-label");td.appendChild(dateLabel);}
+    if(field==="date"){const dateLabel=create("div","celltop",fmt(date)+" ("+["월","화","수","목","금"][i]+")");if(isHoliday||data?.holiday){dateLabel.classList.add("holiday-date-label");dateLabel.style.setProperty("color","#c62828","important");}td.appendChild(dateLabel);}
     else if(data&&data.holiday){if(field==="inclass")td.appendChild(create("div","holidaytext",holidayNames[date]||"휴무일"));}else if(data&&data.special&&field!=="homework"){if(field==="inclass")td.appendChild(create("div","specialtext",specialNames[date]||"기념일"));}
     else if(data&&(data.lesson||(data.special&&field==="homework"))){
      const area=create("textarea"),printed=create("div","print-value");
