@@ -361,6 +361,16 @@ html,body{width:auto!important;margin:0!important;padding:0!important}
  .calendar tr.date-row .celltop{display:block!important;width:100%!important;height:auto!important;box-sizing:border-box!important;margin:0!important;padding:0!important;border:0!important;font-size:9pt!important;font-weight:800!important;color:#fff!important;background:transparent!important;line-height:1.15!important;text-align:center!important}
  .calendar tbody tr.date-row>th,.calendar tbody tr.date-row>td{border-top:1px solid #a9bad0!important;border-bottom:1px solid #a9bad0!important;box-sizing:border-box!important}
 }
+
+/* 인쇄 날짜행: 중첩 배경띠 제거, 단일 8mm 행으로 통일 */
+@media print{
+ table.calendar tbody tr.date-row{height:var(--print-date-height,8mm)!important}
+ table.calendar tbody tr.date-row>th.sidehead,
+ table.calendar tbody tr.date-row>td{display:table-cell!important;height:var(--print-date-height,8mm)!important;min-height:var(--print-date-height,8mm)!important;max-height:var(--print-date-height,8mm)!important;vertical-align:middle!important;padding:0!important;border:1px solid #a9bad0!important;background:var(--teacher-soft)!important;color:#233c60!important;box-shadow:none!important}
+ table.calendar tbody tr.date-row>td .celltop,
+ table.calendar tbody tr.date-row>td:nth-child(1) .celltop,
+ table.calendar tbody tr.date-row>td:nth-child(5) .celltop{display:block!important;position:static!important;width:100%!important;height:auto!important;min-height:0!important;max-height:none!important;margin:0!important;padding:0!important;background:transparent!important;background-image:none!important;color:#233c60!important;border:0!important;box-shadow:none!important;font-size:9pt!important;font-weight:800!important;line-height:1.2!important;text-align:center!important}
+}
 </style></head><body>
 <header><strong>✦ 고림파머스어학원 스케줄러</strong><span class="admin-placeholder" id="adminTeacherPicker" hidden style="display:none">관리자용 선생님 선택 <select id="adminTeacherSelect" aria-label="조회할 선생님"><option value="">선생님 선택</option></select></span></header>
 <main class="wrap">
