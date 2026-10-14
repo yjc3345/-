@@ -425,7 +425,7 @@ const t=textbookTemplate(book),out=[];
 for(let i=0;i<25;i++){
 const w=Math.floor(i/5),day=w*4+i%5+1,review=i%5===4;
 let inclass=t.first?.[i];
-if(!inclass){if(w===4){const endings=t.kind==="runner"?["전체복습","Monthly Test 및 I-Pattern 촬영","프레젠테이션 쓰기 및 촬영","문법 및 Activity","교재마무리"]:["전체복습","Monthly Test 및 촬영","프레젠테이션 쓰기 및 촬영","문법 및 Activity","교재마무리"];inclass=endings[i%5]}
+if(!inclass){if(w===4){const endings=t.kind==="runner"?["전체복습","Monthly Test 및 I-Pattern 촬영","프레젠테이션 쓰기 및 촬영","문법 및 Activity","교재마무리"]:t.kind==="silverB"?["전체복습","Monthly Test 및 촬영","프레젠테이션 쓰기 및 촬영","문법/수행마스터 마무리","교재마무리"]:["전체복습","Monthly Test 및 촬영","프레젠테이션 쓰기 및 촬영","문법 및 Activity","교재마무리"];inclass=endings[i%5]}
 else if(review){inclass=t.kind==="runner"?"Review & Weekly Test":t.kind==="silverA"?"Review + 수행마스터 Step "+(w+1):t.kind==="silverB"?"Review + 수행마스터 Step "+(w+1):t.kind==="inter"?"Review + Unit Test":"Review"}
 else if(t.kind==="runner")inclass="Unit "+(w+1)+" - "+(i%5+1);
 else inclass="Day "+day}
