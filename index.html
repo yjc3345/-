@@ -475,6 +475,7 @@ const items=Object.entries(archive).filter(([id,item])=>(item.config.className||
   });nav.appendChild(btn);
  }
 }
+window.addEventListener("message",event=>{if(event.origin!==location.origin||event.data?.type!=="academy-windows")return;const list=event.data.windows||[];if(!Array.isArray(list))return;dataWindowArchiveIds=new Set(list.slice(6).map(w=>w.id));availableWindows=list.slice(0,6);const select=document.getElementById("academyWindow");select.replaceChildren(new Option("수업 기간을 선택하세요",""));for(const w of availableWindows){const opt=new Option(w.label+" ("+(w.start_date||"시작일 미지정")+" ~ "+w.end_date+")",w.id);opt.dataset.start=w.start_date||"";opt.dataset.end=w.end_date||"";opt.dataset.holidays=(w.holidays||[]).join(",");select.add(opt)}if(availableWindows.length){select.value=availableWindows[0].id;select.dispatchEvent(new Event("change"));}drawTabs();});
 function persistArchive(){/* 임시 변경은 저장하지 않습니다. */}
 function vocabFor(index,start){const block=Math.floor(index/5),position=index%5,first=start+block*40;return position===4?"(누적) "+first+"~"+(first+39):(first+position*10)+"~"+(first+position*10+9);}
 function printFit(){const weeks=Math.max($("calendar").querySelectorAll(".date-row").length,1);const lessonRows=$("calendar").querySelectorAll(".lesson-row").length;const body=182, dateHeight=Math.min(4,body/(weeks*5)),lessonHeight=Math.max(1,(body-weeks*dateHeight)/Math.max(lessonRows,1));const root=document.documentElement.style;root.setProperty("--week-height",(body/weeks).toFixed(3)+"mm");root.setProperty("--week-count",String(weeks));root.setProperty("--print-body-height",body+"mm");root.setProperty("--print-table-height","187mm");root.setProperty("--print-date-height",dateHeight.toFixed(3)+"mm");root.setProperty("--print-lesson-height",lessonHeight.toFixed(3)+"mm");root.setProperty("--print-font-size",(lessonHeight<6?5.2:lessonHeight<8?6:7)+"pt");}
@@ -731,7 +732,7 @@ else{picker.value=assigned[0].class_name;picker.dispatchEvent(new Event("change"
 (async()=>{
 try{
 const db=supabase.createClient("https://eovntwuvjzvnztyxzwer.supabase.co","sb_publishable_XMxCvN3wguCsjUY-6GrR2g_HidFJtoc");
-const {data:{user}}=await db.auth.getUser();if(!user)return;
+const {data:{user}}=await db.auth.getUser();if(!user){document.getElementById("message").textContent="로그인 세션을 확인하지 못했습니다. 로그인 화면에서 다시 접속해 주세요.";return;}
 const {data,error}=await db.from("academy_schedule_windows").select("id,label,start_date,end_date,holidays").order("start_date",{ascending:false});
 const select=document.getElementById("academyWindow"),start=document.getElementById("start"),message=document.getElementById("message");
 if(error){message.textContent="수업 기간을 불러오지 못했습니다: "+error.message;return}
