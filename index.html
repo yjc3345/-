@@ -431,6 +431,8 @@ html,body{width:auto!important;margin:0!important;padding:0!important}
 }
 /* 승인 상태 문구는 화면에 표시하지 않고 잠금 판정에만 사용 */
 #approvalStatus{display:none!important}
+/* 관리자 지정 휴무일의 날짜만 빨간색으로 강조 (화면/인쇄 공통) */
+.calendar .celltop.holiday-date-label,.calendar .holiday .celltop.holiday-date-label{color:#c62828!important;font-weight:800!important}
 </style></head><body>
 <header><strong>✦ 고림파머스어학원 스케줄러</strong><span class="admin-placeholder" id="adminTeacherPicker" hidden style="display:none">관리자용 선생님 선택 <select id="adminTeacherSelect" aria-label="조회할 선생님"><option value="">선생님 선택</option></select></span></header>
 <main class="wrap">
@@ -665,7 +667,7 @@ function draw(){
     const data=cells[date];
     const cumulative=field==="vocab"&&data&&data.lesson&&String(data.vocab||"").includes("(누적)");
     const td=create("td",(outside?"off ":"")+(data&&data.holiday?"holiday ":"")+(cumulative?"cumulative ":""));
-    if(field==="date")td.appendChild(create("div","celltop",fmt(date)+" ("+["월","화","수","목","금"][i]+")"));
+    if(field==="date"){const dateLabel=create("div","celltop",fmt(date)+" ("+["월","화","수","목","금"][i]+")");if(data?.holiday)dateLabel.classList.add("holiday-date-label");td.appendChild(dateLabel);}
     else if(data&&data.holiday){if(field==="inclass")td.appendChild(create("div","holidaytext",holidayNames[date]||"휴무일"));}else if(data&&data.special&&field!=="homework"){if(field==="inclass")td.appendChild(create("div","specialtext",specialNames[date]||"기념일"));}
     else if(data&&(data.lesson||(data.special&&field==="homework"))){
      const area=create("textarea"),printed=create("div","print-value");
