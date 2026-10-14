@@ -643,9 +643,9 @@ function installCellDrag(td,area,printed,date,field){
  td.addEventListener("drop",e=>{
   e.preventDefault();td.classList.remove("drag-over");
   const from=dragFrom;dragFrom=null;
-  if(!from||from.field!==field||!canEditCell()||!cells[date]?.lesson)return;
+  if(!from||from.field!==field||!canEditCell()||!cells[date]||cells[date].holiday||cells[date].special)return;
   if(Number.isInteger(from.scratch)){const items=scratchRead(),item=items[from.scratch];if(!item)return;const old=cells[date][field]||"";cells[date][field]=item.text;if(old)items[from.scratch]={field,text:old};else items.splice(from.scratch,1);scratchWrite(items);draw();return}
-  if(from.date===date||!cells[from.date]?.lesson)return;
+  if(from.date===date||!cells[from.date]||cells[from.date].holiday||cells[from.date].special)return;
   const value=cells[from.date][field]||"",target=cells[date][field]||"";
   if(!value)return;
   if(target&&!confirm("두 날짜의 내용을 서로 교환할까요?"))return;
@@ -698,7 +698,11 @@ function draw(){
     else if(!outside&&Object.hasOwn(specialNames,date)){
       cells[date]={special:true,lesson:false,homework:config.hasHomework?(cells[date]?.homework||""):""};
     }
-    if(!outside&&!cells[date]&&!isHoliday&&!Object.hasOwn(specialNames,date))cells[date]={lesson:true,inclass:"",vocab:"",troom:"",homework:""};
+    if(!outside&&!isHoliday&&!Object.hasOwn(specialNames,date)){
+     // 저장된 진도가 끝난 뒤에도 관리자 지정 종료일까지 빈 날짜를 편집/드래그 대상으로 유지.
+     if(!cells[date])cells[date]={lesson:true,inclass:"",vocab:"",troom:"",homework:""};
+     else if(!cells[date].holiday&&!cells[date].special)cells[date].lesson=true;
+    }
     const data=cells[date];
     const cumulative=field==="vocab"&&data&&data.lesson&&String(data.vocab||"").includes("(누적)");
     const td=create("td",(outside?"off ":"")+(data&&data.holiday?"holiday ":"")+(cumulative?"cumulative ":""));
