@@ -506,7 +506,7 @@ function persistArchive(){/* 임시 변경은 저장하지 않습니다. */}
 function vocabFor(index,start){const block=Math.floor(index/5),position=index%5,first=start+block*40;return position===4?"(누적) "+first+"~"+(first+39):(first+position*10)+"~"+(first+position*10+9);}
 function printFit(){const weeks=Math.max($("calendar").querySelectorAll(".date-row").length,1);const lessonRows=$("calendar").querySelectorAll(".lesson-row").length;const body=182, dateHeight=Math.min(8,body/(weeks*3)),lessonHeight=Math.max(1,(body-weeks*dateHeight)/Math.max(lessonRows,1));const root=document.documentElement.style;root.setProperty("--week-height",(body/weeks).toFixed(3)+"mm");root.setProperty("--week-count",String(weeks));root.setProperty("--print-body-height",body+"mm");root.setProperty("--print-table-height","182mm");root.setProperty("--print-date-height",dateHeight.toFixed(3)+"mm");root.setProperty("--print-lesson-height",lessonHeight.toFixed(3)+"mm");root.setProperty("--print-font-size",(lessonHeight<6?5.2:lessonHeight<8?6:7)+"pt");}
 window.getCurrentTeacherSchedule=()=>config?{config:structuredClone(config),cells:structuredClone(cells)}:null;window.clearTeacherSchedule=()=>{config=null;scratchDraw();cells={};activePeriod=null;$("calendar").replaceChildren();document.querySelector(".sheet-title h2").textContent="";$("sheetClassName").textContent="";$("studentPeriod").textContent="";};
-window.applySavedTeacherSchedule=(c,rows)=>{c.noVocab=textbookTemplate(c.book||"Inter Bridge 1").noVocab||false;c.hasHomework=!!c.noVocab||!!c.hasHomework;config=c;cells=rows;approvedScheduleKey=null;activePeriod=archiveId(c);const savedWindow=availableWindows.find(w=>w.start_date===c.start||w.id===c.windowId);if(savedWindow){$("academyWindow").value=savedWindow.id;$("start").value=savedWindow.start_date||"";$("holidays").value=(savedWindow.holidays||[]).join(",");}$("book").value=c.book||"Inter Bridge 1";$("vocabStart").value=c.vocabStart||1;draw();drawTabs()};
+window.applySavedTeacherSchedule=(c,rows)=>{c.noVocab=textbookTemplate(c.book||"Inter Bridge 1").noVocab||false;c.hasHomework=!!c.noVocab;config=c;cells=rows;approvedScheduleKey=null;activePeriod=archiveId(c);const savedWindow=availableWindows.find(w=>w.start_date===c.start||w.id===c.windowId);if(savedWindow){$("academyWindow").value=savedWindow.id;$("start").value=savedWindow.start_date||"";$("holidays").value=(savedWindow.holidays||[]).join(",");}$("book").value=c.book||"Inter Bridge 1";$("vocabStart").value=c.vocabStart||1;draw();drawTabs()};
 function save(){/* 저장 버튼을 누르기 전에는 브라우저에 기록하지 않습니다. */}
 function create(tag,cls,text){const el=document.createElement(tag);if(cls)el.className=cls;if(text!==undefined)el.textContent=text;return el;}
 let dragFrom=null;
@@ -626,7 +626,7 @@ function generate(){
   if(count<lessons.length){cells[date]={...lessons[count],vocab:textbookTemplate(book).noVocab?"":vocabFor(count,vocabStart),lesson:true};count++;end=date;}
  }
  if(selectedWindow.dataset.end&&end>selectedWindow.dataset.end){$("message").textContent="선택한 기간의 종료일("+selectedWindow.dataset.end+")까지 교재 진도 "+count+"일을 모두 배치할 수 없습니다. 관리자에게 기간 연장을 요청해 주세요.";return;}
- config={start,end,windowId:$("academyWindow").value,windowLabel:selectedWindow.textContent,holidays,vocabStart,book,noVocab:textbookTemplate(book).noVocab||false,hasHomework:!!textbookTemplate(book).noVocab||Object.keys(JSON.parse(selectedWindow.dataset.specialDays||"{}")).length>0,className:$("className").value.trim()||"Inter Bridge 1"};
+ config={start,end,windowId:$("academyWindow").value,windowLabel:selectedWindow.textContent,holidays,vocabStart,book,noVocab:textbookTemplate(book).noVocab||false,hasHomework:!!textbookTemplate(book).noVocab,className:$("className").value.trim()||"Inter Bridge 1"};
  $("message").textContent="기본 진도 "+count+"일을 자동 배치했습니다. 마지막 수업일: "+end;
  save();draw();
 }
@@ -685,7 +685,7 @@ async function reloadSelectedSchedule(){
  if(rows.error)throw rows.error;
  const cells={};for(const r of rows.data||[])cells[r.lesson_date]={inclass:r.inclass||"",troom:r.troom||"",vocab:r.vocab_base||"",homework:r.homework||"",holiday:!!r.is_holiday,special:!r.is_holiday&&Object.hasOwn(JSON.parse(opt.dataset.specialDays||"{}"),r.lesson_date),lesson:!r.is_holiday&&!Object.hasOwn(JSON.parse(opt.dataset.specialDays||"{}"),r.lesson_date)};
  const c={start:p.start_date,end:p.end_date,holidays:p.holidays||[],vocabStart:p.vocab_start||1,book:p.book||document.getElementById("book").value,className:cls,windowId:opt.value,windowLabel:opt.textContent,noVocab:false,hasHomework:false};
- c.hasHomework=c.hasHomework||Object.keys(JSON.parse(opt.dataset.specialDays||"{}")).length>0;window.applySavedTeacherSchedule?.(c,cells);
+ window.applySavedTeacherSchedule?.(c,cells);
  status.textContent=cls+" · 저장된 시간표를 불러왔습니다.";
  }catch(error){status.textContent="시간표 조회 실패: "+(error.message||error)}
 }
