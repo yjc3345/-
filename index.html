@@ -349,7 +349,7 @@ html,body{width:auto!important;margin:0!important;padding:0!important}
  .calendar tr.troom-row td,.calendar tr.troom-row th { border-bottom:1px dashed #7086a6!important; }
  .calendar tr.homework-row td,.calendar tr.homework-row th { border-top:1px dashed #7086a6!important; }
 }
-.calendar td.draggable-lesson{cursor:grab}.calendar td.draggable-lesson.dragging{opacity:.4}.calendar td.draggable-lesson.drag-over{outline:3px solid #3b82f6;outline-offset:-3px}.calendar td.draggable-lesson textarea{cursor:grab}.calendar td.draggable-lesson textarea:not([readonly]){cursor:text}@media print{.calendar td.draggable-lesson{cursor:default}}.period-tabs .period-tab.active{background:#fff!important;color:#1b477e!important;border-bottom-color:#fff!important;box-shadow:inset 0 3px 0 var(--teacher-color);font-weight:800}.period-tabs .period-tab:not(.active){opacity:.8}.sheet-title{position:relative;min-height:60px}.sheet-title #sheetClassName{position:absolute;right:16px;top:7px;font-size:17px;font-weight:800;color:var(--teacher-color);white-space:nowrap}@media print{.sheet-title #sheetClassName{right:5mm;top:1mm;font-size:13pt}}</style></head><body>
+.calendar td.draggable-lesson{cursor:grab}.calendar td.draggable-lesson.dragging{opacity:.4}.calendar td.draggable-lesson.drag-over{outline:3px solid #3b82f6;outline-offset:-3px}.calendar td.draggable-lesson textarea{cursor:grab}.calendar td.draggable-lesson textarea:not([readonly]){cursor:text}@media print{.calendar td.draggable-lesson{cursor:default}}.period-tabs .period-tab.active{background:#fff!important;color:#1b477e!important;border-bottom-color:#fff!important;box-shadow:inset 0 3px 0 var(--teacher-color);font-weight:800}.period-tabs .period-tab:not(.active){opacity:.8}.sheet-title{position:relative;min-height:60px}.sheet-title #sheetClassName{position:absolute;right:16px;top:7px;font-size:17px;font-weight:800;color:var(--teacher-color);white-space:nowrap}@media print{.sheet-title #sheetClassName{right:5mm;top:1mm;font-size:13pt}}#scratchTray{padding:12px;margin:12px 0;border:2px dashed var(--teacher-color);border-radius:10px;background:var(--teacher-pale)}#scratchTray p{font-size:12px;margin:5px 0}.scratch-entry{display:inline-block;vertical-align:top;max-width:240px;padding:8px;margin:5px;border:1px solid #b5c8df;background:white;border-radius:8px;cursor:grab;white-space:pre-wrap;overflow-wrap:anywhere;font-size:12px}@media print{#scratchTray{display:none!important}}</style></head><body>
 <header><strong>✦ 고림파머스어학원 스케줄러</strong><span class="admin-placeholder" id="adminTeacherPicker" hidden style="display:none">관리자용 선생님 선택 <select id="adminTeacherSelect" aria-label="조회할 선생님"><option value="">선생님 선택</option></select></span></header>
 <main class="wrap">
 <section class="controls">
@@ -369,7 +369,7 @@ html,body{width:auto!important;margin:0!important;padding:0!important}
 <p class="muted" style="margin-bottom:4px">선택한 수업의 기간별 시간표</p><nav class="period-tabs" id="periodTabs" aria-label="수업 기간 선택"></nav>
 <section class="sheet" id="sheet">
 <div class="sheet-title"><span id="sheetClassName" aria-label="반 이름"></span><h2></h2><div id="studentPeriod" class="muted"></div></div>
-<table class="calendar"><colgroup><col class="label-column"><col span="5"></colgroup><thead><tr><th>항목</th><th>월요일</th><th>화요일</th><th>수요일</th><th>목요일</th><th>금요일</th></tr></thead><tbody id="calendar"></tbody></table>
+<aside id="scratchTray"><strong>임시 보관함 · Keywords</strong><p>내용을 드래그해 잠시 보관하고 다시 옮길 수 있습니다.</p><div id="scratchItems"></div></aside><table class="calendar"><colgroup><col class="label-column"><col span="5"></colgroup><thead><tr><th>항목</th><th>월요일</th><th>화요일</th><th>수요일</th><th>목요일</th><th>금요일</th></tr></thead><tbody id="calendar"></tbody></table>
 <p class="help">표 안의 Inclass, Vocab., T-Room 내용을 직접 수정할 수 있습니다. 수정한 내용은 현재 브라우저에 저장됩니다.</p>
 <p id="saveFeedback" role="status" style="text-align:right;font-weight:600"></p><div class="schedule-bottom-actions"><button type="button" id="saveSchedule">시간표 저장</button><button type="button" id="deleteSchedule" class="danger-button">시간표 삭제</button></div>
 </section>
@@ -479,11 +479,18 @@ window.addEventListener("message",event=>{if(event.origin!==location.origin||eve
 function persistArchive(){/* 임시 변경은 저장하지 않습니다. */}
 function vocabFor(index,start){const block=Math.floor(index/5),position=index%5,first=start+block*40;return position===4?"(누적) "+first+"~"+(first+39):(first+position*10)+"~"+(first+position*10+9);}
 function printFit(){const weeks=Math.max($("calendar").querySelectorAll(".date-row").length,1);const lessonRows=$("calendar").querySelectorAll(".lesson-row").length;const body=182, dateHeight=Math.min(4,body/(weeks*5)),lessonHeight=Math.max(1,(body-weeks*dateHeight)/Math.max(lessonRows,1));const root=document.documentElement.style;root.setProperty("--week-height",(body/weeks).toFixed(3)+"mm");root.setProperty("--week-count",String(weeks));root.setProperty("--print-body-height",body+"mm");root.setProperty("--print-table-height","187mm");root.setProperty("--print-date-height",dateHeight.toFixed(3)+"mm");root.setProperty("--print-lesson-height",lessonHeight.toFixed(3)+"mm");root.setProperty("--print-font-size",(lessonHeight<6?5.2:lessonHeight<8?6:7)+"pt");}
-window.getCurrentTeacherSchedule=()=>config?{config:structuredClone(config),cells:structuredClone(cells)}:null;window.clearTeacherSchedule=()=>{config=null;cells={};activePeriod=null;$("calendar").replaceChildren();document.querySelector(".sheet-title h2").textContent="";$("sheetClassName").textContent="";$("studentPeriod").textContent="";};
+window.getCurrentTeacherSchedule=()=>config?{config:structuredClone(config),cells:structuredClone(cells)}:null;window.clearTeacherSchedule=()=>{config=null;scratchDraw();cells={};activePeriod=null;$("calendar").replaceChildren();document.querySelector(".sheet-title h2").textContent="";$("sheetClassName").textContent="";$("studentPeriod").textContent="";};
 window.applySavedTeacherSchedule=(c,rows)=>{c.noVocab=textbookTemplate(c.book||"Inter Bridge 1").noVocab||false;c.hasHomework=!!c.noVocab;config=c;cells=rows;approvedScheduleKey=null;activePeriod=archiveId(c);const savedWindow=availableWindows.find(w=>w.start_date===c.start||w.id===c.windowId);if(savedWindow){$("academyWindow").value=savedWindow.id;$("start").value=savedWindow.start_date||"";$("holidays").value=(savedWindow.holidays||[]).join(",");}$("book").value=c.book||"Inter Bridge 1";$("vocabStart").value=c.vocabStart||1;draw();drawTabs()};
 function save(){/* 저장 버튼을 누르기 전에는 브라우저에 기록하지 않습니다. */}
 function create(tag,cls,text){const el=document.createElement(tag);if(cls)el.className=cls;if(text!==undefined)el.textContent=text;return el;}
 let dragFrom=null;
+const scratchKey=()=>config?"scratch|"+config.className+"|"+config.start:"";
+const scratchRead=()=>{try{return JSON.parse(localStorage.getItem(scratchKey())||"[]")}catch{return []}};
+function scratchWrite(items){localStorage.setItem(scratchKey(),JSON.stringify(items));scratchDraw()}
+function scratchDraw(){const box=$("scratchItems");box.replaceChildren();if(!config)return;const items=scratchRead();if(!items.length)box.textContent="여기에 내용을 놓으세요.";items.forEach((item,i)=>{const el=create("div","scratch-entry");el.draggable=canEditCell();el.textContent=item.field+" · "+item.text;el.addEventListener("dragstart",e=>{if(!canEditCell()){e.preventDefault();return}dragFrom={scratch:i,field:item.field};e.dataTransfer.setData("text/plain","scratch:"+i)});el.addEventListener("dragend",()=>{dragFrom=null});box.append(el)})}
+$("scratchTray").addEventListener("dragover",e=>{if(dragFrom?.date&&canEditCell())e.preventDefault()});
+$("scratchTray").addEventListener("drop",e=>{e.preventDefault();const from=dragFrom;dragFrom=null;if(!from?.date||!canEditCell())return;const value=cells[from.date]?.[from.field];if(!value)return;const items=scratchRead();items.push({field:from.field,text:value});cells[from.date][from.field]="";scratchWrite(items);draw()});
+
 function canEditCell(){return !document.getElementById("approvalStatus")?.textContent.includes("승인 완료");}
 function installCellDrag(td,area,printed,date,field){
  td.classList.add("draggable-lesson");
@@ -501,11 +508,13 @@ function installCellDrag(td,area,printed,date,field){
  td.addEventListener("drop",e=>{
   e.preventDefault();td.classList.remove("drag-over");
   const from=dragFrom;dragFrom=null;
-  if(!from||from.field!==field||from.date===date||!canEditCell()||!cells[date]?.lesson||!cells[from.date]?.lesson)return;
+  if(!from||from.field!==field||!canEditCell()||!cells[date]?.lesson)return;
+  if(Number.isInteger(from.scratch)){const items=scratchRead(),item=items[from.scratch];if(!item)return;const old=cells[date][field]||"";cells[date][field]=item.text;if(old)items[from.scratch]={field,text:old};else items.splice(from.scratch,1);scratchWrite(items);draw();return}
+  if(from.date===date||!cells[from.date]?.lesson)return;
   const value=cells[from.date][field]||"",target=cells[date][field]||"";
   if(!value)return;
-  if(target&&!confirm("이동할 날짜에 이미 내용이 있습니다. 기존 내용을 덮어쓸까요?"))return;
-  cells[date][field]=value;cells[from.date][field]="";draw();
+  if(target&&!confirm("두 날짜의 내용을 서로 교환할까요?"))return;
+  cells[date][field]=value;cells[from.date][field]=target;draw();
  });
 }
 function draw(){
@@ -545,7 +554,7 @@ function draw(){
  }
  $("period").textContent="선생님용 · 수업 기간: "+config.start+" ~ "+config.end+"  |  월~금 수업  |  휴무일 "+config.holidays.length+"일";
  $("studentPeriod").textContent=config.start+" ~ "+config.end;
- printFit();drawTabs();
+ printFit();drawTabs();scratchDraw();
 }
 function readHolidays(){return [...new Set($("holidays").value.split(/[,，\n]+/).map(s=>s.trim()).filter(Boolean))];}
 function refreshSuggestions(){
