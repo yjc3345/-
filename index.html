@@ -375,7 +375,14 @@ html,body{width:auto!important;margin:0!important;padding:0!important}
 /* 교재명 제목 배경은 인쇄와 화면 모두 직각 모서리, 하단 경계선 */
 .sheet-title{border-radius:0!important;border-bottom:1px solid #a9bad0!important;box-sizing:border-box!important}
 @media print{.sheet-title{border-radius:0!important;border-bottom:1px solid #a9bad0!important;box-sizing:border-box!important}}
-#scratchTray{top:var(--keywords-tray-top,230px)!important;transition:top .12s ease-out}@media(max-width:949px){#scratchTray{top:auto!important}}@media print{#scratchTray{display:none!important}}#scratchTrash{margin-top:12px;padding:13px 8px;border:2px dashed #bf5360;border-radius:9px;background:#fff5f5;color:#9b2633;text-align:center;font-size:12px;font-weight:700;cursor:default;user-select:none}#scratchTrash.trash-hover{background:#ffdce1;border-color:#d12036;box-shadow:0 0 0 3px #f7a4af66}@media print{#scratchTrash{display:none!important}}</style></head><body>
+#scratchTray{top:var(--keywords-tray-top,230px)!important;transition:top .12s ease-out}@media(max-width:949px){#scratchTray{top:auto!important}}@media print{#scratchTray{display:none!important}}#scratchTrash{margin-top:12px;padding:13px 8px;border:2px dashed #bf5360;border-radius:9px;background:#fff5f5;color:#9b2633;text-align:center;font-size:12px;font-weight:700;cursor:default;user-select:none}#scratchTrash.trash-hover{background:#ffdce1;border-color:#d12036;box-shadow:0 0 0 3px #f7a4af66}@media print{#scratchTrash{display:none!important}}
+/* 인쇄 시 시간표 마지막 하단 테두리는 주차 구분선과 같은 실선으로 표시 */
+@media print{
+ .calendar{border-bottom:1pt solid #a9bad0!important;border-collapse:collapse!important}
+ .calendar tbody tr:last-child>th,.calendar tbody tr:last-child>td{border-bottom:1pt solid #a9bad0!important}
+ .calendar tbody tr:last-child .entry{border-bottom:0!important}
+}
+</style></head><body>
 <header><strong>✦ 고림파머스어학원 스케줄러</strong><span class="admin-placeholder" id="adminTeacherPicker" hidden style="display:none">관리자용 선생님 선택 <select id="adminTeacherSelect" aria-label="조회할 선생님"><option value="">선생님 선택</option></select></span></header>
 <main class="wrap">
 <section class="controls">
