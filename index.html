@@ -563,7 +563,12 @@ function draw(){
    const tr=create("tr",field==="date"?"date-row":"lesson-row "+field+"-row");
    tr.appendChild(create("th","sidehead",labelText));
    for(let i=0;i<5;i++){
-    const date=dates[i],data=cells[date],outside=local(date)<start||local(date)>end;
+    const date=dates[i],outside=local(date)<start||local(date)>end;
+    const specialNames=JSON.parse($("academyWindow").selectedOptions[0]?.dataset.specialDays||"{}");
+    if(!outside&&Object.hasOwn(specialNames,date)&&!cells[date]?.holiday){
+      cells[date]={special:true,lesson:false,homework:cells[date]?.homework||""};
+    }
+    const data=cells[date];
     const cumulative=field==="vocab"&&data&&data.lesson&&String(data.vocab||"").includes("(누적)");
     const td=create("td",(outside?"off ":"")+(data&&data.holiday?"holiday ":"")+(cumulative?"cumulative ":""));
     if(field==="date")td.appendChild(create("div","celltop",fmt(date)+" ("+["월","화","수","목","금"][i]+")"));
