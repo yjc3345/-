@@ -410,9 +410,9 @@ html,body{width:auto!important;margin:0!important;padding:0!important}
  html,body,main.wrap,.wrap,#sheet,.sheet{height:auto!important;min-height:0!important;max-height:none!important;overflow:visible!important}
  #sheet,.sheet{width:287mm!important;max-width:287mm!important;break-inside:avoid!important;page-break-inside:avoid!important}
  .sheet-title{height:10mm!important;min-height:10mm!important;max-height:10mm!important}
- table.calendar{width:287mm!important;height:var(--print-table-height,164mm)!important;max-height:var(--print-table-height,164mm)!important;table-layout:fixed!important;border-collapse:collapse!important;border:1pt solid #a9bad0!important}
+ table.calendar{width:287mm!important;height:var(--print-table-height,183mm)!important;max-height:var(--print-table-height,183mm)!important;table-layout:fixed!important;border-collapse:collapse!important;border:1pt solid #a9bad0!important}
  .calendar thead{display:none!important}
- .calendar tbody{height:var(--print-body-height,164mm)!important}
+ .calendar tbody{height:var(--print-body-height,183mm)!important}
  table.calendar tbody tr.date-row,table.calendar tbody tr.date-row>th,table.calendar tbody tr.date-row>td{
   height:var(--print-date-height)!important;min-height:var(--print-date-height)!important;max-height:var(--print-date-height)!important;
  }
@@ -565,8 +565,8 @@ function printFit(){
  const lessonRows=$("calendar").querySelectorAll(".lesson-row").length;
  const lessonPerWeek=Math.max(1,Math.round(lessonRows/weeks));
  // 날짜, Voca, T-Room, Homework는 동일한 높이; Inclass만 1.8배.
- // 여유를 남겨 브라우저 인쇄 반올림으로 인한 마지막 행 잘림을 방지.
- const body=164;
+ // A4 인쇄 가능 높이 200mm 중 제목 10mm와 안전 여백 7mm를 제외한 183mm를 사용.
+ const body=183;
  const unitsPerWeek=1+Math.max(0,lessonPerWeek-1)+1.8;
  const unit=body/(weeks*unitsPerWeek);
  const inclass=unit*1.8;
