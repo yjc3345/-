@@ -429,6 +429,8 @@ html,body{width:auto!important;margin:0!important;padding:0!important}
  .calendar .print-value{font-size:var(--print-font-size,6pt)!important;line-height:1.08!important}
  .print-bottom-rule{display:none!important}
 }
+/* 승인 상태 문구는 화면에 표시하지 않고 잠금 판정에만 사용 */
+#approvalStatus{display:none!important}
 </style></head><body>
 <header><strong>✦ 고림파머스어학원 스케줄러</strong><span class="admin-placeholder" id="adminTeacherPicker" hidden style="display:none">관리자용 선생님 선택 <select id="adminTeacherSelect" aria-label="조회할 선생님"><option value="">선생님 선택</option></select></span></header>
 <main class="wrap">
@@ -764,7 +766,7 @@ async function reloadSelectedSchedule(){
  const cells={};for(const r of rows.data||[])cells[r.lesson_date]={inclass:r.inclass||"",troom:r.troom||"",vocab:r.vocab_base||"",homework:r.homework||"",holiday:!!r.is_holiday,special:!r.is_holiday&&Object.hasOwn(JSON.parse(opt.dataset.specialDays||"{}"),r.lesson_date),lesson:!r.is_holiday&&!Object.hasOwn(JSON.parse(opt.dataset.specialDays||"{}"),r.lesson_date)};
  const c={start:p.start_date,end:p.end_date,holidays:p.holidays||[],vocabStart:p.vocab_start||1,book:p.book||document.getElementById("book").value,className:cls,windowId:opt.value,windowLabel:opt.textContent,noVocab:false,hasHomework:false};
  window.applySavedTeacherSchedule?.(c,cells);
- status.textContent=cls+" · 저장된 시간표를 불러왔습니다.";
+ status.textContent="";
  }catch(error){status.textContent="시간표 조회 실패: "+(error.message||error)}
 }
 window.addEventListener("load-saved-schedule",()=>reloadSelectedSchedule());
