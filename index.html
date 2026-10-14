@@ -372,9 +372,9 @@ html,body{width:auto!important;margin:0!important;padding:0!important}
  table.calendar tbody tr.date-row>td:nth-child(5) .celltop{display:block!important;position:static!important;width:100%!important;height:auto!important;min-height:0!important;max-height:none!important;margin:0!important;padding:0!important;background:transparent!important;background-image:none!important;color:#233c60!important;border:0!important;box-shadow:none!important;font-size:9pt!important;font-weight:800!important;line-height:1.2!important;text-align:center!important}
 }
 
-/* 교재명 제목 배경은 인쇄와 화면 모두 직각 모서리 */
-.sheet-title{border-radius:0!important}
-@media print{.sheet-title{border-radius:0!important}}
+/* 교재명 제목 배경은 인쇄와 화면 모두 직각 모서리, 하단 경계선 */
+.sheet-title{border-radius:0!important;border-bottom:1px solid #a9bad0!important;box-sizing:border-box!important}
+@media print{.sheet-title{border-radius:0!important;border-bottom:1px solid #a9bad0!important;box-sizing:border-box!important}}
 </style></head><body>
 <header><strong>✦ 고림파머스어학원 스케줄러</strong><span class="admin-placeholder" id="adminTeacherPicker" hidden style="display:none">관리자용 선생님 선택 <select id="adminTeacherSelect" aria-label="조회할 선생님"><option value="">선생님 선택</option></select></span></header>
 <main class="wrap">
