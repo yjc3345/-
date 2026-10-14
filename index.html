@@ -400,7 +400,7 @@ const templates={
 "Inter B":{kind:"inter",room:"Day "}
 };
 function textbookTemplate(book){
-const n=Number((book.match(/(\\d+)$/)||[])[1]||1);
+const n=Number((book.match(/(\d+)$/)||[])[1]||1);
 if(book.startsWith("Sound Doctor"))return n===1?templates["Sound Doctor 1"]:n===2?templates["Sound Doctor 2"]:templates["Sound Doctor 3~6"];
 if(book.startsWith("Pre Stella A"))return n<=2?templates["Pre A1~A2"]:n===3?templates["Pre A3 (단어시작)"]:templates["Pre A4~Pre B(문법시작)"];
 if(book.startsWith("Pre Stella B"))return templates["Pre A4~Pre B(문법시작)"];
