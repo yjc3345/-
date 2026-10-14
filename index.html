@@ -429,7 +429,7 @@ let cells={}, config=null;
 const key="evo-academy-schedule-v2",archiveKey="evo-academy-schedule-archive-v2";
 let archive={},activePeriod=null,availableWindows=[],dataWindowArchiveIds=new Set();
 const archiveId=c=>(c.className||"Inter Bridge 1")+"|"+c.start;
-try{archive=JSON.parse(localStorage.getItem(archiveKey)||"{}")||{};}catch(e){archive={};}
+archive={};
 const periodLabel=c=>{const a=local(c.start),b=local(c.end);return (a.getFullYear()===b.getFullYear()?"":a.getFullYear()+"년 ")+(a.getMonth()+1)+"월~"+(b.getMonth()+1)+"월";};
 function drawTabs(){
  const names=[...new Set(Object.values(archive).map(x=>x.config.className||"Inter Bridge 1"))];
@@ -464,18 +464,11 @@ const items=Object.entries(archive).filter(([id,item])=>(item.config.className||
   });nav.appendChild(btn);
  }
 }
-function persistArchive(){
- if(!config)return;
- const id=archiveId(config);
- archive[id]={config:structuredClone(config),cells:structuredClone(cells)};
- activePeriod=id;
- try{localStorage.setItem(archiveKey,JSON.stringify(archive));}catch(e){$("message").textContent="지난 스케줄 저장 공간이 부족합니다.";}
- drawTabs();
-}
+function persistArchive(){/* 임시 변경은 저장하지 않습니다. */}
 function vocabFor(index,start){const block=Math.floor(index/5),position=index%5,first=start+block*40;return position===4?"(누적) "+first+"~"+(first+39):(first+position*10)+"~"+(first+position*10+9);}
 function printFit(){const weeks=Math.max($("calendar").querySelectorAll(".date-row").length,1);const lessonRows=$("calendar").querySelectorAll(".lesson-row").length;const body=182, dateHeight=Math.min(4,body/(weeks*5)),lessonHeight=Math.max(1,(body-weeks*dateHeight)/Math.max(lessonRows,1));const root=document.documentElement.style;root.setProperty("--week-height",(body/weeks).toFixed(3)+"mm");root.setProperty("--week-count",String(weeks));root.setProperty("--print-body-height",body+"mm");root.setProperty("--print-table-height","187mm");root.setProperty("--print-date-height",dateHeight.toFixed(3)+"mm");root.setProperty("--print-lesson-height",lessonHeight.toFixed(3)+"mm");root.setProperty("--print-font-size",(lessonHeight<6?5.2:lessonHeight<8?6:7)+"pt");}
 window.getCurrentTeacherSchedule=()=>config?{config:structuredClone(config),cells:structuredClone(cells)}:null;
-function save(){try{localStorage.setItem(key,JSON.stringify({config,cells}));persistArchive();}catch(e){$("message").textContent="저장 공간이 부족하거나 차단되어 변경사항을 저장하지 못했습니다.";}}
+function save(){/* 저장 버튼을 누르기 전에는 브라우저에 기록하지 않습니다. */}
 function create(tag,cls,text){const el=document.createElement(tag);if(cls)el.className=cls;if(text!==undefined)el.textContent=text;return el;}
 function draw(){
  if(!config)return;
@@ -548,7 +541,7 @@ function generate(){
  const holidays=[...new Set(tokens)];
  const vocabStart=Number($("vocabStart").value);
  if(!Number.isSafeInteger(vocabStart)||vocabStart<1||vocabStart>99999){$("message").textContent="단어 시작 번호는 1 이상의 정수로 입력해 주세요.";return;}
- if(config&&activePeriod)persistArchive();
+
  activePeriod=null;cells={};let count=0;let end=start;
  for(let d=local(start),steps=0;count<lessons.length&&steps<365;d.setDate(d.getDate()+1),steps++){
   const day=d.getDay(),date=iso(d);if(day===0||day===6)continue;
@@ -565,7 +558,7 @@ $("print").onclick=()=>{if(!config){$("message").textContent="먼저 스케줄�
 $("reset").onclick=()=>{if(!confirm("직접 수정한 내용을 지우고 기본 진도로 다시 생성할까요?"))return;generate();};
 const now=new Date();
 $("start").value=iso(now);
-try{const stored=JSON.parse(localStorage.getItem(key)||"null");if(stored&&stored.config&&stored.cells&&/^\d{4}-\d{2}-\d{2}$/.test(stored.config.start)){config=stored.config;cells=stored.cells;activePeriod=archiveId(config);if(!archive[activePeriod])persistArchive();$("className").value=config.className||"Inter Bridge 1";$("start").value=config.start;$("vocabStart").value=config.vocabStart||1;$("holidays").value=(config.holidays||[]).join(", ");draw();}}catch(e){}
+try{localStorage.removeItem(key);localStorage.removeItem(archiveKey)}catch(e){}
 $("className").addEventListener("change",drawTabs);
 refreshSuggestions();drawTabs();
 })();
