@@ -632,6 +632,7 @@ function draw(){
  const windowInfo=availableWindows.find(w=>w.id===config.windowId||w.start_date===config.start);
  const specialDates=windowInfo?.special_days||{};
  const blocked=new Set([...(config.holidays||[]),...(windowInfo?.holidays||[]),...Object.keys(specialDates)]);
+ // 관리자 기간의 마지막 날짜까지 빈 날짜도 편집할 수 있도록 보존합니다.
  const occupied=Object.keys(cells).filter(d=>cells[d]?.lesson).sort();
  if(occupied.some(d=>blocked.has(d))){
   const sequence=occupied.map(d=>({...cells[d]}));
@@ -643,7 +644,7 @@ function draw(){
    $("message").textContent="휴무일·기념일을 제외하면 수업일이 부족합니다. 관리자에게 기간 조정을 요청해 주세요.";
   }
  }
- const start=local(config.start),end=local(config.end);
+ const start=local(config.start),end=local(windowInfo?.end_date&&windowInfo.end_date>config.end?windowInfo.end_date:config.end);
  const first=new Date(start);first.setDate(first.getDate()-(first.getDay()+6)%7);
  const last=new Date(end);last.setDate(last.getDate()+(5-last.getDay()+7)%7);
  let cursor=new Date(first),rows=0;
