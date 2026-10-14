@@ -637,7 +637,7 @@ async function reloadSelectedSchedule(){
  const token=window.__classScheduleLoadToken=(window.__classScheduleLoadToken||0)+1;
  status.textContent=cls+" · 저장된 시간표 확인 중...";
  try{
- const result=await db.from("schedule_periods").select("id,start_date,end_date,holidays,vocab_start,approved_at").eq("teacher_id",user.id).eq("start_date",date).eq("class_name",cls).maybeSingle();
+ const result=await db.from("schedule_periods").select("id,start_date,end_date,holidays,vocab_start,approved_at,book").eq("teacher_id",user.id).eq("start_date",date).eq("class_name",cls).maybeSingle();
  if(token!==window.__classScheduleLoadToken||document.getElementById("className").value!==cls||select.value!==opt.value)return;
  if(result.error)throw result.error;
  if(!result.data){status.textContent=cls+" · 이 기간에 저장된 시간표가 없습니다.";window.clearTeacherSchedule?.();return;}
@@ -645,7 +645,7 @@ async function reloadSelectedSchedule(){
  if(token!==window.__classScheduleLoadToken||document.getElementById("className").value!==cls||select.value!==opt.value)return;
  if(rows.error)throw rows.error;
  const cells={};for(const r of rows.data||[])cells[r.lesson_date]={inclass:r.inclass||"",troom:r.troom||"",vocab:r.vocab_base||"",homework:r.homework||"",holiday:!!r.is_holiday,lesson:!r.is_holiday};
- const c={start:p.start_date,end:p.end_date,holidays:p.holidays||[],vocabStart:p.vocab_start||1,book:document.getElementById("book").value,className:cls,windowId:opt.value,windowLabel:opt.textContent,noVocab:false,hasHomework:false};
+ const c={start:p.start_date,end:p.end_date,holidays:p.holidays||[],vocabStart:p.vocab_start||1,book:p.book||document.getElementById("book").value,className:cls,windowId:opt.value,windowLabel:opt.textContent,noVocab:false,hasHomework:false};
  window.applySavedTeacherSchedule?.(c,cells);
  status.textContent=cls+" · 저장된 시간표를 불러왔습니다.";
  }catch(error){status.textContent="시간표 조회 실패: "+(error.message||error)}
@@ -661,7 +661,7 @@ if(!current?.config?.start){status.textContent="먼저 스케줄을 생성해 �
 saveButton.disabled=true;status.textContent="서버에 저장 중...";
 try{
 const c=current.config;if(c.className!==document.getElementById("className").value.trim()){throw new Error("현재 선택한 반과 시간표의 반이 다릅니다. 반을 다시 선택해 주세요.")}let period=await findPeriod(c.start,c.className);
-const fields={teacher_id:user.id,class_name:c.className||"Inter Bridge 1",label:c.start+" ~ "+c.end,start_date:c.start,end_date:c.end,holidays:c.holidays||[],vocab_start:c.vocabStart||1};
+const fields={teacher_id:user.id,class_name:c.className||"Inter Bridge 1",label:c.start+" ~ "+c.end,start_date:c.start,end_date:c.end,holidays:c.holidays||[],vocab_start:c.vocabStart||1,book:c.book||document.getElementById("book").value};
 if(period){const r=await db.from("schedule_periods").update(fields).eq("id",period.id);if(r.error)throw r.error}
 else{const r=await db.from("schedule_periods").insert(fields).select("id").single();if(r.error)throw r.error;period=r.data}
 const old=await db.from("schedule_cells").select("id").eq("period_id",period.id);if(old.error)throw old.error;
@@ -702,7 +702,7 @@ if(!c?.start){approved=false}else{
 const r=await db.from("schedule_periods").select("approved_at").eq("teacher_id",user.id).eq("start_date",c.start).eq("class_name",c.className||"Inter Bridge 1").maybeSingle();
 approved=!!r.data?.approved_at;
 }
-const classLabel=document.getElementById("sheetClassName");if(classLabel)classLabel.textContent=approved&&c?.className?c.className:"";save.disabled=approved;del.disabled=approved;
+const bookPicker=document.getElementById("book");if(bookPicker){bookPicker.disabled=approved;bookPicker.title=approved?"승인된 시간표의 교재명은 변경할 수 없습니다.":"";}const classLabel=document.getElementById("sheetClassName");if(classLabel)classLabel.textContent=approved&&c?.className?c.className:"";save.disabled=approved;del.disabled=approved;
 save.title=del.title=approved?"관리자가 승인한 시간표입니다. 승인 취소 후 수정·삭제할 수 있습니다.":"";
 cal.querySelectorAll("textarea").forEach(t=>t.readOnly=approved);
 const msg=document.getElementById("approvalStatus");msg.textContent=approved?"🔒 관리자 승인 완료 · 수정 및 삭제가 잠겨 있습니다.":"";
