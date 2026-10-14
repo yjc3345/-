@@ -440,6 +440,9 @@ html,body{width:auto!important;margin:0!important;padding:0!important}
 /* 휴무일 날짜 텍스트: 테마색보다 우선하여 빨강 적용 */
 .calendar tr.date-row td .celltop.holiday-date-label,.calendar tr.date-row td.holiday .celltop{color:#c62828!important;-webkit-text-fill-color:#c62828!important;font-weight:800!important}
 @media print{.calendar tr.date-row td .celltop.holiday-date-label,.calendar tr.date-row td.holiday .celltop{color:#c62828!important;-webkit-text-fill-color:#c62828!important;print-color-adjust:exact!important;-webkit-print-color-adjust:exact!important}}
+/* 관리자 미리보기는 편집 도구를 감추고 출력물만 표시 */
+.admin-preview-mode .controls,.admin-preview-mode .schedule-bottom-actions,.admin-preview-mode #scratchTray,.admin-preview-mode #periodTabs,.admin-preview-mode .help,.admin-preview-mode #saveFeedback{display:none!important}
+.admin-preview-mode #sheet{margin-top:0!important}
 </style></head><body>
 <header><strong>✦ 고림파머스어학원 스케줄러</strong><span class="admin-placeholder" id="adminTeacherPicker" hidden style="display:none">관리자용 선생님 선택 <select id="adminTeacherSelect" aria-label="조회할 선생님"><option value="">선생님 선택</option></select></span></header>
 <main class="wrap">
@@ -593,13 +596,14 @@ window.getCurrentTeacherSchedule=()=>config?{config:structuredClone(config),cell
 // 관리자 읽기 전용 미리보기: 교사용 달력과 동일한 렌더링/인쇄 스타일 사용
 window.addEventListener("message",event=>{
  if(event.origin!==location.origin||event.data?.type!=="admin-schedule-preview")return;
- const payload=event.data;
+ const payload=event.data;window.__adminPreviewPayload=payload;
  const w=payload.window||{};
  availableWindows=[{id:w.id||"admin-preview",start_date:w.start_date||payload.period.start_date,end_date:w.end_date||payload.period.end_date,holidays:w.holidays||[],holiday_names:w.holiday_names||{},special_days:w.special_days||{}}];
  const select=$("academyWindow");select.replaceChildren(new Option(w.label||payload.period.label||"관리자 기간",availableWindows[0].id));select.options[0].dataset.holidayNames=JSON.stringify(w.holiday_names||{});select.options[0].dataset.specialDays=JSON.stringify(w.special_days||{});
  const rows={};for(const r of payload.cells||[])rows[r.lesson_date]={inclass:r.inclass||"",troom:r.troom||"",vocab:r.vocab_base||"",homework:r.homework||"",holiday:!!r.is_holiday,lesson:!r.is_holiday&&!!([r.inclass,r.troom,r.vocab_base,r.homework].some(v=>String(v||"").trim()))};
  window.applySavedTeacherSchedule({start:payload.period.start_date,end:w.end_date||payload.period.end_date,windowId:availableWindows[0].id,holidays:w.holidays||[],book:payload.period.book||"Inter Bridge 1",className:payload.period.class_name||"",vocabStart:1},rows);
  document.querySelectorAll("textarea").forEach(el=>{el.readOnly=true});
+ parent.postMessage({type:"admin-schedule-rendered",periodId:payload.period.id},location.origin);
  document.querySelectorAll(".controls,.schedule-bottom-actions,#scratchTray").forEach(el=>el.style.display="none");
 });
 window.applySavedTeacherSchedule=(c,rows)=>{c.noVocab=textbookTemplate(c.book||"Inter Bridge 1").noVocab||false;c.hasHomework=!!c.noVocab;config=c;cells=rows;approvedScheduleKey=null;activePeriod=archiveId(c);const savedWindow=availableWindows.find(w=>w.start_date===c.start||w.id===c.windowId);if(savedWindow){if(savedWindow.end_date&&savedWindow.end_date>c.end)c.end=savedWindow.end_date;$("academyWindow").value=savedWindow.id;$("start").value=savedWindow.start_date||"";$("holidays").value=(savedWindow.holidays||[]).join(",");}$("book").value=c.book||"Inter Bridge 1";$("vocabStart").value=c.vocabStart||1;$("vocabResetDate").value=c.vocabResetDate||"";draw();drawTabs()};
@@ -933,4 +937,10 @@ window.addEventListener("message",function(event){
  if(!Number.isFinite(top))return;
  document.documentElement.style.setProperty("--keywords-tray-top",Math.max(16,Math.min(top,930))+"px");
 });
+
+// 관리자 미리보기는 프레임의 모든 초기화가 끝난 뒤 준비 신호를 보냅니다.
+if(new URLSearchParams(location.search).has("adminPreview")){
+ document.documentElement.classList.add("admin-preview-mode");
+ parent.postMessage({type:"admin-schedule-ready"},location.origin);
+}
 </script></body></html>
