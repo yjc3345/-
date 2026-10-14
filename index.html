@@ -375,7 +375,7 @@ html,body{width:auto!important;margin:0!important;padding:0!important}
 /* 교재명 제목 배경은 인쇄와 화면 모두 직각 모서리, 하단 경계선 */
 .sheet-title{border-radius:0!important;border-bottom:1px solid #a9bad0!important;box-sizing:border-box!important}
 @media print{.sheet-title{border-radius:0!important;border-bottom:1px solid #a9bad0!important;box-sizing:border-box!important}}
-#scratchTray{top:var(--keywords-tray-top,230px)!important;transition:top .12s ease-out}@media(max-width:949px){#scratchTray{top:auto!important}}@media print{#scratchTray{display:none!important}}</style></head><body>
+#scratchTray{top:var(--keywords-tray-top,230px)!important;transition:top .12s ease-out}@media(max-width:949px){#scratchTray{top:auto!important}}@media print{#scratchTray{display:none!important}}#scratchTrash{margin-top:12px;padding:13px 8px;border:2px dashed #bf5360;border-radius:9px;background:#fff5f5;color:#9b2633;text-align:center;font-size:12px;font-weight:700;cursor:default;user-select:none}#scratchTrash.trash-hover{background:#ffdce1;border-color:#d12036;box-shadow:0 0 0 3px #f7a4af66}@media print{#scratchTrash{display:none!important}}</style></head><body>
 <header><strong>✦ 고림파머스어학원 스케줄러</strong><span class="admin-placeholder" id="adminTeacherPicker" hidden style="display:none">관리자용 선생님 선택 <select id="adminTeacherSelect" aria-label="조회할 선생님"><option value="">선생님 선택</option></select></span></header>
 <main class="wrap">
 <section class="controls">
@@ -395,7 +395,7 @@ html,body{width:auto!important;margin:0!important;padding:0!important}
 <p class="muted" style="margin-bottom:4px">선택한 수업의 기간별 시간표</p><nav class="period-tabs" id="periodTabs" aria-label="수업 기간 선택"></nav>
 <section class="sheet" id="sheet">
 <div class="sheet-title"><span id="sheetClassName" aria-label="반 이름"></span><h2></h2><div id="studentPeriod" class="muted"></div></div>
-<aside id="scratchTray"><strong>임시 보관함 · Keywords</strong><p>내용을 드래그해 잠시 보관하고 다시 옮길 수 있습니다.</p><div id="scratchItems"></div></aside><table class="calendar"><colgroup><col class="label-column"><col span="5"></colgroup><thead><tr><th>항목</th><th>월요일</th><th>화요일</th><th>수요일</th><th>목요일</th><th>금요일</th></tr></thead><tbody id="calendar"></tbody></table>
+<aside id="scratchTray"><strong>임시 보관함 · Keywords</strong><p>내용을 드래그해 잠시 보관하고 다시 옮길 수 있습니다.</p><div id="scratchItems"></div><div id="scratchTrash" role="button" tabindex="0" aria-label="보관함 항목을 여기로 드래그하면 삭제" title="보관함 항목을 여기로 드래그하면 삭제">🗑️ 쓰레기통 · 여기에 놓아 삭제</div></aside><table class="calendar"><colgroup><col class="label-column"><col span="5"></colgroup><thead><tr><th>항목</th><th>월요일</th><th>화요일</th><th>수요일</th><th>목요일</th><th>금요일</th></tr></thead><tbody id="calendar"></tbody></table>
 <p class="help">표 안의 Inclass, Vocab., T-Room 내용을 직접 수정할 수 있습니다. 수정한 내용은 현재 브라우저에 저장됩니다.</p>
 <p id="saveFeedback" role="status" style="text-align:right;font-weight:600"></p><div class="schedule-bottom-actions"><button type="button" id="saveSchedule">시간표 저장</button><button type="button" id="deleteSchedule" class="danger-button">시간표 삭제</button></div>
 </section>
@@ -514,6 +514,10 @@ const scratchKey=()=>config?"scratch|"+config.className+"|"+config.start:"";
 const scratchRead=()=>{try{return JSON.parse(localStorage.getItem(scratchKey())||"[]")}catch{return []}};
 function scratchWrite(items){localStorage.setItem(scratchKey(),JSON.stringify(items));scratchDraw()}
 function scratchDraw(){const box=$("scratchItems");box.replaceChildren();if(!config)return;const items=scratchRead();if(!items.length)box.textContent="여기에 내용을 놓으세요.";items.forEach((item,i)=>{const el=create("div","scratch-entry");el.draggable=canEditCell();el.textContent=item.field+" · "+item.text;el.addEventListener("dragstart",e=>{if(!canEditCell()){e.preventDefault();return}dragFrom={scratch:i,field:item.field};e.dataTransfer.setData("text/plain","scratch:"+i)});el.addEventListener("dragend",()=>{dragFrom=null});box.append(el)})}
+const trash=$("scratchTrash");
+trash.addEventListener("dragover",e=>{if(!Number.isInteger(dragFrom?.scratch)||!canEditCell())return;e.preventDefault();e.stopPropagation();e.dataTransfer.dropEffect="move";trash.classList.add("trash-hover")});
+trash.addEventListener("dragleave",()=>trash.classList.remove("trash-hover"));
+trash.addEventListener("drop",e=>{e.preventDefault();e.stopPropagation();trash.classList.remove("trash-hover");const from=dragFrom;dragFrom=null;if(!Number.isInteger(from?.scratch)||!canEditCell())return;const items=scratchRead();if(!items[from.scratch])return;if(!confirm("임시 보관함의 이 항목을 삭제하시겠습니까?"))return;items.splice(from.scratch,1);scratchWrite(items)});
 $("scratchTray").addEventListener("dragover",e=>{if(dragFrom?.date&&canEditCell())e.preventDefault()});
 $("scratchTray").addEventListener("drop",e=>{e.preventDefault();const from=dragFrom;dragFrom=null;if(!from?.date||!canEditCell())return;const value=cells[from.date]?.[from.field];if(!value)return;const items=scratchRead();items.push({field:from.field,text:value});cells[from.date][from.field]="";scratchWrite(items);draw()});
 
