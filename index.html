@@ -448,7 +448,7 @@ function drawTabs(){
  const nav=$("periodTabs");nav.replaceChildren();
  const selectedClass=$("className").value.trim()||"Inter Bridge 1";
 const items=Object.entries(archive).filter(([id,item])=>(item.config.className||"Inter Bridge 1")===selectedClass).sort((a,b)=>a[1].config.start.localeCompare(b[1].config.start));
- for(const w of availableWindows){
+ for(const w of [...availableWindows].sort((a,b)=>(a.start_date||"").localeCompare(b.start_date||""))){
  const archived=items.find(([id,item])=>item.config.windowId===w.id||item.config.start===w.start_date);
  const tab=create("button","period-tab"+((archived&&archived[0]===activePeriod)||(!archived&&$("academyWindow").value===w.id&&!config)?" active":""),w.label);
  tab.type="button";tab.title=w.start_date+" ~ "+w.end_date;
