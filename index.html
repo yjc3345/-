@@ -444,7 +444,7 @@ const items=Object.entries(archive).filter(([id,item])=>(item.config.className||
  tab.onclick=()=>{
  const select=$("academyWindow");select.value=w.id;select.dispatchEvent(new Event("change"));
  if(archived){const [id,item]=archived;activePeriod=id;config=structuredClone(item.config);cells=structuredClone(item.cells);$("book").value=config.book||"Inter Bridge 1";$("vocabStart").value=config.vocabStart||1;draw()}
- else{activePeriod=null;config=null;cells={};$("calendar").replaceChildren();$("studentPeriod").textContent="스케줄 생성하기를 눌러 시간표를 만드세요."}
+ else{activePeriod=null;config=null;cells={};$("calendar").replaceChildren();$("studentPeriod").textContent="저장된 시간표를 확인하는 중...";window.dispatchEvent(new CustomEvent("load-saved-schedule",{detail:{start:w.start_date,end:w.end_date,windowId:w.id,windowLabel:w.label,className:$("className").value}}))}
  drawTabs();
  };nav.append(tab);
  }
@@ -468,6 +468,7 @@ function persistArchive(){/* 임시 변경은 저장하지 않습니다. */}
 function vocabFor(index,start){const block=Math.floor(index/5),position=index%5,first=start+block*40;return position===4?"(누적) "+first+"~"+(first+39):(first+position*10)+"~"+(first+position*10+9);}
 function printFit(){const weeks=Math.max($("calendar").querySelectorAll(".date-row").length,1);const lessonRows=$("calendar").querySelectorAll(".lesson-row").length;const body=182, dateHeight=Math.min(4,body/(weeks*5)),lessonHeight=Math.max(1,(body-weeks*dateHeight)/Math.max(lessonRows,1));const root=document.documentElement.style;root.setProperty("--week-height",(body/weeks).toFixed(3)+"mm");root.setProperty("--week-count",String(weeks));root.setProperty("--print-body-height",body+"mm");root.setProperty("--print-table-height","187mm");root.setProperty("--print-date-height",dateHeight.toFixed(3)+"mm");root.setProperty("--print-lesson-height",lessonHeight.toFixed(3)+"mm");root.setProperty("--print-font-size",(lessonHeight<6?5.2:lessonHeight<8?6:7)+"pt");}
 window.getCurrentTeacherSchedule=()=>config?{config:structuredClone(config),cells:structuredClone(cells)}:null;
+window.applySavedTeacherSchedule=(c,rows)=>{config=c;cells=rows;activePeriod=archiveId(c);$("book").value=c.book||"Inter Bridge 1";$("vocabStart").value=c.vocabStart||1;draw();drawTabs()};
 function save(){/* 저장 버튼을 누르기 전에는 브라우저에 기록하지 않습니다. */}
 function create(tag,cls,text){const el=document.createElement(tag);if(cls)el.className=cls;if(text!==undefined)el.textContent=text;return el;}
 function draw(){
@@ -593,6 +594,17 @@ async function findPeriod(start,className){
 const r=await db.from("schedule_periods").select("id").eq("teacher_id",user.id).eq("start_date",start).eq("class_name",className||"Inter Bridge 1").maybeSingle();
 if(r.error)throw r.error;return r.data;
 }
+window.addEventListener("load-saved-schedule",async e=>{
+const detail=e.detail||{},cls=detail.className;if(!cls)return;
+const result=await db.from("schedule_periods").select("id,start_date,end_date,holidays,vocab_start,approved_at").eq("teacher_id",user.id).eq("start_date",detail.start).eq("class_name",cls).maybeSingle();
+if(result.error){status.textContent="저장된 시간표 조회 실패: "+result.error.message;return}
+if(!result.data){document.getElementById("studentPeriod").textContent="저장된 시간표가 없습니다. 스케줄 생성하기를 눌러주세요.";return}
+const p=result.data,rows=await db.from("schedule_cells").select("lesson_date,inclass,troom,vocab_base,is_holiday").eq("period_id",p.id);
+if(rows.error){status.textContent="시간표 내용 조회 실패: "+rows.error.message;return}
+const cells={};for(const r of rows.data||[])cells[r.lesson_date]={inclass:r.inclass||"",troom:r.troom||"",vocab:r.vocab_base||"",holiday:!!r.is_holiday,lesson:!r.is_holiday};
+const c={start:p.start_date,end:p.end_date,holidays:p.holidays||[],vocabStart:p.vocab_start||1,book:document.getElementById("book").value,className:cls,windowId:detail.windowId,windowLabel:detail.windowLabel,noVocab:false,hasHomework:false};
+window.applySavedTeacherSchedule?.(c,cells);status.textContent="서버에 저장된 시간표를 불러왔습니다.";
+});
 saveButton.onclick=async()=>{
 const current=window.getCurrentTeacherSchedule?.();
 if(!current?.config?.start){status.textContent="먼저 스케줄을 생성해 주세요.";return}
