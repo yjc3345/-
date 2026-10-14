@@ -438,7 +438,7 @@ return out;
 let lessons=makeLessons("Inter Bridge 1");
 let cells={}, config=null;
 const key="evo-academy-schedule-v2",archiveKey="evo-academy-schedule-archive-v2";
-let archive={},activePeriod=null,availableWindows=[],dataWindowArchiveIds=new Set();
+let archive={},activePeriod=null,availableWindows=[],dataWindowArchiveIds=new Set(),scheduleLoadSequence=0;
 const archiveId=c=>(c.className||"Inter Bridge 1")+"|"+c.start;
 archive={};
 const periodLabel=c=>{const a=local(c.start),b=local(c.end);return (a.getFullYear()===b.getFullYear()?"":a.getFullYear()+"년 ")+(a.getMonth()+1)+"월~"+(b.getMonth()+1)+"월";};
@@ -597,7 +597,7 @@ $("reset").onclick=()=>{if(!confirm("직접 수정한 내용을 지우고 기본
 const now=new Date();
 $("start").value=iso(now);
 try{localStorage.removeItem(key);localStorage.removeItem(archiveKey)}catch(e){}
-$("className").addEventListener("change",drawTabs);
+$("className").addEventListener("change",()=>{scheduleLoadSequence++;config=null;cells={};activePeriod=null;$("calendar").replaceChildren();document.querySelector(".sheet-title h2").textContent="";$("studentPeriod").textContent="";$("message").textContent="";drawTabs();const selected=availableWindows.find(w=>w.id===$("academyWindow").value);if(selected&&$("className").value)window.dispatchEvent(new CustomEvent("load-saved-schedule",{detail:{start:selected.start_date,end:selected.end_date,windowId:selected.id,windowLabel:selected.label,className:$("className").value}}));});
 refreshSuggestions();drawTabs();
 })();
 </script><script src="https://cdn.jsdelivr.net/npm/@supabase/supabase-js@2/dist/umd/supabase.min.js"></script><script>
@@ -632,12 +632,12 @@ const r=await db.from("schedule_periods").select("id").eq("teacher_id",user.id).
 if(r.error)throw r.error;return r.data;
 }
 window.addEventListener("load-saved-schedule",async e=>{
-const detail=e.detail||{},cls=detail.className;if(!cls)return;
+const detail=e.detail||{},cls=detail.className;if(!cls)return;const loadToken=++window.__classScheduleLoadToken;
 const result=await db.from("schedule_periods").select("id,start_date,end_date,holidays,vocab_start,approved_at").eq("teacher_id",user.id).eq("start_date",detail.start).eq("class_name",cls).maybeSingle();
-if(result.error){status.textContent="저장된 시간표 조회 실패: "+result.error.message;return}
+if(loadToken!==window.__classScheduleLoadToken||document.getElementById("className").value!==cls||document.getElementById("academyWindow").value!==detail.windowId)return;if(result.error){status.textContent="저장된 시간표 조회 실패: "+result.error.message;return}
 if(!result.data){document.querySelector(".sheet-title h2").textContent="";document.getElementById("studentPeriod").textContent="";return}
 const p=result.data,rows=await db.from("schedule_cells").select("lesson_date,inclass,troom,vocab_base,homework,is_holiday").eq("period_id",p.id);
-if(rows.error){status.textContent="시간표 내용 조회 실패: "+rows.error.message;return}
+if(loadToken!==window.__classScheduleLoadToken||document.getElementById("className").value!==cls||document.getElementById("academyWindow").value!==detail.windowId)return;if(rows.error){status.textContent="시간표 내용 조회 실패: "+rows.error.message;return}
 const cells={};for(const r of rows.data||[])cells[r.lesson_date]={inclass:r.inclass||"",troom:r.troom||"",vocab:r.vocab_base||"",homework:r.homework||"",holiday:!!r.is_holiday,lesson:!r.is_holiday};
 const c={start:p.start_date,end:p.end_date,holidays:p.holidays||[],vocabStart:p.vocab_start||1,book:document.getElementById("book").value,className:cls,windowId:detail.windowId,windowLabel:detail.windowLabel,noVocab:false,hasHomework:false};
 window.applySavedTeacherSchedule?.(c,cells);status.textContent="서버에 저장된 시간표를 불러왔습니다.";
@@ -647,7 +647,7 @@ const current=window.getCurrentTeacherSchedule?.();
 if(!current?.config?.start){status.textContent="먼저 스케줄을 생성해 주세요.";return}
 saveButton.disabled=true;status.textContent="서버에 저장 중...";
 try{
-const c=current.config;let period=await findPeriod(c.start,c.className);
+const c=current.config;if(c.className!==document.getElementById("className").value.trim()){throw new Error("현재 선택한 반과 시간표의 반이 다릅니다. 반을 다시 선택해 주세요.")}let period=await findPeriod(c.start,c.className);
 const fields={teacher_id:user.id,class_name:c.className||"Inter Bridge 1",label:c.start+" ~ "+c.end,start_date:c.start,end_date:c.end,holidays:c.holidays||[],vocab_start:c.vocabStart||1};
 if(period){const r=await db.from("schedule_periods").update(fields).eq("id",period.id);if(r.error)throw r.error}
 else{const r=await db.from("schedule_periods").insert(fields).select("id").single();if(r.error)throw r.error;period=r.data}
