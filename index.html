@@ -375,7 +375,7 @@ html,body{width:auto!important;margin:0!important;padding:0!important}
 /* 교재명 제목 배경은 인쇄와 화면 모두 직각 모서리, 하단 경계선 */
 .sheet-title{border-radius:0!important;border-bottom:1px solid #a9bad0!important;box-sizing:border-box!important}
 @media print{.sheet-title{border-radius:0!important;border-bottom:1px solid #a9bad0!important;box-sizing:border-box!important}}
-</style></head><body>
+#scratchTray{top:var(--keywords-tray-top,230px)!important;transition:top .12s ease-out}@media(max-width:949px){#scratchTray{top:auto!important}}@media print{#scratchTray{display:none!important}}</style></head><body>
 <header><strong>✦ 고림파머스어학원 스케줄러</strong><span class="admin-placeholder" id="adminTeacherPicker" hidden style="display:none">관리자용 선생님 선택 <select id="adminTeacherSelect" aria-label="조회할 선생님"><option value="">선생님 선택</option></select></span></header>
 <main class="wrap">
 <section class="controls">
@@ -790,4 +790,12 @@ select.onchange=()=>{const opt=select.selectedOptions[0];start.value=opt?.datase
 if(!data?.length)message.textContent="관리자가 아직 수업 기간을 등록하지 않았습니다.";else if(availableWindows.length){select.value=availableWindows[0].id;select.dispatchEvent(new Event("change"));drawTabs();}else{message.textContent="등록된 수업 기간이 없습니다. 지난 시간표는 로그인 화면의 지난 스케줄표 조회에서 확인하세요.";drawTabs();}
 }catch(e){console.warn("Academy windows",e)}
 })();
+</script><script>
+window.addEventListener("message",function(event){
+ if(event.origin!==location.origin||event.source!==window.parent)return;
+ if(event.data?.type!=="keywords-tray-position")return;
+ const top=Number(event.data.top);
+ if(!Number.isFinite(top))return;
+ document.documentElement.style.setProperty("--keywords-tray-top",Math.max(16,Math.min(top,930))+"px");
+});
 </script></body></html>
