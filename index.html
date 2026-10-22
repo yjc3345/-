@@ -64,11 +64,11 @@ async function reloadSelectedSchedule(){
  status.textContent=cls+" · 저장된 시간표 확인 중...";
  try{
  const result=await db.from("schedule_periods").select("id,start_date,end_date,holidays,vocab_start,approved_at,book").eq("teacher_id",user.id).eq("start_date",date).eq("class_name",cls).maybeSingle();
- if(token!==window.__classScheduleLoadToken||document.getElementById("className").value!==cls||select.value!==opt.value)return;
+ if(token!==window.__classScheduleLoadToken||document.getElementById("className").value.trim()!==cls||select.value!==opt.value)return;
  if(result.error)throw result.error;
  if(!result.data){status.textContent=cls+" · 이 기간에 저장된 시간표가 없습니다.";window.clearTeacherSchedule?.();return;}
  const p=result.data,rows=await db.from("schedule_cells").select("lesson_date,inclass,troom,vocab_base,homework,is_holiday").eq("period_id",p.id);
- if(token!==window.__classScheduleLoadToken||document.getElementById("className").value!==cls||select.value!==opt.value)return;
+ if(token!==window.__classScheduleLoadToken||document.getElementById("className").value.trim()!==cls||select.value!==opt.value)return;
  if(rows.error)throw rows.error;
  const cells={};for(const r of rows.data||[])cells[r.lesson_date]={inclass:r.inclass||"",troom:r.troom||"",vocab:r.vocab_base||"",homework:r.homework||"",holiday:!!r.is_holiday,special:!r.is_holiday&&Object.hasOwn(JSON.parse(opt.dataset.specialDays||"{}"),r.lesson_date),lesson:!r.is_holiday&&!!((r.inclass||"").trim()||(r.troom||"").trim()||(r.vocab_base||"").trim()||(r.homework||"").trim())};
  const c={start:p.start_date,end:p.end_date,holidays:p.holidays||[],vocabStart:p.vocab_start||1,book:p.book||document.getElementById("book").value,className:cls,windowId:opt.value,windowLabel:opt.textContent,noVocab:false,hasHomework:false};
@@ -93,7 +93,7 @@ const c=current.config;if(c.className!==document.getElementById("className").val
 const rows=Object.entries(current.cells||{}).map(([date,v])=>({lesson_date:date,inclass:v.inclass||"",troom:v.troom||"",vocab_base:v.vocab||"",homework:v.homework||"",is_holiday:!!v.holiday}));
 const saved=await db.rpc("save_teacher_schedule_atomic",{p_class_name:c.className,p_start:c.start,p_end:c.end,p_holidays:c.holidays||[],p_vocab_start:c.vocabStart||1,p_book:c.book||document.getElementById("book").value,p_cells:rows});
 if(saved.error)throw saved.error;
-status.textContent="시간표가 서버에 저장됐습니다. 관리자가 조회할 수 있어요.";
+status.textContent="시간표가 서버에 저장됐습니다.";window.dispatchEvent(new Event("teacher-schedule-loaded"));
 }catch(e){status.textContent="저장 실패: "+e.message}finally{saveButton.disabled=false}
 };
 deleteButton.onclick=async()=>{
@@ -125,13 +125,13 @@ try{
 const c=window.getCurrentTeacherSchedule?.()?.config;
 if(!c?.start){approved=false}else{
 const r=await db.from("schedule_periods").select("approved_at").eq("teacher_id",user.id).eq("start_date",c.start).eq("class_name",c.className||"Inter Bridge 1").maybeSingle();
-approved=!!r.data?.approved_at;
+if(r.error)throw r.error;const latest=window.getCurrentTeacherSchedule?.()?.config;if(!latest||latest.start!==c.start||latest.className!==c.className)return;approved=!!r.data?.approved_at;
 }
 const bookPicker=document.getElementById("book");if(bookPicker){bookPicker.disabled=approved;bookPicker.title=approved?"승인된 시간표의 교재명은 변경할 수 없습니다.":"";}const classLabel=document.getElementById("sheetClassName");if(classLabel)classLabel.textContent=approved&&c?.className?c.className:"";save.disabled=approved;del.disabled=approved;
 save.title=del.title=approved?"관리자가 승인한 시간표입니다. 승인 취소 후 수정·삭제할 수 있습니다.":"";
 cal.querySelectorAll("textarea").forEach(t=>t.readOnly=approved);
 const msg=document.getElementById("approvalStatus");msg.textContent=approved?"🔒 관리자 승인 완료 · 수정 및 삭제가 잠겨 있습니다.":"";
-}catch(e){console.warn("Approval status",e)}finally{checking=false}
+}catch(e){console.warn("Approval status",e);save.disabled=true;del.disabled=true;cal.querySelectorAll("textarea").forEach(t=>t.readOnly=true);const msg=document.getElementById("approvalStatus");if(msg)msg.textContent="승인 상태를 확인할 수 없어 편집을 잠시 제한했습니다. 새로고침 후 다시 확인해 주세요.";}finally{checking=false}
 }
 const status=document.createElement("p");status.id="approvalStatus";status.style.cssText="text-align:right;font-weight:700;color:#b45309";document.querySelector(".schedule-bottom-actions")?.before(status);
 const observer=new MutationObserver(()=>{clearTimeout(window.__approvalTimer);window.__approvalTimer=setTimeout(check,250)});
