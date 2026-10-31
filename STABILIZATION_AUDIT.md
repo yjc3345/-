@@ -27,3 +27,16 @@ Production `main`: unchanged.
 - Implement verified fixes in this branch; review before merging into `main`.
 
 Status: **audit in progress; not production-ready**.
+
+## Live Supabase read-only audit — 2026-10-31
+Project: `Evo AI Academy` (`eovntwuvjzvnztyxzwer`), healthy at inspection.
+
+- RLS is enabled on all five inspected tables: schedule_periods, schedule_cells, staff_profiles, teacher_classes, academy_schedule_windows.
+- Teacher save RPC is SECURITY DEFINER but explicitly requires `auth.uid()` and a staff profile without mandatory password change; it locks a matching period row and refuses approved schedules.
+- Both schedule periods and cells have approval-protection triggers. This provides database-level protection in addition to UI locks, although authenticated behavioral tests are still needed.
+- `schedule_cells.period_id` references `schedule_periods.id ON DELETE CASCADE`; cascading deletion is configured.
+- Security advisor flagged 8 SECURITY DEFINER functions executable by `anon`, 8 executable by `authenticated` (some intentionally needed), and disabled leaked-password protection. Review execute privileges function by function; do not blanket revoke authenticated access.
+- Multiple overlapping approval triggers exist. Verify trigger order and behavior with test data before consolidating.
+- No SQL writes, policy changes, authentication changes, or production deployments performed.
+
+Status: database structural inspection completed; integration tests and remediation pending.
