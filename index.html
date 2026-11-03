@@ -118,9 +118,9 @@ setTimeout(()=>location.reload(),700);
 const db=supabase.createClient("https://eovntwuvjzvnztyxzwer.supabase.co","sb_publishable_XMxCvN3wguCsjUY-6GrR2g_HidFJtoc");
 const {data:{user}}=await db.auth.getUser();if(!user)return;
 const save=document.getElementById("saveSchedule"),del=document.getElementById("deleteSchedule"),cal=document.getElementById("calendar");
-let approved=false,checking=false;
+let approved=false,checking=false,recheckPending=false;
 async function check(){
-if(checking)return;checking=true;
+if(checking){recheckPending=true;return;}checking=true;
 try{
 const c=window.getCurrentTeacherSchedule?.()?.config;
 if(!c?.start){approved=false}else{
@@ -131,7 +131,7 @@ const bookPicker=document.getElementById("book");if(bookPicker){bookPicker.disab
 save.title=del.title=approved?"관리자가 승인한 시간표입니다. 승인 취소 후 수정·삭제할 수 있습니다.":"";
 cal.querySelectorAll("textarea").forEach(t=>t.readOnly=approved);
 const msg=document.getElementById("approvalStatus");msg.textContent=approved?"🔒 관리자 승인 완료 · 수정 및 삭제가 잠겨 있습니다.":"";
-}catch(e){console.warn("Approval status",e);save.disabled=true;del.disabled=true;cal.querySelectorAll("textarea").forEach(t=>t.readOnly=true);const msg=document.getElementById("approvalStatus");if(msg)msg.textContent="승인 상태를 확인할 수 없어 편집을 잠시 제한했습니다. 새로고침 후 다시 확인해 주세요.";}finally{checking=false}
+}catch(e){console.warn("Approval status",e);save.disabled=true;del.disabled=true;cal.querySelectorAll("textarea").forEach(t=>t.readOnly=true);const msg=document.getElementById("approvalStatus");if(msg)msg.textContent="승인 상태를 확인할 수 없어 편집을 잠시 제한했습니다. 새로고침 후 다시 확인해 주세요.";}finally{checking=false;if(recheckPending){recheckPending=false;void check();}}
 }
 const status=document.createElement("p");status.id="approvalStatus";status.style.cssText="text-align:right;font-weight:700;color:#b45309";document.querySelector(".schedule-bottom-actions")?.before(status);
 const observer=new MutationObserver(()=>{clearTimeout(window.__approvalTimer);window.__approvalTimer=setTimeout(check,250)});
