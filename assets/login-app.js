@@ -46,7 +46,7 @@ $("scheduleTab").onclick=()=>{if(current?.must_change_password)return;show("sche
 $("adminTab").onclick=()=>{if(current?.role!=="admin"||current.must_change_password)return;const opening=$("adminPanel").classList.contains("hidden");show("schedulePanel",!opening);show("historyPanel",false);show("adminPanel",opening);show("passwordArea",false);$("adminTab").textContent=opening?"시간표로 돌아가기":"관리자"};
 $("passwordTab").onclick=()=>{show("schedulePanel",false);show("historyPanel",false);show("adminPanel",false);show("passwordArea",true)};
 $("logout").onclick=async()=>{await client.auth.signOut();await load()};
-let historyPeriods=[];let historyWindows=[];let historyPreviewCleanup=null;
+let historyPeriods=[];let historyWindows=[];let historyPreviewCleanup=null;let historyTeachers=new Map();
 async function openHistory(){
 if(!current||current.must_change_password)return;
 show("schedulePanel",false);show("adminPanel",false);show("historyPanel",true);msg("historyMessage","불러오는 중...");
@@ -54,6 +54,13 @@ const [periodsResult,windowsResult]=await Promise.all([client.from("schedule_per
  if(periodsResult.error||windowsResult.error){msg("historyMessage",(periodsResult.error||windowsResult.error).message);return}
  historyWindows=windowsResult.data||[];const existingWindows=new Set(historyWindows.map(w=>w.start_date+"|"+w.end_date));
  historyPeriods=(periodsResult.data||[]).filter(p=>(current.role==="admin"||p.teacher_id===current.user_id)&&existingWindows.has(p.start_date+"|"+p.end_date));
+ const teacherPicker=$("historyTeacher");teacherPicker.replaceChildren(new Option("전체 선생님",""));
+ historyTeachers=new Map();
+ if(current.role==="admin"){
+  const {data:staff,error:staffError}=await client.from("staff_profiles").select("user_id,display_name").order("display_name");
+  if(staffError){msg("historyMessage","선생님 목록 조회 실패: "+staffError.message);return}
+  for(const person of staff||[]){historyTeachers.set(person.user_id,person.display_name);if(historyPeriods.some(p=>p.teacher_id===person.user_id))teacherPicker.add(new Option(person.display_name,person.user_id))}
+ }
  const select=$("historyClass");select.replaceChildren(new Option("전체 반",""));
 for(const name of [...new Set(historyPeriods.map(p=>p.class_name||"미지정"))])select.add(new Option(name,name));
  const periodSelect=$("historyWindow");periodSelect.replaceChildren(new Option("전체 기간",""));const availableKeys=new Set(historyPeriods.map(p=>p.start_date+"|"+p.end_date));for(const w of (windowsResult.data||[]).filter(w=>availableKeys.has(w.start_date+"|"+w.end_date)).sort((a,b)=>b.start_date.localeCompare(a.start_date))){periodSelect.add(new Option((w.label?w.label+" · ":"")+w.start_date+" ~ "+w.end_date,w.start_date+"|"+w.end_date))}
@@ -83,8 +90,8 @@ async function viewHistory(p){
  historyPreviewCleanup=()=>{window.removeEventListener("message",listener);frame.remove()};
  frame.src="./?adminPreview=1&history=1&style=v126";
 }
-function renderHistory(){if(historyPreviewCleanup){historyPreviewCleanup();historyPreviewCleanup=null}const box=$("historyList");box.replaceChildren();$("historyDetail").replaceChildren();const cls=$("historyClass").value,period=$("historyWindow").value;const items=historyPeriods.filter(p=>(!cls||(p.class_name||"미지정")===cls)&&(!period||p.start_date+"|"+p.end_date===period));msg("historyMessage",items.length?"저장된 시간표 "+items.length+"개":"조회 가능한 시간표가 없습니다.");for(const p of items){const row=document.createElement("div");row.className="staff";const label=document.createElement("span");label.textContent=(p.class_name||"미지정")+" · "+(p.label||"")+" ("+p.start_date+" ~ "+p.end_date+")";const btn=document.createElement("button");btn.textContent="조회";btn.onclick=()=>viewHistory(p);row.append(label,btn);box.append(row)}}
-$("historyClass").onchange=renderHistory;$("historyWindow").onchange=renderHistory;
+function renderHistory(){if(historyPreviewCleanup){historyPreviewCleanup();historyPreviewCleanup=null}const box=$("historyList");box.replaceChildren();$("historyDetail").replaceChildren();const cls=$("historyClass").value,period=$("historyWindow").value,teacher=current.role==="admin"?$("historyTeacher").value:"";const items=historyPeriods.filter(p=>(!teacher||p.teacher_id===teacher)&&(!cls||(p.class_name||"미지정")===cls)&&(!period||p.start_date+"|"+p.end_date===period));msg("historyMessage",items.length?"저장된 시간표 "+items.length+"개":"조회 가능한 시간표가 없습니다.");for(const p of items){const row=document.createElement("div");row.className="staff";const label=document.createElement("span");label.textContent=(current.role==="admin"?(historyTeachers.get(p.teacher_id)||"선생님")+" · ":"")+(p.class_name||"미지정")+" · "+(p.label||"")+" ("+p.start_date+" ~ "+p.end_date+")";const btn=document.createElement("button");btn.textContent="조회";btn.onclick=()=>viewHistory(p);row.append(label,btn);box.append(row)}}
+$("historyClass").onchange=renderHistory;$("historyWindow").onchange=renderHistory;$("historyTeacher").onchange=renderHistory;
 $("historyButton").onclick=openHistory;$("historyBack").onclick=()=>{show("historyPanel",false);show("schedulePanel",true)};
 async function adminCall(payload){
  const {data:{session}}=await client.auth.getSession();
