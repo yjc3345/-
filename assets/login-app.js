@@ -138,12 +138,32 @@ for(const week of dates){
 }
 approval.onclick=async()=>{const selected=data.find(p=>p.id===choose.value);if(!selected)return;const next=selected.approved_at?null:new Date().toISOString();if(!confirm(next?"이 시간표를 승인하고 선생님의 수정·삭제를 잠글까요?":"승인을 취소하고 선생님의 수정·삭제를 허용할까요?"))return;const result=await client.from("schedule_periods").update({approved_at:next}).eq("id",selected.id);if(result.error){alert(result.error.message);return}selected.approved_at=next;await render()};category.onchange=async()=>{fillPeriods();await render()};choose.onchange=render;await render();
 };
+const recommendedPublicHolidays={
+2026:{"2026-01-01":"신정","2026-02-16":"설날 연휴","2026-02-17":"설날","2026-02-18":"설날 연휴","2026-03-02":"삼일절 대체공휴일","2026-05-01":"노동절","2026-05-05":"어린이날","2026-05-25":"부처님오신날 대체공휴일","2026-06-03":"지방선거일","2026-07-17":"제헌절","2026-08-17":"광복절 대체공휴일","2026-09-24":"추석 연휴","2026-09-25":"추석 연휴","2026-10-05":"개천절 대체공휴일","2026-10-09":"한글날","2026-12-25":"성탄절"},
+2027:{"2027-01-01":"신정","2027-02-08":"설날 연휴","2027-02-09":"설날 대체공휴일","2027-03-01":"삼일절","2027-05-03":"노동절 대체공휴일","2027-05-05":"어린이날","2027-05-13":"부처님오신날","2027-07-19":"제헌절 대체공휴일","2027-08-16":"광복절 대체공휴일","2027-09-14":"추석 연휴","2027-09-15":"추석","2027-09-16":"추석 연휴","2027-10-04":"개천절 대체공휴일","2027-10-11":"한글날 대체공휴일","2027-12-27":"성탄절 대체공휴일"}
+};
+function renderRecommendedHolidays(){
+ const box=$("recommendedHolidayChips");if(!box)return;
+ box.replaceChildren();
+ const start=$("windowStart").value,end=recommendedEnd||$("windowEnd").value;
+ if(!start||!end)return;
+ const holidays=Object.entries(recommendedPublicHolidays).flatMap(([,dates])=>Object.entries(dates)).filter(([date])=>date>=start&&date<=end).sort((a,b)=>a[0].localeCompare(b[0]));
+ if(!holidays.length){const p=document.createElement("span");p.className="hint";p.textContent="이 기간에 등록된 추천 공휴일이 없습니다.";box.append(p);return}
+ for(const [date,name] of holidays){
+  const button=document.createElement("button");button.type="button";button.className="secondary";
+  const selected=chosenHolidays.has(date);
+  button.textContent=(selected?"✓ ":"+ ")+date+" · "+name;
+  button.disabled=selected;
+  button.onclick=()=>{chosenHolidays.set(date,name);renderHolidays();updateEndRecommendation()};
+  box.append(button);
+ }
+}
 const chosenHolidays=new Map(),chosenSpecials=new Map();
 let recommendedEnd="";
 function updateEndRecommendation(){
  const start=$("windowStart").value,info=$("windowEndRecommendation"),apply=$("applyRecommendedEnd");
  recommendedEnd="";apply.hidden=true;
- if(!start){info.textContent="시작일을 선택하면 25회 수업 기준 종료일을 추천합니다.";return}
+ if(!start){info.textContent="시작일을 선택하면 25회 수업 기준 종료일을 추천합니다.";renderRecommendedHolidays();return}
  const blocked=new Set([...chosenHolidays.keys(),...chosenSpecials.keys()]);
  const day=new Date(start+"T12:00:00");
  if(Number.isNaN(day.getTime()))return;
@@ -156,27 +176,27 @@ function updateEndRecommendation(){
  }
  if(!recommendedEnd){info.textContent="25회 수업 종료일을 계산하지 못했습니다.";return}
  const current=$("windowEnd").value;
- info.textContent="25회 수업 기준 추천 종료일: "+recommendedEnd+" (월~금, 휴무일·기념일 제외)"+(current&&current!==recommendedEnd?" · 현재 입력한 종료일은 유지됩니다.":"");
- apply.hidden=current===recommendedEnd;
+ info.textContent="25회 수업 기준 추천 종료일: "+recommendedEnd+" (월~금, 휴무일·행사일정 제외)"+(current&&current!==recommendedEnd?" · 현재 입력한 종료일은 유지됩니다.":"");
+ apply.hidden=current===recommendedEnd;renderRecommendedHolidays();
 }
 $("windowStart").addEventListener("change",updateEndRecommendation);
 $("windowEnd").addEventListener("change",updateEndRecommendation);
 $("applyRecommendedEnd").onclick=()=>{if(recommendedEnd){$("windowEnd").value=recommendedEnd;updateEndRecommendation()}};
 
-function renderHolidays(){const box=$("holidayChips");box.replaceChildren();for(const [date,name] of [...chosenHolidays].sort((a,b)=>a[0].localeCompare(b[0]))){const btn=document.createElement("button");btn.type="button";btn.className="secondary";btn.textContent=date+" · "+name+" ×";btn.title="휴무일 삭제";btn.onclick=()=>{chosenHolidays.delete(date);renderHolidays();updateEndRecommendation()};box.append(btn)}}
+function renderHolidays(){const box=$("holidayChips");box.replaceChildren();for(const [date,name] of [...chosenHolidays].sort((a,b)=>a[0].localeCompare(b[0]))){const btn=document.createElement("button");btn.type="button";btn.className="secondary";btn.textContent=date+" · "+name+" ×";btn.title="휴무일 삭제";btn.onclick=()=>{chosenHolidays.delete(date);renderHolidays();updateEndRecommendation()};box.append(btn)}renderRecommendedHolidays()}
 $("addHoliday").onclick=()=>{const date=$("holidayPicker").value,start=$("windowStart").value,end=$("windowEnd").value;if(!date){msg("windowMessage","달력에서 휴무일을 선택해 주세요.");return}if(!start||date<start){msg("windowMessage","휴무일은 시작일 이후 날짜로 선택해 주세요.");return}chosenHolidays.set(date,$("holidayName").value.trim()||"휴무일");$("holidayPicker").value="";$("holidayName").value="";renderHolidays();updateEndRecommendation();msg("windowMessage","")};
 let editingWindowId=null;
 function resetWindowEditor(){editingWindowId=null;$("windowForm").reset();chosenHolidays.clear();chosenSpecials.clear();renderHolidays();renderSpecials();updateEndRecommendation();$("windowSubmit").textContent="기간 등록";$("cancelWindowEdit").hidden=true}
 $("cancelWindowEdit").onclick=()=>{resetWindowEditor();msg("windowMessage","수정을 취소했습니다.")};
 function renderSpecials(){const box=$("specialChips");box.replaceChildren();for(const [date,name] of chosenSpecials){const b=document.createElement("button");b.type="button";b.className="secondary";b.textContent=date+" · "+name+" ×";b.onclick=()=>{chosenSpecials.delete(date);renderSpecials();updateEndRecommendation()};box.append(b)}}
-$("addSpecial").onclick=()=>{const d=$("specialPicker").value,n=$("specialName").value.trim();if(!d||!n){msg("windowMessage","기념일 날짜와 이름을 입력해 주세요.");return}chosenSpecials.set(d,n);renderSpecials();updateEndRecommendation();$("specialPicker").value="";$("specialName").value=""};
+$("addSpecial").onclick=()=>{const d=$("specialPicker").value,n=$("specialName").value.trim();if(!d||!n){msg("windowMessage","행사 날짜와 이름을 입력해 주세요.");return}chosenSpecials.set(d,n);renderSpecials();updateEndRecommendation();$("specialPicker").value="";$("specialName").value=""};
 async function loadWindows(){
 const {data,error}=await client.from("academy_schedule_windows").select("*").order("start_date",{ascending:false});
 const box=$("windowList");box.replaceChildren();if(error){msg("windowMessage",error.message);return}
-for(const w of data||[]){const row=document.createElement("div");row.className="staff window-list-row";const label=document.createElement("strong");label.textContent=w.label+" · 시작일 "+(w.start_date||"미지정")+" · 종료일 "+w.end_date+" · 휴무일 "+(w.holidays||[]).length+"일 · 기념일 "+Object.keys(w.special_days||{}).length+"일";const edit=document.createElement("button");edit.type="button";edit.className="secondary";edit.textContent="수정";edit.onclick=()=>{editingWindowId=w.id;$("windowLabel").value=w.label||"";$("windowStart").value=w.start_date||"";$("windowEnd").value=w.end_date||"";chosenHolidays.clear();for(const d of w.holidays||[])chosenHolidays.set(d,w.holiday_names?.[d]||"휴무일");renderHolidays();chosenSpecials.clear();for(const [d,n] of Object.entries(w.special_days||{}))chosenSpecials.set(d,n);renderSpecials();updateEndRecommendation();$("windowSubmit").textContent="수정 저장";$("cancelWindowEdit").hidden=false;msg("windowMessage",w.label+" 기간을 수정 중입니다.");$("windowForm").scrollIntoView({behavior:"smooth",block:"start"})};
+for(const w of data||[]){const row=document.createElement("div");row.className="staff window-list-row";const label=document.createElement("strong");label.textContent=w.label+" · 시작일 "+(w.start_date||"미지정")+" · 종료일 "+w.end_date+" · 휴무일 "+(w.holidays||[]).length+"일 · 행사일정 "+Object.keys(w.special_days||{}).length+"일";const edit=document.createElement("button");edit.type="button";edit.className="secondary";edit.textContent="수정";edit.onclick=()=>{editingWindowId=w.id;$("windowLabel").value=w.label||"";$("windowStart").value=w.start_date||"";$("windowEnd").value=w.end_date||"";chosenHolidays.clear();for(const d of w.holidays||[])chosenHolidays.set(d,w.holiday_names?.[d]||"휴무일");renderHolidays();chosenSpecials.clear();for(const [d,n] of Object.entries(w.special_days||{}))chosenSpecials.set(d,n);renderSpecials();updateEndRecommendation();$("windowSubmit").textContent="수정 저장";$("cancelWindowEdit").hidden=false;msg("windowMessage",w.label+" 기간을 수정 중입니다.");$("windowForm").scrollIntoView({behavior:"smooth",block:"start"})};
 const del=document.createElement("button");del.type="button";del.className="secondary";del.textContent="삭제";del.onclick=async()=>{if(!confirm(w.label+" 기간을 삭제할까요?"))return;const r=await client.from("academy_schedule_windows").delete().eq("id",w.id);msg("windowMessage",r.error?r.error.message:"기간을 삭제했습니다.");if(!r.error)loadWindows()};const actions=document.createElement("div");actions.className="window-actions";actions.append(edit,del);row.append(label,actions);box.append(row)}
 }
-$("windowForm").onsubmit=async e=>{e.preventDefault();const label=$("windowLabel").value.trim(),start=$("windowStart").value;const end=$("windowEnd").value;const holidays=[...chosenHolidays.keys()].sort();const holiday_names=Object.fromEntries(chosenHolidays);if(holidays.some(v=>v<start||v>end)){msg("windowMessage","선택한 휴무일이 기간 밖에 있습니다.");return;}if(end<start){msg("windowMessage","마지막 날짜는 시작일보다 빠를 수 없습니다.");return;}const special_days=Object.fromEntries(chosenSpecials);if(Object.keys(special_days).some(d=>d<start||d>end||holidays.includes(d))){msg("windowMessage","기념일이 기간 밖이거나 휴무일과 겹칩니다.");return}const payload={label,start_date:start,end_date:end,holidays,holiday_names,special_days};const wasEditing=!!editingWindowId;const r=wasEditing?await client.from("academy_schedule_windows").update(payload).eq("id",editingWindowId):await client.from("academy_schedule_windows").insert(payload);msg("windowMessage",r.error?r.error.message:wasEditing?"기간 수정이 저장됐습니다.":"기간이 등록됐습니다.");if(!r.error){resetWindowEditor();await loadWindows();await sendScheduleWindows()}};
+$("windowForm").onsubmit=async e=>{e.preventDefault();const label=$("windowLabel").value.trim(),start=$("windowStart").value;const end=$("windowEnd").value;const holidays=[...chosenHolidays.keys()].sort();const holiday_names=Object.fromEntries(chosenHolidays);if(holidays.some(v=>v<start||v>end)){msg("windowMessage","선택한 휴무일이 기간 밖에 있습니다.");return;}if(end<start){msg("windowMessage","마지막 날짜는 시작일보다 빠를 수 없습니다.");return;}const special_days=Object.fromEntries(chosenSpecials);if(Object.keys(special_days).some(d=>d<start||d>end||holidays.includes(d))){msg("windowMessage","행사일정이 기간 밖이거나 휴무일과 겹칩니다.");return}const payload={label,start_date:start,end_date:end,holidays,holiday_names,special_days};const wasEditing=!!editingWindowId;const r=wasEditing?await client.from("academy_schedule_windows").update(payload).eq("id",editingWindowId):await client.from("academy_schedule_windows").insert(payload);msg("windowMessage",r.error?r.error.message:wasEditing?"기간 수정이 저장됐습니다.":"기간이 등록됐습니다.");if(!r.error){resetWindowEditor();await loadWindows();await sendScheduleWindows()}};
 document.querySelector('[data-pane="windows"]').addEventListener("click",loadWindows);
 load();
 })();
