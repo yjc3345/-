@@ -50,21 +50,15 @@ let historyPeriods=[];
 async function openHistory(){
 if(!current||current.must_change_password)return;
 show("schedulePanel",false);show("adminPanel",false);show("historyPanel",true);msg("historyMessage","불러오는 중...");
-const [windowsResult,periodsResult]=await Promise.all([
- client.from("academy_schedule_windows").select("id,start_date,end_date").order("start_date",{ascending:false}),
- client.from("schedule_periods").select("id,label,start_date,end_date,class_name,teacher_id").order("start_date",{ascending:false})
-]);
-if(windowsResult.error||periodsResult.error){msg("historyMessage",(windowsResult.error||periodsResult.error).message);return}
-const windows=windowsResult.data||[],recent=windows.slice(0,6),old=windows.slice(6);
-const oldStarts=new Set(old.map(w=>w.start_date)),recentStarts=new Set(recent.map(w=>w.start_date));
-const oldestRecent=recent.length?recent[recent.length-1].start_date:null;
-historyPeriods=(periodsResult.data||[]).filter(p=>(current.role==="admin"||p.teacher_id===current.user_id)&&(oldStarts.has(p.start_date)||(!recentStarts.has(p.start_date)&&oldestRecent&&p.start_date<oldestRecent)));
-const select=$("historyClass");select.replaceChildren(new Option("전체 반",""));
+const {data:allPeriods,error:periodsError}=await client.from("schedule_periods").select("id,label,start_date,end_date,class_name,teacher_id").order("start_date",{ascending:false});
+ if(periodsError){msg("historyMessage",periodsError.message);return}
+ historyPeriods=(allPeriods||[]).filter(p=>current.role==="admin"||p.teacher_id===current.user_id);
+ const select=$("historyClass");select.replaceChildren(new Option("전체 반",""));
 for(const name of [...new Set(historyPeriods.map(p=>p.class_name||"미지정"))])select.add(new Option(name,name));
 renderHistory();
 }
 async function viewHistory(p){const box=$("historyDetail");box.replaceChildren();const heading=document.createElement("h3");heading.textContent=(p.class_name||"수업")+" · "+p.start_date+" ~ "+p.end_date;box.append(heading);const {data,error}=await client.from("schedule_cells").select("lesson_date,inclass,vocab_base,troom,homework,is_holiday").eq("period_id",p.id).order("lesson_date");if(error){const note=document.createElement("p");note.textContent=error.message;box.append(note);return}const textbookTitle=document.createElement("h3");textbookTitle.className="admin-textbook-title";box.append(textbookTitle);const table=document.createElement("table");table.className="teacher-table";const head=document.createElement("tr");for(const name of ["날짜","Inclass","Vocab.","T-Room"]){const th=document.createElement("th");th.textContent=name;head.append(th)}table.append(head);for(const c of data||[]){const tr=document.createElement("tr");for(const value of [c.lesson_date,c.is_holiday?"휴무":c.inclass,c.is_holiday?"":c.vocab_base,c.is_holiday?"":c.troom]){const td=document.createElement("td");td.textContent=value||"";tr.append(td)}table.append(tr)}box.append(table)}
-function renderHistory(){const box=$("historyList");box.replaceChildren();$("historyDetail").replaceChildren();const cls=$("historyClass").value,q=$("historySearch").value.trim().toLowerCase();const items=historyPeriods.filter(p=>(!cls||(p.class_name||"미지정")===cls)&&(!q||[p.label,p.start_date,p.end_date,p.class_name].join(" ").toLowerCase().includes(q)));msg("historyMessage",items.length?"지난 시간표 "+items.length+"개":"조회 가능한 시간표가 없습니다.");for(const p of items){const row=document.createElement("div");row.className="staff";const label=document.createElement("span");label.textContent=(p.class_name||"미지정")+" · "+(p.label||"")+" ("+p.start_date+" ~ "+p.end_date+")";const btn=document.createElement("button");btn.textContent="조회";btn.onclick=()=>viewHistory(p);row.append(label,btn);box.append(row)}}
+function renderHistory(){const box=$("historyList");box.replaceChildren();$("historyDetail").replaceChildren();const cls=$("historyClass").value,q=$("historySearch").value.trim().toLowerCase();const items=historyPeriods.filter(p=>(!cls||(p.class_name||"미지정")===cls)&&(!q||[p.label,p.start_date,p.end_date,p.class_name].join(" ").toLowerCase().includes(q)));msg("historyMessage",items.length?"저장된 시간표 "+items.length+"개":"조회 가능한 시간표가 없습니다.");for(const p of items){const row=document.createElement("div");row.className="staff";const label=document.createElement("span");label.textContent=(p.class_name||"미지정")+" · "+(p.label||"")+" ("+p.start_date+" ~ "+p.end_date+")";const btn=document.createElement("button");btn.textContent="조회";btn.onclick=()=>viewHistory(p);row.append(label,btn);box.append(row)}}
 $("historyClass").onchange=renderHistory;$("historySearch").oninput=renderHistory;
 $("historyButton").onclick=openHistory;$("historyBack").onclick=()=>{show("historyPanel",false);show("schedulePanel",true)};
 async function adminCall(payload){
