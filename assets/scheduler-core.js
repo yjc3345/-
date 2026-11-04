@@ -54,6 +54,7 @@ else if(review){inclass=t.kind==="runner"?"Review & Weekly Test":t.kind==="silve
 else if(t.kind==="runner")inclass="Unit "+(w+1)+" - "+(i%5+1);
 else inclass="Day "+day}
 if((book.startsWith("Pre Stella A")||book.startsWith("Pre Stella B"))&&i===22)inclass="영독비";
+if(book.startsWith("Silver Stella A")&&i===22)inclass="문법 / 수행마스터 마무리";
 if(i===0&&!t.first)inclass=book+" START!!\n"+inclass;
 const vocab=t.noVocab?"":review?"(누적) "+(w*40+1)+"~"+((w+1)*40):(w*40+(i%5)*10+1)+"~"+(w*40+(i%5+1)*10);
 out.push({inclass,vocab,troom:review?"영어 도서관":t.room+(t.room.endsWith(" ")?day:""),homework:t.noVocab?textbookHomework(book,i):""});
