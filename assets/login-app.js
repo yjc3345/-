@@ -54,7 +54,7 @@ const [periodsResult,windowsResult]=await Promise.all([client.from("schedule_per
  if(periodsResult.error||windowsResult.error){msg("historyMessage",(periodsResult.error||windowsResult.error).message);return}
  historyWindows=windowsResult.data||[];const existingWindows=new Set(historyWindows.map(w=>w.start_date+"|"+w.end_date));
  historyPeriods=(periodsResult.data||[]).filter(p=>(current.role==="admin"||p.teacher_id===current.user_id)&&existingWindows.has(p.start_date+"|"+p.end_date));
- const teacherPicker=$("historyTeacher");teacherPicker.replaceChildren(new Option("전체 선생님",""));
+ show("historyTeacherField",current.role==="admin");const teacherPicker=$("historyTeacher");teacherPicker.replaceChildren(new Option("전체 선생님",""));
  historyTeachers=new Map();
  if(current.role==="admin"){
   const {data:staff,error:staffError}=await client.from("staff_profiles").select("user_id,display_name").order("display_name");
