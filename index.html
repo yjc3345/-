@@ -12,7 +12,7 @@ if(window.self===window.top && !new URLSearchParams(location.search).has("adminP
 #saveFeedback, #approvalStatus, .schedule-bottom-actions, .help { display:none!important; visibility:hidden!important; }
 </style>
 </head><body>
-<header><strong>✦ 고림파머스어학원 스케줄러</strong><span class="admin-placeholder" id="adminTeacherPicker" hidden style="display:none">관리자용 선생님 선택 <select id="adminTeacherSelect" aria-label="조회할 선생님"><option value="">선생님 선택</option></select></span></header>
+<header><strong>✦ 고림파머스어학원 스케줄러</strong></header>
 <main class="wrap">
 <section class="controls">
 <h1>수업 스케줄 자동 생성</h1><p class="muted">교재와 시작일, 휴무일을 정하면 교재 전체 진도를 월~금 수업일에 자동 배치합니다.</p>
@@ -153,18 +153,6 @@ observer.observe(cal,{childList:true,subtree:false});
 document.getElementById("periodTabs")?.addEventListener("click",()=>setTimeout(check,100));
 window.addEventListener("teacher-schedule-loaded",()=>check());
 setInterval(check,12000);check();
-})();
-</script><script>
-(async()=>{
-try{
-const db=supabase.createClient("https://eovntwuvjzvnztyxzwer.supabase.co","sb_publishable_XMxCvN3wguCsjUY-6GrR2g_HidFJtoc");
-const {data:{user}}=await db.auth.getUser();if(!user)return;
-const {data:profile}=await db.from("staff_profiles").select("role").eq("user_id",user.id).maybeSingle();if(profile?.role!=="admin")return;
-const picker=document.getElementById("adminTeacherPicker"),select=document.getElementById("adminTeacherSelect");picker.hidden=false;picker.style.display="";
-const {data:staff}=await db.from("staff_profiles").select("user_id,display_name").order("display_name");
-for(const p of staff||[]){if(p.user_id===user.id)continue;select.add(new Option(p.display_name,p.user_id))}
-select.onchange=()=>{if(!select.value)return;const loginUrl=new URL("./login.html",location.href);loginUrl.searchParams.set("viewTeacher",select.value);window.top.location.href=loginUrl.href};
-}catch(e){console.warn(e)}
 })();
 </script><script>
 (async()=>{
