@@ -25,7 +25,7 @@ async function load(){
  const {data:{user}}=await client.auth.getUser();
  if(!user){clearPage();setTeacherTheme("#27538d");show("teacherLogout",false);show("historyButton",false);show("historyPanel",false);current=null;show("loginPanel",true);show("accountPanel",false);show("adminPanel",false);show("schedulePanel",false);return;}
  const {data,error}=await client.from("staff_profiles").select("*").eq("user_id",user.id).single();
- if(error||!data){await client.auth.signOut();msg("loginMessage","등록되지 않은 계정입니다. 관리자에게 문의하세요.");return load();}
+ if(error||!data||data.is_archived){await client.auth.signOut();msg("loginMessage","등록되지 않은 계정입니다. 관리자에게 문의하세요.");return load();}
  current=data;setTeacherTheme(data.theme_color);setTimeout(sendScheduleWindows,350);show("teacherLogout",data.role!=="admin"&&!data.must_change_password);show("historyButton",!data.must_change_password);show("historyPanel",false);show("loginPanel",false);show("accountPanel",true);show("adminTab",data.role==="admin"&&!data.must_change_password);
  $("welcome").textContent=data.display_name+" · "+(data.role==="admin"?"관리자":"선생님");
  $("changeNotice").textContent=data.must_change_password?"첫 로그인입니다. 다른 기능을 사용하기 전에 비밀번호를 변경하세요.":"필요할 때 비밀번호를 변경할 수 있어요.";
@@ -114,8 +114,9 @@ $("createForm").onsubmit=async e=>{
  try{const name=$("newName").value.trim(),r=await adminCall({action:"create",name});msg("adminMessage",name+" 임시 비밀번호: "+r.temporary_password+"\n이 화면을 닫으면 다시 볼 수 없습니다.");$("newName").value="";await staff()}catch(err){msg("adminMessage",err.message)}
 };
 async function staff(){
- const {data,error}=await client.from("staff_profiles").select("user_id,display_name,role,theme_color").order("display_name");
+ const {data,error}=await client.from("staff_profiles").select("user_id,display_name,role,theme_color,is_archived").eq("is_archived",false).order("display_name");
  if(error){msg("adminMessage",error.message);return;}
+ const renameBox=$("renameList");renameBox.replaceChildren();
  const colorBox=$("colorList"),resetBox=$("resetList");const picker=$("viewTeacher");picker.replaceChildren(new Option("선생님 선택",""));colorBox.replaceChildren();resetBox.replaceChildren();
  for(const p of data){const option=new Option(p.display_name+(p.role==="admin"?" (내 시간표)":""),p.user_id);option.dataset.color=p.theme_color;picker.add(option);
  const row=document.createElement("div");row.className="staff";
@@ -124,12 +125,13 @@ async function staff(){
  color.onchange=async()=>{try{await adminCall({action:"color",user_id:p.user_id,color:color.value});msg("adminMessage",p.display_name+" 색상 저장 완료")}catch(e){msg("adminMessage",e.message)}};
  const reset=document.createElement("button");reset.type="button";reset.className="secondary";reset.textContent="비밀번호 초기화";
  reset.onclick=async()=>{if(!confirm(p.display_name+" 비밀번호를 초기화할까요?"))return;try{const r=await adminCall({action:"reset",user_id:p.user_id});msg("adminMessage",p.display_name+" 새 임시 비밀번호: "+r.temporary_password)}catch(e){msg("adminMessage",e.message)}};
+ const renameRow=document.createElement("div");renameRow.className="staff";const renameLabel=document.createElement("strong");renameLabel.textContent=p.display_name;const renameInput=document.createElement("input");renameInput.value=p.display_name;renameInput.maxLength=31;renameInput.style.maxWidth="190px";renameInput.setAttribute("aria-label",p.display_name+" 변경할 이름");const renameButton=document.createElement("button");renameButton.type="button";renameButton.className="secondary";renameButton.textContent="이름 변경";renameButton.onclick=async()=>{const next=renameInput.value.trim();if(next===p.display_name)return;if(!/^[A-Za-z][A-Za-z0-9_-]{1,30}$/.test(next)){msg("adminMessage","영문으로 시작하는 2~31자 이름을 입력하세요.");return;}if(!confirm(p.display_name+" → "+next+" 이름을 변경할까요? 로그인 아이디는 유지됩니다."))return;renameButton.disabled=true;try{const {error}=await client.from("staff_profiles").update({display_name:next}).eq("user_id",p.user_id);if(error)throw error;await staff();msg("adminMessage",p.display_name+" → "+next+" 변경 완료");if(current?.user_id===p.user_id){current.display_name=next;$("welcome").textContent=next+" · 관리자";}}catch(err){msg("adminMessage",err.code==="23505"?"이미 사용 중인 이름입니다.":err.message)}finally{renameButton.disabled=false}};renameRow.append(renameLabel,renameInput,renameButton);renameBox.append(renameRow);
  row.append(label,color);colorBox.appendChild(row);const rr=document.createElement("div");rr.className="staff";const name=document.createElement("strong");name.textContent=p.display_name;rr.append(name,reset);resetBox.appendChild(rr);
  }
 }
 async function loadTeacherClasses(){
  const box=$("classesList");box.textContent="담당 반을 불러오는 중...";
- const [profiles,assignments]=await Promise.all([client.from("staff_profiles").select("user_id,display_name,role").order("display_name"),client.from("teacher_classes").select("teacher_id,class_name")]);
+ const [profiles,assignments]=await Promise.all([client.from("staff_profiles").select("user_id,display_name,role").eq("is_archived",false).order("display_name"),client.from("teacher_classes").select("teacher_id,class_name")]);
  if(profiles.error||assignments.error){msg("classesMessage",profiles.error?.message||assignments.error?.message);return;}
  box.replaceChildren();msg("classesMessage","");
  for(const p of profiles.data||[]){
