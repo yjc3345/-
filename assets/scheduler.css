@@ -444,3 +444,19 @@ html,body{width:auto!important;margin:0!important;padding:0!important}
 /* Keep holiday labels the same size as event labels, with a red distinction. */
 .calendar .holidaytext{background:transparent!important;color:#c62828!important;font-weight:700;text-align:center;padding:7px 2px;white-space:pre-wrap;font-size:inherit;}
 .calendar .specialtext{font-size:inherit;}
+
+/* Unified event/holiday labels: equal type size in screen and print; holidays red. */
+.calendar tbody tr.lesson-row td .specialtext,
+.calendar tbody tr.lesson-row td .holidaytext{
+  font-size:16px!important;
+  line-height:1.4!important;
+  font-weight:700!important;
+  padding:7px 2px!important;
+  text-align:center!important;
+  white-space:pre-wrap!important;
+}
+.calendar tbody tr.lesson-row td .holidaytext{color:#c62828!important;}
+@media print{
+  .calendar tbody tr.lesson-row td .specialtext,
+  .calendar tbody tr.lesson-row td .holidaytext{font-size:12pt!important;}
+}
