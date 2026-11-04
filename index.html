@@ -129,9 +129,12 @@ async function check(){
 if(checking){recheckPending=true;return;}checking=true;
 try{
 const c=window.getCurrentTeacherSchedule?.()?.config;
-if(!c?.start){approved=false}else{
-const r=await db.from("schedule_periods").select("approved_at").eq("teacher_id",user.id).eq("start_date",c.start).eq("class_name",c.className||"Inter Bridge 1").maybeSingle();
-if(r.error)throw r.error;const latest=window.getCurrentTeacherSchedule?.()?.config;if(!latest||latest.start!==c.start||latest.className!==c.className)return;approved=!!r.data?.approved_at;
+const selectedStart=document.getElementById("academyWindow")?.selectedOptions?.[0]?.dataset.start;
+const selectedClass=document.getElementById("className")?.value.trim();
+const targetStart=selectedStart||c?.start,targetClass=selectedClass||c?.className;
+if(!targetStart||!targetClass){approved=false}else{
+const r=await db.from("schedule_periods").select("approved_at").eq("teacher_id",user.id).eq("start_date",targetStart).eq("class_name",targetClass).maybeSingle();
+if(r.error)throw r.error;const latestStart=document.getElementById("academyWindow")?.selectedOptions?.[0]?.dataset.start;const latestClass=document.getElementById("className")?.value.trim();if(latestStart!==selectedStart||latestClass!==selectedClass)return;approved=!!r.data?.approved_at;
 }
 const bookPicker=document.getElementById("book");if(bookPicker){bookPicker.disabled=approved;bookPicker.title=approved?"승인된 시간표의 교재명은 변경할 수 없습니다.":"";}const classLabel=document.getElementById("sheetClassName");if(classLabel)classLabel.textContent=approved&&c?.className?c.className:"";save.disabled=approved;del.disabled=approved;
 save.title=del.title=approved?"관리자가 승인한 시간표입니다. 승인 취소 후 수정·삭제할 수 있습니다.":"";
