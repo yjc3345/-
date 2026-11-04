@@ -46,21 +46,44 @@ $("scheduleTab").onclick=()=>{if(current?.must_change_password)return;show("sche
 $("adminTab").onclick=()=>{if(current?.role!=="admin"||current.must_change_password)return;const opening=$("adminPanel").classList.contains("hidden");show("schedulePanel",!opening);show("historyPanel",false);show("adminPanel",opening);show("passwordArea",false);$("adminTab").textContent=opening?"시간표로 돌아가기":"관리자"};
 $("passwordTab").onclick=()=>{show("schedulePanel",false);show("historyPanel",false);show("adminPanel",false);show("passwordArea",true)};
 $("logout").onclick=async()=>{await client.auth.signOut();await load()};
-let historyPeriods=[];
+let historyPeriods=[];let historyWindows=[];let historyPreviewCleanup=null;
 async function openHistory(){
 if(!current||current.must_change_password)return;
 show("schedulePanel",false);show("adminPanel",false);show("historyPanel",true);msg("historyMessage","불러오는 중...");
-const [periodsResult,windowsResult]=await Promise.all([client.from("schedule_periods").select("id,label,start_date,end_date,class_name,teacher_id").order("start_date",{ascending:false}),client.from("academy_schedule_windows").select("start_date,end_date,label")]);
+const [periodsResult,windowsResult]=await Promise.all([client.from("schedule_periods").select("id,label,start_date,end_date,class_name,teacher_id").order("start_date",{ascending:false}),client.from("academy_schedule_windows").select("id,start_date,end_date,label,holidays,holiday_names,special_days")]);
  if(periodsResult.error||windowsResult.error){msg("historyMessage",(periodsResult.error||windowsResult.error).message);return}
- const existingWindows=new Set((windowsResult.data||[]).map(w=>w.start_date+"|"+w.end_date));
+ historyWindows=windowsResult.data||[];const existingWindows=new Set(historyWindows.map(w=>w.start_date+"|"+w.end_date));
  historyPeriods=(periodsResult.data||[]).filter(p=>(current.role==="admin"||p.teacher_id===current.user_id)&&existingWindows.has(p.start_date+"|"+p.end_date));
  const select=$("historyClass");select.replaceChildren(new Option("전체 반",""));
 for(const name of [...new Set(historyPeriods.map(p=>p.class_name||"미지정"))])select.add(new Option(name,name));
  const periodSelect=$("historyWindow");periodSelect.replaceChildren(new Option("전체 기간",""));const availableKeys=new Set(historyPeriods.map(p=>p.start_date+"|"+p.end_date));for(const w of (windowsResult.data||[]).filter(w=>availableKeys.has(w.start_date+"|"+w.end_date)).sort((a,b)=>b.start_date.localeCompare(a.start_date))){periodSelect.add(new Option((w.label?w.label+" · ":"")+w.start_date+" ~ "+w.end_date,w.start_date+"|"+w.end_date))}
 renderHistory();
 }
-async function viewHistory(p){const box=$("historyDetail");box.replaceChildren();const heading=document.createElement("h3");heading.textContent=(p.class_name||"수업")+" · "+p.start_date+" ~ "+p.end_date;box.append(heading);const {data,error}=await client.from("schedule_cells").select("lesson_date,inclass,vocab_base,troom,homework,is_holiday").eq("period_id",p.id).order("lesson_date");if(error){const note=document.createElement("p");note.textContent=error.message;box.append(note);return}const textbookTitle=document.createElement("h3");textbookTitle.className="admin-textbook-title";box.append(textbookTitle);const table=document.createElement("table");table.className="teacher-table";const head=document.createElement("tr");for(const name of ["날짜","Inclass","Vocab.","T-Room"]){const th=document.createElement("th");th.textContent=name;head.append(th)}table.append(head);for(const c of data||[]){const tr=document.createElement("tr");for(const value of [c.lesson_date,c.is_holiday?"휴무":c.inclass,c.is_holiday?"":c.vocab_base,c.is_holiday?"":c.troom]){const td=document.createElement("td");td.textContent=value||"";tr.append(td)}table.append(tr)}box.append(table)}
-function renderHistory(){const box=$("historyList");box.replaceChildren();$("historyDetail").replaceChildren();const cls=$("historyClass").value,period=$("historyWindow").value;const items=historyPeriods.filter(p=>(!cls||(p.class_name||"미지정")===cls)&&(!period||p.start_date+"|"+p.end_date===period));msg("historyMessage",items.length?"저장된 시간표 "+items.length+"개":"조회 가능한 시간표가 없습니다.");for(const p of items){const row=document.createElement("div");row.className="staff";const label=document.createElement("span");label.textContent=(p.class_name||"미지정")+" · "+(p.label||"")+" ("+p.start_date+" ~ "+p.end_date+")";const btn=document.createElement("button");btn.textContent="조회";btn.onclick=()=>viewHistory(p);row.append(label,btn);box.append(row)}}
+async function viewHistory(p){
+ if(historyPreviewCleanup){historyPreviewCleanup();historyPreviewCleanup=null}
+ const box=$("historyDetail");box.replaceChildren();
+ const heading=document.createElement("h3");heading.textContent=(p.class_name||"수업")+" · "+(historyWindows.find(w=>w.start_date===p.start_date&&w.end_date===p.end_date)?.label||p.label||"수업 기간")+" · "+p.start_date+" ~ "+p.end_date;box.append(heading);
+ const message=document.createElement("p");message.className="hint";message.textContent="캘린더를 불러오는 중입니다.";box.append(message);
+ const [periodResult,cellsResult]=await Promise.all([
+  client.from("schedule_periods").select("id,start_date,end_date,class_name,book,vocab_start,approved_at").eq("id",p.id).single(),
+  client.from("schedule_cells").select("lesson_date,inclass,vocab_base,troom,homework,is_holiday").eq("period_id",p.id).order("lesson_date")
+ ]);
+ if(periodResult.error||cellsResult.error){message.textContent="조회 실패: "+(periodResult.error||cellsResult.error).message;return}
+ const win=historyWindows.find(w=>w.start_date===p.start_date&&w.end_date===p.end_date);
+ if(!win){message.textContent="삭제된 수업 기간은 조회할 수 없습니다.";return}
+ const frame=document.createElement("iframe");frame.title="지난 스케줄표 달력 미리보기";frame.style.cssText="display:block;width:100%;height:980px;border:1px solid #d5dfeb;border-radius:8px;background:white";box.append(frame);
+ const payload={type:"admin-schedule-preview",period:periodResult.data,window:win,cells:cellsResult.data||[]};
+ let ready=false;const listener=event=>{
+  if(event.source!==frame.contentWindow||event.origin!==location.origin)return;
+  if(event.data?.type==="admin-schedule-ready"){ready=true;frame.contentWindow.postMessage(payload,location.origin)}
+  if(event.data?.type==="admin-schedule-rendered"){message.textContent="캘린더 형식으로 불러왔습니다."}
+  if(event.data?.type==="admin-schedule-error"){message.textContent="달력 표시 오류: "+event.data.message}
+ };
+ window.addEventListener("message",listener);
+ historyPreviewCleanup=()=>{window.removeEventListener("message",listener);frame.remove()};
+ frame.src="./?adminPreview=1&history=1&style=v126";
+}
+function renderHistory(){if(historyPreviewCleanup){historyPreviewCleanup();historyPreviewCleanup=null}const box=$("historyList");box.replaceChildren();$("historyDetail").replaceChildren();const cls=$("historyClass").value,period=$("historyWindow").value;const items=historyPeriods.filter(p=>(!cls||(p.class_name||"미지정")===cls)&&(!period||p.start_date+"|"+p.end_date===period));msg("historyMessage",items.length?"저장된 시간표 "+items.length+"개":"조회 가능한 시간표가 없습니다.");for(const p of items){const row=document.createElement("div");row.className="staff";const label=document.createElement("span");label.textContent=(p.class_name||"미지정")+" · "+(p.label||"")+" ("+p.start_date+" ~ "+p.end_date+")";const btn=document.createElement("button");btn.textContent="조회";btn.onclick=()=>viewHistory(p);row.append(label,btn);box.append(row)}}
 $("historyClass").onchange=renderHistory;$("historyWindow").onchange=renderHistory;
 $("historyButton").onclick=openHistory;$("historyBack").onclick=()=>{show("historyPanel",false);show("schedulePanel",true)};
 async function adminCall(payload){
