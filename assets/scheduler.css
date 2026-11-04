@@ -460,3 +460,8 @@ html,body{width:auto!important;margin:0!important;padding:0!important}
   .calendar tbody tr.lesson-row td .specialtext,
   .calendar tbody tr.lesson-row td .holidaytext{font-size:12pt!important;}
 }
+
+/* Status messages are screen-only; never include them on printed schedules. */
+@media print {
+  #saveFeedback, #approvalStatus { display:none!important; }
+}
