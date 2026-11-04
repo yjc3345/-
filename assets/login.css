@@ -4,3 +4,8 @@
 /* Keep selected period tabs readable regardless of inherited button/theme styles. */
 #teacherView .admin-period-tab.active{background:#ffffff!important;color:#203958!important;-webkit-text-fill-color:#203958!important;opacity:1!important;border-color:#aebed3!important;box-shadow:inset 0 4px 0 var(--viewer-color,#27538d)!important}
 #teacherView .admin-period-tab{opacity:1!important;-webkit-text-fill-color:currentColor}
+
+#historyPanel .history-filters{display:grid;grid-template-columns:repeat(3,minmax(0,1fr));gap:16px;margin:14px 0 18px;align-items:end}
+#historyPanel .history-filters label{margin:0;min-width:0}
+#historyPanel .history-filters select{width:100%;min-width:0;appearance:auto}
+@media(max-width:700px){#historyPanel .history-filters{grid-template-columns:1fr;gap:12px}}
