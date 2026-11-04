@@ -7,7 +7,11 @@ if(window.self===window.top && !new URLSearchParams(location.search).has("adminP
   location.replace(new URL("./login.html", location.href).href);
 }
 </script>
-<link rel="stylesheet" href="./assets/scheduler.css?v=125"></head><body>
+<link rel="stylesheet" href="./assets/scheduler.css?v=125"><style media="print">
+/* Print only the schedule sheet. Hide approval feedback and all controls. */
+#saveFeedback, #approvalStatus, .schedule-bottom-actions, .help { display:none!important; visibility:hidden!important; }
+</style>
+</head><body>
 <header><strong>✦ 고림파머스어학원 스케줄러</strong><span class="admin-placeholder" id="adminTeacherPicker" hidden style="display:none">관리자용 선생님 선택 <select id="adminTeacherSelect" aria-label="조회할 선생님"><option value="">선생님 선택</option></select></span></header>
 <main class="wrap">
 <section class="controls">
@@ -53,6 +57,7 @@ try{
 (async()=>{
 const db=supabase.createClient("https://eovntwuvjzvnztyxzwer.supabase.co","sb_publishable_XMxCvN3wguCsjUY-6GrR2g_HidFJtoc");
 const status=document.getElementById("saveFeedback");
+status.setAttribute("data-print-exclude","true");
 const authResult=await db.auth.getUser();const user=authResult.data?.user;
 if(!user){status.textContent="로그인 정보를 확인할 수 없습니다. 로그인 페이지에서 다시 로그인해 주세요.";return;}
 const {data:profile,error:profileError}=await db.from("staff_profiles").select("must_change_password").eq("user_id",user.id).single();
