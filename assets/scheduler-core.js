@@ -135,6 +135,9 @@ window.addEventListener("message",event=>{
  const rows={};for(const r of payload.cells||[])rows[r.lesson_date]={inclass:r.inclass||"",troom:r.troom||"",vocab:r.vocab_base||"",homework:r.homework||"",holiday:!!r.is_holiday,lesson:!r.is_holiday&&!!([r.inclass,r.troom,r.vocab_base,r.homework].some(v=>String(v||"").trim()))};
  try{
  window.applySavedTeacherSchedule({start:payload.period.start_date,end:w.end_date||payload.period.end_date,windowId:availableWindows[0].id,holidays:w.holidays||[],book:payload.period.book||"Inter Bridge 1",className:payload.period.class_name||"",vocabStart:1},rows);
+  $("sheetClassName").textContent=payload.period.class_name||"";
+  $("className").replaceChildren(new Option(payload.period.class_name||"수업",payload.period.class_name||""));
+  $("className").value=payload.period.class_name||"";
  }catch(err){
   parent.postMessage({type:"admin-schedule-error",message:String(err?.message||err)},location.origin);
   return;
