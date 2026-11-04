@@ -11,7 +11,7 @@ async function sendScheduleWindows(){
 }
 $("scheduleFrame").addEventListener("load",()=>{if(current)sendScheduleWindows()});
 function msg(id,text){$(id).textContent=text||""}
-function show(id,visible){$(id).classList.toggle("hidden",!visible)}
+function show(id,visible){$(id).classList.toggle("hidden",!visible);if(id==="historyPanel"){const button=$("historyButton");button.textContent=visible?"현재 시간표로 돌아가기":"지난 스케줄표 조회";button.setAttribute("aria-pressed",String(!!visible))}}
 async function load(){
  const {data:{user}}=await client.auth.getUser();
  if(!user){setTeacherTheme("#27538d");show("teacherLogout",false);show("historyButton",false);show("historyPanel",false);current=null;show("loginPanel",true);show("accountPanel",false);show("adminPanel",false);show("schedulePanel",false);return;}
@@ -92,7 +92,7 @@ async function viewHistory(p){
 }
 function renderHistory(){if(historyPreviewCleanup){historyPreviewCleanup();historyPreviewCleanup=null}const box=$("historyList");box.replaceChildren();$("historyDetail").replaceChildren();const cls=$("historyClass").value,period=$("historyWindow").value,teacher=current.role==="admin"?$("historyTeacher").value:"";const items=historyPeriods.filter(p=>(!teacher||p.teacher_id===teacher)&&(!cls||(p.class_name||"미지정")===cls)&&(!period||p.start_date+"|"+p.end_date===period));msg("historyMessage",items.length?"저장된 시간표 "+items.length+"개":"조회 가능한 시간표가 없습니다.");for(const p of items){const row=document.createElement("div");row.className="staff";const label=document.createElement("span");label.textContent=(current.role==="admin"?(historyTeachers.get(p.teacher_id)||"선생님")+" · ":"")+(p.class_name||"미지정")+" · "+(p.label||"")+" ("+p.start_date+" ~ "+p.end_date+")";const btn=document.createElement("button");btn.textContent="조회";btn.onclick=()=>viewHistory(p);row.append(label,btn);box.append(row)}}
 $("historyClass").onchange=renderHistory;$("historyWindow").onchange=renderHistory;$("historyTeacher").onchange=renderHistory;
-$("historyButton").onclick=openHistory;$("historyBack").onclick=()=>{show("historyPanel",false);show("schedulePanel",true)};
+$("historyButton").onclick=()=>{if(!$("historyPanel").classList.contains("hidden")){show("historyPanel",false);show("schedulePanel",true);show("adminPanel",false);if(historyPreviewCleanup){historyPreviewCleanup();historyPreviewCleanup=null}}else openHistory()};
 async function adminCall(payload){
  const {data:{session}}=await client.auth.getSession();
  if(!session)throw Error("다시 로그인해 주세요.");
