@@ -81,7 +81,7 @@ async function reloadSelectedSchedule(){
  const lessonDates=Object.keys(cells).filter(d=>cells[d].lesson).sort();const resetAt=lessonDates.find((d,i)=>i>0&&/^1\s*[~–-]\s*10$/.test(String(cells[d].vocab||"").trim()));if(resetAt)c.vocabResetDate=resetAt;
  window.applySavedTeacherSchedule?.(c,cells);
  window.dispatchEvent(new Event("teacher-schedule-loaded"));
- status.textContent="저장된 시간표를 불러왔습니다.";
+ status.textContent=p.approved_at?"승인된 시간표입니다.":"저장된 시간표를 불러왔습니다.";
 
  }catch(error){status.textContent="시간표 조회 실패: "+(error.message||error)}
 }
