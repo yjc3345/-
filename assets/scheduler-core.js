@@ -214,7 +214,7 @@ function draw(){
  while(cursor<=last&&rows<60){
   const dates=[];
   for(let i=0;i<5;i++){dates.push(iso(cursor));cursor.setDate(cursor.getDate()+1);}
-  const fields=[["date","날짜"],["inclass","Inclass"],...(config.noVocab?[]:[["vocab","Vocab."]]),["troom","T-Room"],...(config.hasHomework?[["homework","Homework"]]:[])];
+  const hasEventDays=Object.keys(specialDates).some(date=>date>=config.start&&date<=config.end);const fields=[["date","날짜"],["inclass","Inclass"],...(config.noVocab?[]:[["vocab","Vocab."]]),["troom","T-Room"],...(config.hasHomework||hasEventDays?[["homework","Homework"]]:[])];
   for(const [field,labelText] of fields){
    const tr=create("tr",field==="date"?"date-row":"lesson-row "+field+"-row");
    tr.appendChild(create("th","sidehead",labelText));
@@ -226,7 +226,7 @@ function draw(){
     const isHoliday=(config.holidays||[]).includes(date)||(chosenWindow?.holidays||[]).includes(date);
     if(!outside&&isHoliday)cells[date]={holiday:true,lesson:false};
     else if(!outside&&Object.hasOwn(specialNames,date)){
-      cells[date]={special:true,lesson:false,homework:config.hasHomework?(cells[date]?.homework||""):""};
+      cells[date]={special:true,lesson:false,homework:cells[date]?.homework||""};
     }
     if(!outside&&!isHoliday&&!Object.hasOwn(specialNames,date)){
      // 저장된 진도가 끝난 뒤에도 관리자 지정 종료일까지 빈 날짜를 편집/드래그 대상으로 유지.
@@ -237,8 +237,8 @@ function draw(){
     const cumulative=field==="vocab"&&data&&data.lesson&&String(data.vocab||"").includes("(누적)");
     const td=create("td",(outside?"off ":"")+(data&&data.holiday?"holiday ":"")+(cumulative?"cumulative ":""));
     if(field==="date"){const dateLabel=create("div","celltop",fmt(date)+" ("+["월","화","수","목","금"][i]+")");if(isHoliday||data?.holiday){dateLabel.classList.add("holiday-date-label");dateLabel.style.setProperty("color","#c62828","important");}td.appendChild(dateLabel);}
-    else if(data&&data.holiday){if(field==="inclass")td.appendChild(create("div","holidaytext",holidayNames[date]||"휴무일"));}else if(data&&data.special&&field!=="homework"){if(field==="inclass")td.appendChild(create("div","specialtext",specialNames[date]||"기념일"));}
-    else if(data&&(data.lesson||(data.special&&field==="homework"))){
+    else if(data&&data.holiday){if(field==="inclass")td.appendChild(create("div","holidaytext",holidayNames[date]||"휴무일"));}else if(data&&data.special&&field!=="homework"){if(field==="inclass")td.appendChild(create("div","specialtext",specialNames[date]||"행사일"));}
+    else if(data&&((data.lesson&&(field!=="homework"||config.hasHomework))||(data.special&&field==="homework"))){
      const area=create("textarea"),printed=create("div","print-value");
      area.value=data[field]||"";printed.textContent=area.value;
      area.setAttribute("aria-label",date+" "+labelText);
