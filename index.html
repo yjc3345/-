@@ -1,6 +1,12 @@
 <!doctype html>
 <html lang="ko"><head><meta charset="utf-8"><meta name="viewport" content="width=device-width,initial-scale=1">
 <title>고림파머스어학원 스케줄러</title>
+<script>
+// Direct visits open the unified login/dashboard shell; embedded previews stay here.
+if(window.self===window.top && !new URLSearchParams(location.search).has("adminPreview")){
+  location.replace(new URL("./login.html", location.href).href);
+}
+</script>
 <link rel="stylesheet" href="./assets/scheduler.css?v=122"></head><body>
 <header><strong>✦ 고림파머스어학원 스케줄러</strong><span class="admin-placeholder" id="adminTeacherPicker" hidden style="display:none">관리자용 선생님 선택 <select id="adminTeacherSelect" aria-label="조회할 선생님"><option value="">선생님 선택</option></select></span></header>
 <main class="wrap">
