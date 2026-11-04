@@ -214,7 +214,7 @@ function draw(){
  while(cursor<=last&&rows<60){
   const dates=[];
   for(let i=0;i<5;i++){dates.push(iso(cursor));cursor.setDate(cursor.getDate()+1);}
-  const hasEventDays=Object.keys(specialDates).some(date=>date>=config.start&&date<=config.end);const fields=[["date","날짜"],["inclass","Inclass"],...(config.noVocab?[]:[["vocab","Vocab."]]),["troom","T-Room"],...(config.hasHomework||hasEventDays?[["homework","Homework"]]:[])];
+  const fields=[["date","날짜"],["inclass","Inclass"],...(config.noVocab?[]:[["vocab","Vocab."]]),["troom","T-Room"],...(config.hasHomework?[["homework","Homework"]]:[])];
   for(const [field,labelText] of fields){
    const tr=create("tr",field==="date"?"date-row":"lesson-row "+field+"-row");
    tr.appendChild(create("th","sidehead",labelText));
