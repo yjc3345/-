@@ -50,9 +50,10 @@ let historyPeriods=[];
 async function openHistory(){
 if(!current||current.must_change_password)return;
 show("schedulePanel",false);show("adminPanel",false);show("historyPanel",true);msg("historyMessage","불러오는 중...");
-const {data:allPeriods,error:periodsError}=await client.from("schedule_periods").select("id,label,start_date,end_date,class_name,teacher_id").order("start_date",{ascending:false});
- if(periodsError){msg("historyMessage",periodsError.message);return}
- historyPeriods=(allPeriods||[]).filter(p=>current.role==="admin"||p.teacher_id===current.user_id);
+const [periodsResult,windowsResult]=await Promise.all([client.from("schedule_periods").select("id,label,start_date,end_date,class_name,teacher_id").order("start_date",{ascending:false}),client.from("academy_schedule_windows").select("start_date,end_date")]);
+ if(periodsResult.error||windowsResult.error){msg("historyMessage",(periodsResult.error||windowsResult.error).message);return}
+ const existingWindows=new Set((windowsResult.data||[]).map(w=>w.start_date+"|"+w.end_date));
+ historyPeriods=(periodsResult.data||[]).filter(p=>(current.role==="admin"||p.teacher_id===current.user_id)&&existingWindows.has(p.start_date+"|"+p.end_date));
  const select=$("historyClass");select.replaceChildren(new Option("전체 반",""));
 for(const name of [...new Set(historyPeriods.map(p=>p.class_name||"미지정"))])select.add(new Option(name,name));
 renderHistory();
