@@ -440,3 +440,7 @@ html,body{width:auto!important;margin:0!important;padding:0!important}
 /* 관리자 미리보기는 편집 도구를 감추고 출력물만 표시 */
 .admin-preview-mode .controls,.admin-preview-mode .schedule-bottom-actions,.admin-preview-mode #scratchTray,.admin-preview-mode #periodTabs,.admin-preview-mode .help,.admin-preview-mode #saveFeedback{display:none!important}
 .admin-preview-mode #sheet{margin-top:0!important}
+
+/* Keep holiday labels the same size as event labels, with a red distinction. */
+.calendar .holidaytext{background:transparent!important;color:#c62828!important;font-weight:700;text-align:center;padding:7px 2px;white-space:pre-wrap;font-size:inherit;}
+.calendar .specialtext{font-size:inherit;}
