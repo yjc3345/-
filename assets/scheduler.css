@@ -509,3 +509,41 @@ html,body{width:auto!important;margin:0!important;padding:0!important}
    border-color:#a9bad0!important;
  }
 }
+
+/* Consistent weekday date fills and uniform screen grid thickness. */
+@media screen{
+ table.calendar tbody tr.date-row>td,
+ table.calendar tbody tr.date-row>td.off,
+ table.calendar tbody tr.date-row>td.holiday,
+ table.calendar tbody tr.date-row>td:nth-child(5){
+   background:var(--teacher-pale)!important;
+ }
+ table.calendar tbody tr.date-row>td .celltop,
+ table.calendar tbody tr.date-row>td.off .celltop,
+ table.calendar tbody tr.date-row>td.holiday .celltop,
+ table.calendar tbody tr.date-row>td:nth-child(5) .celltop{
+   background:var(--teacher-pale)!important;
+   border:0!important;
+   outline:0!important;
+   box-shadow:none!important;
+ }
+ /* Keep dashed separators between lesson fields; normalize the structural grid only. */
+ table.calendar tbody tr.date-row>th.sidehead,
+ table.calendar tbody tr.date-row>td{
+   border-top:1px solid #a9bad0!important;
+   border-bottom:1px solid #a9bad0!important;
+   border-left:1px solid #a9bad0!important;
+   border-right:1px solid #a9bad0!important;
+ }
+ table.calendar tbody tr.lesson-row>th.sidehead,
+ table.calendar tbody tr.lesson-row>td{
+   border-left:1px solid #a9bad0!important;
+   border-right:1px solid #a9bad0!important;
+ }
+ table.calendar tbody tr.lesson-row:has(+ .date-row)>th.sidehead,
+ table.calendar tbody tr.lesson-row:has(+ .date-row)>td,
+ table.calendar tbody tr.lesson-row:last-child>th.sidehead,
+ table.calendar tbody tr.lesson-row:last-child>td{
+   border-bottom:1px solid #a9bad0!important;
+ }
+}
