@@ -474,3 +474,11 @@ html,body{width:auto!important;margin:0!important;padding:0!important}
 .calendar tbody tr.vocab-row td .entry.cumulative,
 .calendar tbody tr.vocab-row td .entry.cumulative textarea,
 .calendar tbody tr.vocab-row td .entry.cumulative .print-value{color:#000!important;-webkit-text-fill-color:#000!important;}
+
+/* Date inset frames follow each teacher palette, including holiday dates. */
+.calendar tbody tr.date-row td .celltop,
+.calendar tbody tr.date-row td.holiday .celltop,
+.calendar tbody tr.date-row td .celltop.holiday-date-label{
+  border-color:var(--teacher-color)!important;
+  background-color:var(--teacher-soft)!important;
+}
