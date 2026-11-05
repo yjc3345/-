@@ -496,3 +496,18 @@ table.calendar tbody tr.date-row>td.holiday .celltop{border-color:var(--teacher-
  table.calendar tbody tr.date-row>td,
  table.calendar tbody tr.date-row>td.holiday{border-color:var(--teacher-color)!important;}
 }
+
+/* Print typography matches the on-screen schedule: only dates and cumulative vocabulary stay bold. */
+@media print{
+ .calendar tbody tr.lesson-row td .print-value,
+ .calendar tbody tr.lesson-row td textarea,
+ .calendar tbody tr.lesson-row td .entry,
+ .calendar tbody tr.lesson-row td .specialtext,
+ .calendar tbody tr.lesson-row td .holidaytext{font-weight:400!important;}
+ .calendar tbody tr.vocab-row td.cumulative .print-value,
+ .calendar tbody tr.vocab-row td.cumulative textarea,
+ .calendar tbody tr.vocab-row td.cumulative .entry,
+ .calendar tbody tr.vocab-row td .entry.cumulative{font-weight:700!important;}
+ .calendar tbody tr.date-row td .celltop,
+ .calendar tbody tr.date-row td.holiday .celltop{font-weight:700!important;}
+}
