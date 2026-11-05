@@ -505,7 +505,7 @@ html,body{width:auto!important;margin:0!important;padding:0!important}
  table.calendar tbody tr.date-row>td,
  table.calendar tbody tr.date-row>td.off,
  table.calendar tbody tr.date-row>td.holiday{
-   background-color:var(--teacher-color)!important;
+   background-color:var(--teacher-pale)!important;
    border-color:#a9bad0!important;
  }
 }
