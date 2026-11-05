@@ -475,28 +475,6 @@ html,body{width:auto!important;margin:0!important;padding:0!important}
 .calendar tbody tr.vocab-row td .entry.cumulative textarea,
 .calendar tbody tr.vocab-row td .entry.cumulative .print-value{color:#000!important;-webkit-text-fill-color:#000!important;}
 
-/* Date inset frames follow each teacher palette, including holiday dates. */
-.calendar tbody tr.date-row td .celltop,
-.calendar tbody tr.date-row td.holiday .celltop,
-.calendar tbody tr.date-row td .celltop.holiday-date-label{
-  border-color:var(--teacher-color)!important;
-  background-color:var(--teacher-soft)!important;
-}
-
-/* Date row frame lines use the teacher palette, not fixed blue (screen and print). */
-.calendar tbody tr.date-row>td,
-.calendar tbody tr.date-row>td.holiday,
-table.calendar tbody tr.date-row>td,
-table.calendar tbody tr.date-row>td.holiday{border-color:var(--teacher-color)!important;}
-.calendar tbody tr.date-row>td .celltop,
-.calendar tbody tr.date-row>td.holiday .celltop,
-table.calendar tbody tr.date-row>td .celltop,
-table.calendar tbody tr.date-row>td.holiday .celltop{border-color:var(--teacher-color)!important;}
-@media print{
- table.calendar tbody tr.date-row>td,
- table.calendar tbody tr.date-row>td.holiday{border-color:var(--teacher-color)!important;}
-}
-
 /* Print typography matches the on-screen schedule: only dates and cumulative vocabulary stay bold. */
 @media print{
  .calendar tbody tr.lesson-row td .print-value,
@@ -512,20 +490,13 @@ table.calendar tbody tr.date-row>td.holiday .celltop{border-color:var(--teacher-
  .calendar tbody tr.date-row td.holiday .celltop{font-weight:700!important;}
 }
 
-/* Restore neutral table grid; theme only the inset date label frame. */
+/* Subtle teacher-tinted date inset; keep original table grid untouched. */
 @media screen{
- .calendar tbody tr.date-row>td,
- .calendar tbody tr.date-row>td.holiday,
- table.calendar tbody tr.date-row>td,
- table.calendar tbody tr.date-row>td.holiday{border-color:#a9bad0!important;}
  .calendar tbody tr.date-row>td .celltop,
  .calendar tbody tr.date-row>td.holiday .celltop{
-   border:2px solid var(--teacher-color)!important;
+   border:1px solid var(--teacher-soft)!important;
+   background:var(--teacher-pale)!important;
    box-shadow:none!important;
    box-sizing:border-box!important;
  }
-}
-@media print{
- table.calendar tbody tr.date-row>td,
- table.calendar tbody tr.date-row>td.holiday{border-color:#a9bad0!important;}
 }
