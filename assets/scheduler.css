@@ -511,3 +511,21 @@ table.calendar tbody tr.date-row>td.holiday .celltop{border-color:var(--teacher-
  .calendar tbody tr.date-row td .celltop,
  .calendar tbody tr.date-row td.holiday .celltop{font-weight:700!important;}
 }
+
+/* Restore neutral table grid; theme only the inset date label frame. */
+@media screen{
+ .calendar tbody tr.date-row>td,
+ .calendar tbody tr.date-row>td.holiday,
+ table.calendar tbody tr.date-row>td,
+ table.calendar tbody tr.date-row>td.holiday{border-color:#a9bad0!important;}
+ .calendar tbody tr.date-row>td .celltop,
+ .calendar tbody tr.date-row>td.holiday .celltop{
+   border:2px solid var(--teacher-color)!important;
+   box-shadow:none!important;
+   box-sizing:border-box!important;
+ }
+}
+@media print{
+ table.calendar tbody tr.date-row>td,
+ table.calendar tbody tr.date-row>td.holiday{border-color:#a9bad0!important;}
+}
