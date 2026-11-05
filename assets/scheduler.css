@@ -490,13 +490,12 @@ html,body{width:auto!important;margin:0!important;padding:0!important}
  .calendar tbody tr.date-row td.holiday .celltop{font-weight:700!important;}
 }
 
-/* Subtle teacher-tinted date inset; keep original table grid untouched. */
-@media screen{
- .calendar tbody tr.date-row>td .celltop,
- .calendar tbody tr.date-row>td.holiday .celltop{
-   border:1px solid var(--teacher-soft)!important;
-   background:var(--teacher-pale)!important;
-   box-shadow:none!important;
-   box-sizing:border-box!important;
- }
+/* No inset date border: preserve only the existing table grid. */
+.calendar tbody tr.date-row>td .celltop,
+.calendar tbody tr.date-row>td.holiday .celltop,
+.calendar tbody tr.date-row>td .celltop.holiday-date-label{
+ border:0!important;
+ outline:0!important;
+ box-shadow:none!important;
+ background:var(--teacher-pale)!important;
 }
