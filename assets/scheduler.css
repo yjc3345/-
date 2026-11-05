@@ -465,3 +465,12 @@ html,body{width:auto!important;margin:0!important;padding:0!important}
 @media print {
   #saveFeedback, #approvalStatus { display:none!important; }
 }
+
+/* Cumulative vocabulary tests: use black text for readability across teacher colors. */
+.calendar tbody tr.vocab-row td.cumulative,
+.calendar tbody tr.vocab-row td.cumulative textarea,
+.calendar tbody tr.vocab-row td.cumulative .print-value,
+.calendar tbody tr.vocab-row td.cumulative .entry,
+.calendar tbody tr.vocab-row td .entry.cumulative,
+.calendar tbody tr.vocab-row td .entry.cumulative textarea,
+.calendar tbody tr.vocab-row td .entry.cumulative .print-value{color:#000!important;-webkit-text-fill-color:#000!important;}
