@@ -482,3 +482,17 @@ html,body{width:auto!important;margin:0!important;padding:0!important}
   border-color:var(--teacher-color)!important;
   background-color:var(--teacher-soft)!important;
 }
+
+/* Date row frame lines use the teacher palette, not fixed blue (screen and print). */
+.calendar tbody tr.date-row>td,
+.calendar tbody tr.date-row>td.holiday,
+table.calendar tbody tr.date-row>td,
+table.calendar tbody tr.date-row>td.holiday{border-color:var(--teacher-color)!important;}
+.calendar tbody tr.date-row>td .celltop,
+.calendar tbody tr.date-row>td.holiday .celltop,
+table.calendar tbody tr.date-row>td .celltop,
+table.calendar tbody tr.date-row>td.holiday .celltop{border-color:var(--teacher-color)!important;}
+@media print{
+ table.calendar tbody tr.date-row>td,
+ table.calendar tbody tr.date-row>td.holiday{border-color:var(--teacher-color)!important;}
+}
