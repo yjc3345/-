@@ -499,3 +499,13 @@ html,body{width:auto!important;margin:0!important;padding:0!important}
  box-shadow:none!important;
  background:var(--teacher-pale)!important;
 }
+
+/* Color the 2px date-cell padding, not its border or the table grid. */
+@media screen{
+ table.calendar tbody tr.date-row>td,
+ table.calendar tbody tr.date-row>td.off,
+ table.calendar tbody tr.date-row>td.holiday{
+   background-color:var(--teacher-color)!important;
+   border-color:#a9bad0!important;
+ }
+}
