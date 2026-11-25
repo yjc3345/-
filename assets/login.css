@@ -9,3 +9,5 @@
 #historyPanel .history-filters label{margin:0;min-width:0}
 #historyPanel .history-filters select{width:100%;min-width:0;appearance:auto}
 @media(max-width:700px){#historyPanel .history-filters{grid-template-columns:1fr;gap:12px}}
+/* 선생님 이름 변경/삭제 목록: 이름 길이와 상관없이 같은 위치에 정렬 */
+.staff.rename-row{display:grid;grid-template-columns:minmax(120px,170px) minmax(160px,240px) auto 1fr auto;gap:12px;justify-content:stretch}.rename-row>strong{overflow-wrap:anywhere}.rename-row input{margin:0;width:100%}.rename-row button{margin:0;white-space:nowrap}.rename-row button.rename-delete{grid-column:5;background:#b42318;color:white}@media(max-width:640px){.staff.rename-row{grid-template-columns:1fr auto;}.rename-row>strong{grid-column:1/-1}.rename-row .rename-delete{grid-column:1/-1;justify-self:end}}
