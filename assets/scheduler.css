@@ -547,3 +547,11 @@ html,body{width:auto!important;margin:0!important;padding:0!important}
    border-bottom:1px solid #a9bad0!important;
  }
 }
+/* 누적 단어 칸: 배경 색에 따라 글자색 자동(진한 색이면 흰색) — 화면·인쇄 공통 */
+:root{--teacher-on-color:#fff;--teacher-print-date:rgb(203,214,230);--teacher-print-date-text:#27538d}
+html body table.calendar tbody tr.vocab-row>td.cumulative,html body table.calendar tbody tr.vocab-row>td.cumulative textarea,html body table.calendar tbody tr.vocab-row>td.cumulative .print-value,html body table.calendar tbody tr.vocab-row>td.cumulative .entry,html body table.calendar tbody tr.vocab-row>td .entry.cumulative{color:var(--teacher-on-color)!important;-webkit-text-fill-color:var(--teacher-on-color)!important}
+/* 인쇄할 때 날짜 줄: 설정 색보다 연하지만 종이에서 보이는 진하기 */
+@media print{html body table.calendar tbody tr.date-row>th.sidehead,html body table.calendar tbody tr.date-row>td,html body table.calendar tbody tr.date-row>td .celltop{background:var(--teacher-print-date)!important;background-color:var(--teacher-print-date)!important;-webkit-print-color-adjust:exact!important;print-color-adjust:exact!important}
+html body table.calendar tbody tr.date-row>th.sidehead,html body table.calendar tbody tr.date-row>td:not(.holiday) .celltop:not(.holiday-date-label){color:var(--teacher-print-date-text)!important;-webkit-text-fill-color:var(--teacher-print-date-text)!important}}
+/* 인쇄할 때 가장 왼쪽 열(날짜·Inclass·Vocab.·T-Room·Homework)도 날짜 줄과 같은 색 */
+@media print{html body table.calendar tbody tr>th.sidehead,html body table.calendar tbody tr.lesson-row>th.sidehead,html body table.calendar tbody tr.vocab-row>th.sidehead{background:var(--teacher-print-date)!important;background-color:var(--teacher-print-date)!important;color:var(--teacher-print-date-text)!important;-webkit-text-fill-color:var(--teacher-print-date-text)!important;-webkit-print-color-adjust:exact!important;print-color-adjust:exact!important}}

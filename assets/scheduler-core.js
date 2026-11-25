@@ -1,5 +1,17 @@
 
-(()=>{const hex=new URLSearchParams(location.search).get("theme");if(!/^#[0-9a-fA-F]{6}$/.test(hex||""))return;const n=parseInt(hex.slice(1),16),r=n>>16,g=(n>>8)&255,b=n&255;const blend=p=>`rgb(${Math.round(r*p+255*(1-p))},${Math.round(g*p+255*(1-p))},${Math.round(b*p+255*(1-p))})`;document.documentElement.style.setProperty("--teacher-color",hex);document.documentElement.style.setProperty("--teacher-pale",blend(.08));document.documentElement.style.setProperty("--teacher-soft",blend(.15));})();
+(()=>{const hex=new URLSearchParams(location.search).get("theme");if(!/^#[0-9a-fA-F]{6}$/.test(hex||""))return;const n=parseInt(hex.slice(1),16),r=n>>16,g=(n>>8)&255,b=n&255;const blend=p=>`rgb(${Math.round(r*p+255*(1-p))},${Math.round(g*p+255*(1-p))},${Math.round(b*p+255*(1-p))})`;document.documentElement.style.setProperty("--teacher-color",hex);document.documentElement.style.setProperty("--teacher-pale",blend(.08));document.documentElement.style.setProperty("--teacher-soft",blend(.15));
+/* 인쇄용 색상: 날짜 칸은 설정 색보다 연하되 종이에서 보일 만큼 진하게, 누적 단어 칸 글자는 배경에 맞춰 흰색/진한색 자동 선택 */
+const lum=(c)=>{const f=v=>{v/=255;return v<=.03928?v/12.92:Math.pow((v+.055)/1.055,2.4)};return .2126*f(c[0])+.7152*f(c[1])+.0722*f(c[2])};
+const contrast=(a,b)=>{const x=lum(a),y=lum(b);return (Math.max(x,y)+.05)/(Math.min(x,y)+.05)};
+const rgb=c=>`rgb(${c.join(",")})`,base=[r,g,b],white=[255,255,255],dark=[27,42,68],MAX=.72;
+let p=.2,date=base.map(v=>Math.round(v*p+255*(1-p)));
+while(lum(date)>MAX&&p<1){p=Math.min(1,p+.05);date=base.map(v=>Math.round(v*p+255*(1-p)))}
+let k=0;while(lum(date)>MAX&&k<.6){k+=.05;date=base.map(v=>Math.round(v*(1-k)))}
+const root=document.documentElement.style;
+root.setProperty("--teacher-print-date",rgb(date));
+root.setProperty("--teacher-print-date-text",contrast(base,date)>=3?hex:rgb(dark));
+root.setProperty("--teacher-on-color",contrast(base,white)>=contrast(base,dark)?"#fff":rgb(dark));
+})();
 
 (function(){
 "use strict";
