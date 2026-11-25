@@ -10,7 +10,9 @@ let k=0;while(lum(date)>MAX&&k<.6){k+=.05;date=base.map(v=>Math.round(v*(1-k)))}
 const root=document.documentElement.style;
 root.setProperty("--teacher-print-date",rgb(date));
 root.setProperty("--teacher-print-date-text",contrast(base,date)>=3?hex:rgb(dark));
-root.setProperty("--teacher-on-color",contrast(base,white)>=contrast(base,dark)?"#fff":rgb(dark));
+const cum=base.map(v=>Math.round(v*.45+255*.55));
+root.setProperty("--teacher-cumulative",rgb(cum));
+root.setProperty("--teacher-on-color",contrast(cum,white)>=contrast(cum,dark)?"#fff":rgb(dark));
 })();
 
 (function(){
