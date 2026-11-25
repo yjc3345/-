@@ -4,13 +4,13 @@
 const lum=(c)=>{const f=v=>{v/=255;return v<=.03928?v/12.92:Math.pow((v+.055)/1.055,2.4)};return .2126*f(c[0])+.7152*f(c[1])+.0722*f(c[2])};
 const contrast=(a,b)=>{const x=lum(a),y=lum(b);return (Math.max(x,y)+.05)/(Math.min(x,y)+.05)};
 const rgb=c=>`rgb(${c.join(",")})`,base=[r,g,b],white=[255,255,255],dark=[27,42,68],MAX=.72;
-let p=.2,date=base.map(v=>Math.round(v*p+255*(1-p)));
+let p=.6,date=base.map(v=>Math.round(v*p+255*(1-p)));
 while(lum(date)>MAX&&p<1){p=Math.min(1,p+.05);date=base.map(v=>Math.round(v*p+255*(1-p)))}
 let k=0;while(lum(date)>MAX&&k<.6){k+=.05;date=base.map(v=>Math.round(v*(1-k)))}
 const root=document.documentElement.style;
 root.setProperty("--teacher-print-date",rgb(date));
-root.setProperty("--teacher-print-date-text",contrast(base,date)>=3?hex:rgb(dark));
-const cum=base.map(v=>Math.round(v*.45+255*.55));
+root.setProperty("--teacher-print-date-text",contrast(white,date)>=contrast(dark,date)?"#fff":rgb(dark));
+const cum=base.map(v=>Math.round(v*.35+255*.65));
 root.setProperty("--teacher-cumulative",rgb(cum));
 root.setProperty("--teacher-on-color",contrast(cum,white)>=contrast(cum,dark)?"#fff":rgb(dark));
 })();
